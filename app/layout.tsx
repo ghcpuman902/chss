@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "chss",
   description: "Play chess over your favourite chatting app. No download, no sign up.",
+  icons: {
+    icon: "/Pawn.svg",
+  },
 };
 
 export default function RootLayout({

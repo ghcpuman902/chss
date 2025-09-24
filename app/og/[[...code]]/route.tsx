@@ -14,8 +14,8 @@ export const config = {
 };
 
 export async function generateStaticParams() {
-  // Pre-render top 1000 keys as OG image routes: /og/u-<key>.png
-  const keys = Object.keys(unifiedKeys as Record<string, string>).slice(0, 100);
+  // Pre-render top n keys as OG image routes: /og/u-<key>.png
+  const keys = Object.keys(unifiedKeys as Record<string, string>).slice(0, 50);
   return keys.map((key) => ({ code: [`u-${key}.png`] }));
 }
 
@@ -63,8 +63,38 @@ export async function GET(
     );
   } catch (e: unknown) {
     console.log(`${e instanceof Error ? e.message : String(e)}`);
-    return new Response(`Failed to generate the image`, {
-      status: 500,
-    });
+
+    return new ImageResponse(
+      createElement(OGTemplate, {
+        query: undefined,
+      }),
+      {
+        width: 800,
+        height: 800,
+        fonts: [
+          ...(fonts?.interNormal
+            ? [
+              {
+                name: "Inter",
+                data: fonts.interNormal,
+                weight: 400 as const,
+                style: "normal" as const,
+              },
+            ]
+            : []),
+          ...(fonts?.interBold
+            ? [
+              {
+                name: "Inter",
+                data: fonts.interBold,
+                weight: 700 as const,
+                style: "normal" as const,
+              },
+            ]
+            : []),
+        ],
+        debug: false,
+      },
+    );
   }
 }

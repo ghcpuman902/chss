@@ -19,11 +19,10 @@ export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
     const preferred = generateCode(parsed);
     if (preferred) canonicalForOg = preferred;
   } catch { }
-  const base = process.env.NEXT_PUBLIC_APP_BASE_URL ?? 'http://localhost:3000';
   return {
     title,
-    openGraph: { title, images: [`${base}/og/${canonicalForOg}.png`] },
-    twitter: { card: 'summary_large_image', title, images: [`${base}/og/${canonicalForOg}.png`] },
+    openGraph: { title, images: [`https://chss.chat/og/${canonicalForOg}.png`] },
+    twitter: { card: 'summary_large_image', title, images: [`https://chss.chat/og/${canonicalForOg}.png`] },
   };
 }
 
