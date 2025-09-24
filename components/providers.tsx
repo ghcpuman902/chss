@@ -14,7 +14,7 @@ export function AppProviders({ children }: ProvidersProps) {
     const hasTouch =
       typeof window !== 'undefined' &&
       ('ontouchstart' in window ||
-        (navigator as Navigator).maxTouchPoints > 0)
+        (typeof navigator !== 'undefined' && 'maxTouchPoints' in navigator && Number((navigator as unknown as { maxTouchPoints?: number }).maxTouchPoints) > 0))
     setIsTouch(Boolean(hasTouch))
   }, [])
 

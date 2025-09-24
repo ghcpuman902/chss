@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import type React from 'react';
 import { PawnIcon, KnightIcon, BishopIcon, RookIcon, QueenIcon, KingIcon } from './pieces';
 import { useRouter } from 'next/navigation';
@@ -42,18 +42,20 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
   const [canUndo, setCanUndo] = useState<boolean>(false);
   const router = useRouter();
 
+  // Memoize chess instance for read-only queries
+  const chessMemo = useMemo(() => new Chess(gameState.fen), [gameState.fen]);
+
   // Aggregate game info for the TurnIndicator (dynamic island)
-  const indicatorInfo: GameInfo = (() => {
-    const chess = new Chess(gameState.fen);
-    const verboseMoves = chess.moves({ verbose: true }) as Move[];
-    const isCheck = chess.inCheck ? chess.inCheck() : chess.isCheck();
+  const indicatorInfo: GameInfo = useMemo(() => {
+    const verboseMoves = chessMemo.moves({ verbose: true }) as Move[];
+    const isCheck = typeof chessMemo.isCheck === 'function' ? chessMemo.isCheck() : (chessMemo.inCheck ? chessMemo.inCheck() : false);
     const info: GameInfo = {
       fen: gameState.fen,
       sideToMove: gameState.sideToMove,
-      isCheck: typeof chess.isCheck === 'function' ? chess.isCheck() : isCheck,
-      isCheckmate: typeof chess.isCheckmate === 'function' ? chess.isCheckmate() : false,
-      isStalemate: typeof chess.isStalemate === 'function' ? chess.isStalemate() : false,
-      isDraw: typeof chess.isDraw === 'function' ? chess.isDraw() : false,
+      isCheck,
+      isCheckmate: typeof chessMemo.isCheckmate === 'function' ? chessMemo.isCheckmate() : false,
+      isStalemate: typeof chessMemo.isStalemate === 'function' ? chessMemo.isStalemate() : false,
+      isDraw: typeof chessMemo.isDraw === 'function' ? chessMemo.isDraw() : false,
       onlyMove: verboseMoves.length === 1,
       legalMoves: verboseMoves.map((m: Move) => ({ from: m.from, to: m.to, san: m.san, flags: m.flags, promotion: m.promotion })),
       lastMove,
@@ -61,13 +63,12 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
       perspective,
     };
     return info;
-  })();
+  }, [chessMemo, gameState, lastMove, perspective]);
 
   const handleSquareClick = useCallback((square: string) => {
     // If no square is selected, select this square if it has a piece of the current player
     if (!selectedSquare) {
-      const chess = new Chess(gameState.fen);
-      const piece = chess.get(square as Square);
+      const piece = chessMemo.get(square as Square);
 
       if (piece && piece.color === gameState.sideToMove) {
         setSelectedSquare(square);
@@ -111,8 +112,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
       }
     } else {
       // Try to select a different piece
-      const chess = new Chess(gameState.fen);
-      const piece = chess.get(square as Square);
+      const piece = chessMemo.get(square as Square);
 
       if (piece && piece.color === gameState.sideToMove) {
         setSelectedSquare(square);
@@ -123,7 +123,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         setLegalMoves([]);
       }
     }
-  }, [selectedSquare, legalMoves, gameState, onStateChange]);
+  }, [selectedSquare, legalMoves, gameState, onStateChange, chessMemo]);
 
   const handleShare = useCallback(async () => {
     // Prevent sharing before any move has been made
@@ -194,8 +194,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
   // Generate board squares (orientation via iteration order)
   const renderBoard = () => {
-    const chess = new Chess(gameState.fen);
-    const board = chess.board();
+    const board = chessMemo.board();
     const squares = [] as React.ReactNode[];
 
     const rankOrder = perspective === 'white' ? [0, 1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1, 0];

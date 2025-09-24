@@ -43,3 +43,13 @@ next-env.d.ts
 # AI files
 *.ai
 output.ai
+
+# large data
+/data/*
+
+/scripts/*
+lib/state.ts
+
+# large data files
+lib/keys_358.3MB.json
+lib/fen_counts-from-lichess.json

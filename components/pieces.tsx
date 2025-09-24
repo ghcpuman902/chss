@@ -34,11 +34,18 @@ export const BishopIcon: React.FC<PieceIconProps> = (props) => {
   );
 };
 
+// export const QueenIcon: React.FC<PieceIconProps> = (props) => {
+//   return (
+//     <svg viewBox="0 0 500 500" aria-hidden="true" focusable="false" {...props}>
+//       <polygon points="165.4 159.2 131.2 .1 215.4 69.7 250 .7 284.4 69.5 368.5 .1 353.9 68.5 353.6 69.8 334.4 159.2 165.4 159.2" fill="currentColor" />
+//   <polygon points="404.5 500 95.5 500 165.1 174.2 334.4 174.2 404.5 500" fill="currentColor" />
+//     </svg>
+//   );
+// };
 export const QueenIcon: React.FC<PieceIconProps> = (props) => {
   return (
     <svg viewBox="0 0 500 500" aria-hidden="true" focusable="false" {...props}>
-      <polygon points="165.4 159.2 131.2 .1 215.4 69.7 250 .7 284.4 69.5 368.5 .1 353.9 68.5 353.6 69.8 334.4 159.2 165.4 159.2" fill="currentColor" />
-  <polygon points="404.5 500 95.5 500 165.1 174.2 334.4 174.2 404.5 500" fill="currentColor" />
+      <path d="M404.5,500l-71.2-333.3L368.9,0h-237.8l35.6,166.7-71.2,333.3h309ZM250,24.7c20.9,0,40,7.7,54.6,20.5h0c17.5,15.2,28.5,37.7,28.5,62.7s-9.3,43.8-24.4,58.8c-15,15-35.8,24.3-58.8,24.3s-43.7-9.3-58.8-24.3c-15.1-15-24.4-35.8-24.4-58.8s11.1-47.5,28.5-62.7h0c14.6-12.8,33.7-20.5,54.6-20.5Z" fill="currentColor" />
     </svg>
   );
 };

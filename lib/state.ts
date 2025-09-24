@@ -3,6 +3,8 @@ import { Chess, Move, Square } from 'chess.js';
 // manually cast type for chessmovepromotion
 type ChessMovePromotion = 'n' | 'b' | 'r' | 'q';
 
+import unifiedKeys from '@/lib/keys.json';
+
 // Isomorphic base64url helpers (Edge/browser use atob/btoa; Node uses Buffer)
 const btoaSafe = (str: string) =>
   typeof btoa === 'function' ? btoa(str) : Buffer.from(str, 'utf8').toString('base64');
@@ -15,53 +17,66 @@ const base64urlEncode = (s: string) => {
 };
 
 const base64urlDecode = (s: string) => {
-  const rem = s.length % 4;
-  const pad = rem === 2 ? '==' : rem === 3 ? '=' : rem === 1 ? '===' : '';
-  const base64 = s.replace(/-/g, '+').replace(/_/g, '/') + pad;
-  return atobSafe(base64);
+  try {
+    const rem = s.length % 4;
+    const pad = rem === 2 ? '==' : rem === 3 ? '=' : rem === 1 ? '===' : '';
+    const base64 = s.replace(/-/g, '+').replace(/_/g, '/') + pad;
+    return atobSafe(base64);
+  } catch {
+    return '';
+  }
 };
 
-// Optional tiny book (expand later)
-const BOOK: Record<string, string> = {
-  // 'r': 'e2e4e7e5g1f3', // e4 e5 Nf3 (example)
-};
 
-// Static frequency-ordered u-key mapping (approximate popularity)
-// Maps short keys to compact UCI sequences from the starting position
-const U_KEY_TO_UCI: Record<string, string> = {
-  a: 'e2e4',               // King pawn
-  b: 'd2d4',               // Queen pawn
-  c: 'g1f3',               // Reti
-  d: 'c2c4',               // English
-  e: 'e2e4e7e5',           // Open game
-  f: 'e2e4c7c5',           // Sicilian
-  g: 'd2d4d7d5',           // Queen's Gambit decline baseline
-  h: 'c2c4e7e5',           // English ... e5
-  i: 'g1f3d7d5',           // Reti ... d5
-  j: 'e2e4e7e5g1f3',       // King knight
-  k: 'd2d4g8f6',           // Indian defenses
-  l: 'c2c4g8f6',           // English ... Nf6
-  m: 'e2e4e7e5g1f3b8c6',   // Three knights
-  n: 'd2d4d7d5c2c4',       // Queen's Gambit
-};
+// Unified key map from short key -> FEN
+const U_KEY_TO_FEN: Record<string, string> = unifiedKeys as unknown as Record<string, string>;
 
-// Reverse map computed from UCI → FEN using chess.js
-const FEN_TO_U_KEY: Map<string, string> = (() => {
-  const map = new Map<string, string>();
-  for (const [key, uci] of Object.entries(U_KEY_TO_UCI)) {
-    try {
-      const { fen } = applyUciMoves(uci);
-      map.set(fen, key);
-    } catch {
-      // ignore invalid sequences
-    }
+// Export the unified keys map
+export const UNIFIED_KEYS_TO_FEN: Record<string, string> = U_KEY_TO_FEN;
+
+// Fast reverse map: FEN string → short key
+const FEN_TO_U_KEY: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const [key, fen] of Object.entries(U_KEY_TO_FEN)) {
+    map[fen] = key;
   }
   return map;
 })();
 
+// Tiny LRU cache for FEN → short key discovered during normal operation
+class FenToKeyLruCache {
+  private map: Map<string, string>;
+  private readonly maxEntries: number;
+  constructor(maxEntries = 2048) {
+    this.map = new Map<string, string>();
+    this.maxEntries = maxEntries;
+  }
+  get(fen: string): string | undefined {
+    const val = this.map.get(fen);
+    if (val === undefined) return undefined;
+    // refresh recency
+    this.map.delete(fen);
+    this.map.set(fen, val);
+    return val;
+    }
+  set(fen: string, key: string) {
+    if (this.map.has(fen)) this.map.delete(fen);
+    this.map.set(fen, key);
+    if (this.map.size > this.maxEntries) {
+      const oldestKey = this.map.keys().next().value as string | undefined;
+      if (oldestKey !== undefined) this.map.delete(oldestKey);
+    }
+  }
+}
+
+const FEN_TO_U_KEY_LRU = new FenToKeyLruCache(4096);
+
 export type ParsedState = {
   fen: string;
   sideToMove: 'w'|'b';
+  // Optional helpers to accelerate encode path
+  uKey?: string;
+  uci?: string;
 };
 
 export type MoveResult = {
@@ -69,6 +84,8 @@ export type MoveResult = {
   newState?: ParsedState;
   error?: string;
 };
+
+const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 function applyUciMoves(uci: string): ParsedState {
   const chess = new Chess();
@@ -88,52 +105,75 @@ function applyUciMoves(uci: string): ParsedState {
     i += step;
   }
   
-  return { fen: chess.fen(), sideToMove: chess.turn() };
+  return { fen: chess.fen(), sideToMove: chess.turn(), uci };
 }
 
 export function parseCode(code: string): ParsedState {
   // Handle empty board case - if no code or empty string, return starting position
   if (!code || code === '') {
     return { 
-      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', 
+      fen: START_FEN, 
       sideToMove: 'w'
     };
   }
   
-  // formats: "u-<moves>", "f-<b64url>", "s-<bookKey>"
+  // formats: "u-<key>", "f-<b64url>"
   const kind = code.slice(0, 2); // "u-", "f-", "s-"
   const payload = code.slice(2);
 
   if (kind === 'u-') {
-    // Try mapped short key first, else fall back to raw UCI sequence
-    const mapped = U_KEY_TO_UCI[payload];
-    if (mapped) return applyUciMoves(mapped);
-    return applyUciMoves(payload);
+    // Treat payload as a unique short key across openings + midmoves
+    const mapped = U_KEY_TO_FEN[payload];
+    if (mapped) {
+      const sideToMove = (mapped.split(' ')[1] as 'w'|'b') || 'w';
+      const parsed = { fen: mapped, sideToMove, uKey: payload };
+      // Seed LRU for faster encode
+      FEN_TO_U_KEY_LRU.set(parsed.fen, payload);
+      return parsed;
+    }
+    // Fallback: allow raw UCI if key not found
+    const parsed = applyUciMoves(payload);
+    const maybeKey = FEN_TO_U_KEY[parsed.fen];
+    if (maybeKey) {
+      parsed.uKey = maybeKey;
+      FEN_TO_U_KEY_LRU.set(parsed.fen, maybeKey);
+    }
+    return parsed;
   }
   if (kind === 'f-') {
-    const fen = base64urlDecode(payload);
-    const sideToMove = fen.split(' ')[1] as 'w'|'b';
+    const fenDecoded = base64urlDecode(payload);
+    const fen = fenDecoded && fenDecoded.includes(' ') ? fenDecoded : START_FEN;
+    const sideToMove = (fen.split(' ')[1] as 'w'|'b') || 'w';
     return { fen, sideToMove };
   }
-  if (kind === 's-') {
-    const uci = BOOK[payload];
-    if (!uci) throw new Error('Unknown book code');
-    return applyUciMoves(uci);
-  }
   // Fallback: treat entire string as UCI
-  return applyUciMoves(code);
+  const parsed = applyUciMoves(code);
+  const maybeKey = FEN_TO_U_KEY[parsed.fen];
+  if (maybeKey) {
+    parsed.uKey = maybeKey;
+    FEN_TO_U_KEY_LRU.set(parsed.fen, maybeKey);
+  }
+  return parsed;
 }
 
 export function generateCode(state: ParsedState): string {
   // Check if it's the starting position
-  const startingFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-  if (state.fen === startingFen) {
+  if (state.fen === START_FEN) {
     return ''; // Empty board
   }
   
   // Prefer short u-key if available, else fall back to FEN encoding
-  const uKey = FEN_TO_U_KEY.get(state.fen);
-  if (uKey) return `u-${uKey}`;
+  if (state.uKey) return `u-${state.uKey}`;
+  
+  // Check if this FEN has a known short key
+  const key = FEN_TO_U_KEY[state.fen];
+  if (key) return `u-${key}`;
+  
+  // Check LRU cache for recently discovered keys
+  const cachedKey = FEN_TO_U_KEY_LRU.get(state.fen);
+  if (cachedKey) return `u-${cachedKey}`;
+  
+  // Fall back to FEN encoding
   return `f-${base64urlEncode(state.fen)}`;
 }
 
@@ -146,10 +186,32 @@ export function makeMove(currentState: ParsedState, from: string, to: string, pr
       return { success: false, error: 'Invalid move' };
     }
     
+    const newFen = chess.fen();
     const newState: ParsedState = {
-      fen: chess.fen(),
+      fen: newFen,
       sideToMove: chess.turn()
     };
+    // Check if the new FEN has a known short key
+    const maybeKey = FEN_TO_U_KEY[newFen];
+    if (maybeKey) {
+      newState.uKey = maybeKey;
+      FEN_TO_U_KEY_LRU.set(newFen, maybeKey);
+    } else {
+      // Check LRU cache for recently discovered keys
+      const cachedKey = FEN_TO_U_KEY_LRU.get(newFen);
+      if (cachedKey) {
+        newState.uKey = cachedKey;
+      } else {
+        newState.uKey = undefined;
+      }
+    }
+    
+    // Preserve UCI if we have it from the current state
+    if (currentState.uci) {
+      const promo = move.promotion ? String(move.promotion).toLowerCase() : (promotion ? String(promotion).toLowerCase() : undefined);
+      const seg = `${String(from).toLowerCase()}${String(to).toLowerCase()}${promo ? promo : ''}`;
+      newState.uci = `${currentState.uci}${seg}`;
+    }
     
     return { success: true, newState };
   } catch (error) {

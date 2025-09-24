@@ -28,7 +28,7 @@
 //   "perspective": "black"
 // }
 
-import { PawnIcon } from './pieces';
+import { PawnIcon, KingIcon } from './pieces';
 import { Handshake } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -53,11 +53,18 @@ type TurnIndicatorProps = {
 
 export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
   const sideToMove = info.sideToMove;
-  const winnerLabel = sideToMove === 'w' ? 'Black' : 'White';
-  const winnerColorClass = sideToMove === 'w' ? 'black' : 'white brightness-125';
-  const showTooltip = !info.isCheckmate && !info.isStalemate && !info.isDraw && (info.isCheck || info.onlyMove);
+  const winnerColor = sideToMove === 'w' ? 'black' : 'white';
+  const isViewerWinner = info.perspective ? info.perspective === winnerColor : false;
+  const showTooltip = !info.isStalemate && !info.isDraw && (info.isCheckmate || info.isCheck || info.onlyMove);
   const sideLabel = sideToMove === 'w' ? 'White' : 'Black';
-  const tooltipText = `${sideLabel} to move${info.isCheck ? ' — in check' : info.onlyMove ? ' — only move' : ''}`;
+  const tooltipText = info.isCheckmate
+    ? `Checkmate — ${isViewerWinner ? 'You win' : 'They win'}`
+    : `${sideLabel}, ${info.isCheck ? 'Your king is in danger!\n Save the king!' : info.onlyMove ? 'there\'s only one move to save your king!' : ''}`;
+  
+  // Merge isCheck and isCheckmate logic - only difference is translate-y-2 for dead king
+  const isKingInDanger = info.isCheck || info.onlyMove || info.isCheckmate;
+  const isKingDead = info.isCheckmate;
+  
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -70,15 +77,7 @@ export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
           )}
           aria-label="Turn indicator"
         >
-          {info.isCheckmate ? (
-            <div className="px-3 py-2 rounded-full bg-sky-100 text-sky-800 text-xs font-medium">
-              <div className="text-center leading-none">Checkmate</div>
-              <div className="mt-0.5 flex items-center justify-center gap-1.5">
-                <PawnIcon className={cn('block size-4 sm:size-5 chess-piece', winnerColorClass)} aria-hidden />
-                <span className="leading-none">{winnerLabel} wins</span>
-              </div>
-            </div>
-          ) : (info.isStalemate || info.isDraw) ? (
+          {(info.isStalemate || info.isDraw) ? (
             <div className="flex flex-col items-center gap-1">
               <div className="flex items-center justify-center size-6 sm:size-8 rounded-full bg-sky-500 text-white">
                 <Handshake className="size-5 sm:size-6" aria-hidden />
@@ -90,43 +89,59 @@ export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
               <div
                 className={cn(
                   'inline-block size-6 sm:size-8 overflow-hidden',
-                  info.perspective === 'white' && 'turn-minute text-primary'
+                  info.perspective === 'white' && (isKingDead ? 'text-primary' : 'turn-minute text-primary') // deadking no need to count time
                 )}
-                aria-label="White to move indicator"
+                aria-label="White indicator"
               >
                 <div
                   className={cn(
                     'size-6 sm:size-8 rounded-full overflow-hidden flex items-center justify-center',
-                    info.isCheck && info.sideToMove === 'w'
-                      ? 'bg-red-500/20 animate-pulse'
-                      : info.onlyMove && info.sideToMove === 'w'
-                      ? 'bg-amber-500/20 animate-pulse'
-                      : 'bg-primary/20'
+                    isKingInDanger && info.sideToMove === 'w'
+                      ? isKingDead ? 'bg-red-800' : 'bg-red-300 animate-pulse-destructive'
+                      : 'bg-gray-500/20'
                   )}
                   role="img"
                 >
-                  <PawnIcon className="block size-24 chess-piece white brightness-125" aria-hidden />
+                  {isKingInDanger && info.sideToMove === 'w' ? (
+                    <KingIcon 
+                      className={cn(
+                        "block size-24 chess-piece white brightness-125",
+                        isKingDead ? "translate-y-4" : "cry-for-help"
+                      )} 
+                      aria-hidden 
+                    />
+                  ) : (
+                    <PawnIcon className="block size-24 chess-piece white brightness-125" aria-hidden />
+                  )}
                 </div>
               </div>
               <div
                 className={cn(
                   'inline-block size-6 sm:size-8 overflow-hidden',
-                  info.perspective === 'black' && 'turn-minute text-primary'
+                  info.perspective === 'black' && (isKingDead ? 'text-primary' : 'turn-minute text-primary') // deadking no need to count time
                 )}
-                aria-label="Black to move indicator"
+                aria-label="Black indicator"
               >
                 <div
                   className={cn(
                     'size-6 sm:size-8 rounded-full overflow-hidden flex items-center justify-center',
-                    info.isCheck && info.sideToMove === 'b'
-                      ? 'bg-red-500/20 animate-pulse'
-                      : info.onlyMove && info.sideToMove === 'b'
-                      ? 'bg-amber-500/20 animate-pulse'
-                      : 'bg-primary/20'
+                    isKingInDanger && info.sideToMove === 'b'
+                      ? isKingDead ? 'bg-red-800' : 'bg-red-300 animate-pulse-destructive'
+                      : 'bg-gray-500/20'
                   )}
                   role="img"
                 >
-                  <PawnIcon className="block size-24 chess-piece black" aria-hidden />
+                  {isKingInDanger && info.sideToMove === 'b' ? (
+                    <KingIcon 
+                      className={cn(
+                        "block size-24 chess-piece black",
+                        isKingDead ? "translate-y-4" : "cry-for-help"
+                      )} 
+                      aria-hidden 
+                    />
+                  ) : (
+                    <PawnIcon className="block size-24 chess-piece black" aria-hidden />
+                  )}
                 </div>
               </div>
             </>
