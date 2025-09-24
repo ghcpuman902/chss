@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+Please use pnpm for all commands.
+The main tech stack is Nextjs+React+Shadcn+Tailwind.
+Try to use '-primary' and dont attempt to add your own background colors.
+Try to make the main part of the compoenent default font size to keep the design consistent.

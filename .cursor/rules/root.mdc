@@ -1,0 +1,128 @@
+---
+alwaysApply: true
+---
+# Project: Chess OG Share — MVP Context
+
+## 0) One-liner
+A **DB-less**, **edge-native** Next.js app that lets a player share a link which renders an **Open Graph preview** of the board **from the opponent’s perspective**. Recipient taps the link, sees the board, and can **reply-share** using the Web Share API.
+
+---
+
+## 1) Goals (MVP)
+- **Render a position from a short URL**, with no database.
+- **Generate OG images at the edge** (fast, deterministic, crawler-friendly).
+- **Show opponent’s view** (i.e., side-to-move orientation) in both page and OG.
+- **Mobile share loop**: recipient can respond and share back via Web Share API.
+
+---
+
+## 2) Non-Goals (MVP)
+- No accounts, matchmaking, or persistence beyond the URL.
+- No server DB / KV (future: KV + hash mapping).
+- No complex theming / piece sets (initially simple SVGs or glyphs).
+- No move legality UX on the page (we only need display + share for MVP).
+
+---
+
+## 3) Tech & Constraints
+- **Framework**: Next.js 15 (App Router), TypeScript, Edge runtime.
+- **Chess state**: `chess.js` for FEN/turn derivation from encoded moves.
+- **OG renderer**: `next/og` (Satori) with a **flex-only** React tree.
+- **Board image**: inline **SVG** string (manual / Illustrator-minified paths later).
+- **No DOM**, no Node-native deps; keep everything **Edge-safe**.
+
+---
+
+## 4) URL State Encoding (DB-less)
+Prefer **UCI from start** for brevity; support FEN for arbitrary states.
+
+- UCI mode: `u:<moves>`  
+  Example: `u:e2e4e7e5g1f3`
+- FEN mode: `f:<base64url(FEN)>`
+- Starter/book mode (optional short codes): `s:<key>` → expands to UCI via a tiny in-app map.
+
+> Orientation defaults to **side-to-move** (opponent’s perspective). Optional override: `?p=w|b`.
+
+---
+
+## 5) Routes (MVP)
+- **Page**: `/p/[code]`  
+  - Decodes `code` → FEN + sideToMove  
+  - Renders inline SVG board (opponent’s view)  
+  - Sets OG tags pointing to `/og/[code].png`  
+  - Shows a **Share** button (Web Share API) for reply-share.
+- **OG image**: `/og/[code].png`  
+  - Uses Satori (`next/og`) to render a flex layout.  
+  - Embeds the board via `data:image/svg+xml` `<img>` for speed/reliability.  
+  - Outputs 1200×630 PNG (Twitter/WhatsApp-friendly).
+
+---
+
+## 6) Rendering Details
+- **Board SVG**: 8×8 rects + piece layers; no external assets or fonts.
+- **Pieces**: Start with letter glyphs; replace with Illustrator-minified SVG paths later (single set; recolour for black/white).
+- **Highlight (optional)**: last move squares via translucent rects.
+- **OG layout**: split board + text stack (“White/Black to move”, brief prompt).
+
+---
+
+## 7) Performance Targets
+- **OG TTFB**: < 300 ms (edge), cacheable by crawlers/CDN.
+- **OG size**: aim < 120 KB PNG (simple palette + flat fills).
+- **Page First Paint**: inline SVG display; zero network for board assets.
+
+---
+
+## 8) Caching Strategy (MVP)
+- Stateless (no KV). OG is recomputed deterministically from `[code]`.
+- Set: `Cache-Control: public, max-age=31536000, immutable` on `/og/*`.
+- Because the URL fully encodes the state, images are safely immutable.
+
+> **Future**: Add KV for hash→FEN mapping and image blobs to reduce compute on hot paths. Use a **short BLAKE3 hash** for filenames; store `fen:` and `img:` keys.
+
+---
+
+## 9) Share Flow (MVP)
+1. Player makes a move client-side → builds `code` (`u:` or `f:`).
+2. App navigates to `/p/[code]`; OG at `/og/[code].png` is derived purely from URL.
+3. Player taps system share → sends link.
+4. Recipient’s chat preview fetches `/og/[code].png` (opponent’s view).
+5. Recipient opens `/p/[code]` → sees board → taps **Share** to respond
+   (for MVP we can simulate “their move” by appending additional UCI locally and generating a **new** code).
+
+---
+
+## 10) Security & Robustness
+- Validate URL inputs strictly (UCI chunking, FEN sanity via `chess.js`).
+- Handle bad codes: render a neutral fallback board + “Invalid position”.
+- Avoid user-supplied HTML; only render controlled SVG strings.
+
+---
+
+## 11) Milestones & Acceptance
+**M1 — Decode & Page Render**
+- `/p/u:e2e4` shows a correct board with Black to move.
+- Orientation matches side-to-move by default.
+
+**M2 — OG Image**
+- `/og/u:e2e4.png` renders within target time; shows same orientation as page.
+- Chat apps show correct preview image + title.
+
+**M3 — Share Loop**
+- Page shows a Share button (Web Share API); sharing the current `/p/[code]` works on mobile.
+
+**Acceptance Criteria**
+- Deterministic parity between page board and OG image (same FEN, same orientation).
+- OG preview loads reliably in WhatsApp/Twitter.
+- No network for board assets (SVG inline). No DB calls.
+
+---
+
+## 12) Later (Post-MVP)
+- KV + hash mapping for **ultra-short URLs** and **pre-rendered** OG images.
+- Proper piece SVG set (single source; recolour for sides).
+- Move input UI (tap squares) and legality feedback.
+- Opening book short codes for common starters.
+- Theming (light/dark board colours), coordinates overlay.
+
+---
