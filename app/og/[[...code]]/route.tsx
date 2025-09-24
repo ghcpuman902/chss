@@ -10,7 +10,20 @@ export const config = {
   runtime: 'edge',
 };
 
-// No static params: OG encodes full board state in URL and is immutable
+export async function generateStaticParams() {
+  return [
+    {
+      code: [
+        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|w',
+        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|b',
+        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR',
+        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|w.png',
+        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|b.png',
+        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR.png'
+      ]
+    },
+  ];
+}
 
 export async function GET(
   _req: NextRequest,
