@@ -4,7 +4,7 @@ import { createElement } from 'react';
 import OGTemplate from './og-template';
 import { parseUrlSegment } from '@/lib/utils';
 
-export const runtime = 'edge';
+export const dynamic = 'force-static';
 
 export async function GET(
   _req: NextRequest,
@@ -12,14 +12,15 @@ export async function GET(
 ) {
   try {
     const { code } = await ctx.params;
-    const codeString = parseUrlSegment(code);
-
-    const query = codeString;
+    const raw = parseUrlSegment(code);
+    // Sanitize: strip trailing extension like .png and anything after first dot
+    // Accept forms: "o-<payload>", "o-<payload>.png", "o-<payload>..."
+    const dotIdx = raw.indexOf('.');
+    const codeString = dotIdx === -1 ? raw : raw.slice(0, dotIdx);
+    const query = codeString || undefined;
 
     return new ImageResponse(
-      createElement(OGTemplate, {
-        query: query || undefined,
-      }),
+      createElement(OGTemplate, { query }),
       {
         width: 800,
         height: 800,

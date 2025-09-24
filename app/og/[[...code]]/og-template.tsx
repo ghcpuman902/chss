@@ -68,7 +68,13 @@ const decodeBoardEncoding = (rawCode: string): { matrix: (PieceKey | null)[][]; 
 };
 
 export default function OGTemplate({ query }: OGTemplateProps) {
-    const { matrix, perspective } = decodeBoardEncoding(query ?? '');
+    // Sanitize query again (defensive): remove extension/trailing segment after first dot
+    const safe = (() => {
+        const raw = (query || '').trim();
+        const dot = raw.indexOf('.');
+        return dot === -1 ? raw : raw.slice(0, dot);
+    })();
+    const { matrix, perspective } = decodeBoardEncoding(safe);
     const rankOrder = perspective === 'w' ? [0,1,2,3,4,5,6,7] as const : [7,6,5,4,3,2,1,0] as const;
     const fileOrder = perspective === 'w' ? [0,1,2,3,4,5,6,7] as const : [7,6,5,4,3,2,1,0] as const;
 	
