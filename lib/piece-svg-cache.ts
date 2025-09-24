@@ -54,20 +54,27 @@ const pieceSvgs: Record<PieceKey, string> = {
 </svg>`,
 };
 
-// Pre-computed base64 encoded data URLs for each piece
-const pieceDataUrls: Record<PieceKey, string> = {} as Record<PieceKey, string>;
-
-// Initialize the data URLs cache
-const initializePieceCache = () => {
-	for (const [piece, svg] of Object.entries(pieceSvgs)) {
-		const base64 = Buffer.from(svg, "utf-8").toString("base64");
-		pieceDataUrls[piece as PieceKey] = `data:image/svg+xml;base64,${base64}`;
-	}
+// Edge-safe: create utf8 data URLs without Buffer
+const encodeForDataUrl = (svg: string): string => {
+    // Minimal escaping for data URL
+    return encodeURIComponent(svg)
+        .replace(/%20/g, ' ')
+        .replace(/%22/g, '\"')
+        .replace(/%3D/g, '=')
+        .replace(/%3A/g, ':')
+        .replace(/%2F/g, '/')
+        .replace(/%3B/g, ';')
+        .replace(/%2C/g, ',')
+        .replace(/%0A/g, '')
+        .replace(/%09/g, '')
+        .replace(/%23/g, '#');
 };
 
-// Initialize cache at module level
-initializePieceCache();
+const pieceDataUrls: Record<PieceKey, string> = Object.fromEntries(
+    Object.entries(pieceSvgs).map(([key, svg]) => [
+        key,
+        `data:image/svg+xml;utf8,${encodeForDataUrl(svg)}`,
+    ])
+) as Record<PieceKey, string>;
 
-export const getPieceDataUrl = (piece: PieceKey): string => {
-	return pieceDataUrls[piece];
-};
+export const getPieceDataUrl = (piece: PieceKey): string => pieceDataUrls[piece];

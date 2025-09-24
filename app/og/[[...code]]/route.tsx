@@ -1,29 +1,10 @@
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { createElement } from 'react';
 import OGTemplate from './og-template';
 import { parseUrlSegment } from '@/lib/utils';
 
-export const dynamic = 'force-static';
-
-export const config = {
-  runtime: 'edge',
-};
-
-export async function generateStaticParams() {
-  return [
-    {
-      code: [
-        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|w',
-        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|b',
-        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR',
-        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|w.png',
-        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|b.png',
-        'o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR.png'
-      ]
-    },
-  ];
-}
+export const runtime = 'edge';
 
 export async function GET(
   _req: NextRequest,
