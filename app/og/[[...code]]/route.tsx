@@ -5,6 +5,7 @@ import { ImageResponse } from 'next/og';
 import { parseCode } from '@/lib/state';
 import { parseUrlSegment } from '@/lib/utils';
 import { Chess } from 'chess.js';
+import { PreSatori } from '@/lib/pre-satori';
 
 const PIECE_GLYPH: Record<string, string> = {
   wP: '♙', wN: '♘', wB: '♗', wR: '♖', wQ: '♕', wK: '♔',
@@ -27,27 +28,29 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code?: 
   }
   
   const { fen, sideToMove } = gameState;
-  const perspective = sideToMove === 'w' ? 'white' : 'black';
 
-  // Generate board squares for OG image
-  const renderBoardSquares = () => {
+  // Generate board rows (pure flex) in opponent's view (side-to-move at bottom)
+  const renderBoardRows = () => {
     const chess = new Chess(fen);
     const board = chess.board();
-    const squares = [];
+    const rows: React.ReactNode[] = [];
 
-    for (let rank = 0; rank < 8; rank++) {
-      for (let file = 0; file < 8; file++) {
+    const indices = [...Array(8).keys()];
+    const rankIndices = sideToMove === 'w' ? indices : [...indices].reverse();
+    const fileIndices = sideToMove === 'w' ? indices : [...indices].reverse();
+
+    for (const rank of rankIndices) {
+      const squares: React.ReactNode[] = [];
+      for (const file of fileIndices) {
         const piece = board[rank][file];
         const isLight = (rank + file) % 2 === 0;
-
         squares.push(
           <div
-            key={`${rank}-${file}`}
+            key={`sq-${rank}-${file}`}
             style={{
               width: '60px',
               height: '60px',
               backgroundColor: isLight ? '#f0d9b5' : '#b58863',
-              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '32px',
@@ -58,45 +61,45 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code?: 
           </div>
         );
       }
+      rows.push(
+        <div key={`row-${rank}`} style={{ flexDirection: 'row' }}>
+          {squares}
+        </div>
+      );
     }
 
-    return squares;
+    return rows;
   };
 
-  return new ImageResponse(
+  const imageResponse = new ImageResponse(
     (
-      <div
-        style={{
-          width: '1200px',
-          height: '630px',
-          display: 'flex',
-          background: 'white',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '48px',
-          gap: '40px',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(8, 60px)',
-            gridTemplateRows: 'repeat(8, 60px)',
-            border: '2px solid #333',
-          }}
-        >
-          {renderBoardSquares()}
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: 48, fontWeight: 700 }}>
-            {sideToMove === 'w' ? 'White' : 'Black'} to move
-          </div>
-          <div style={{ fontSize: 24, opacity: 0.7, marginTop: 12 }}>
-            Tap to reply with your move
-          </div>
-        </div>
-      </div>
+      <PreSatori>
+        {(transform) => (
+          <>
+            {transform(
+              <div className="flex flex-row h-full w-full items-center justify-center gap-10 p-12 bg-white">
+                <div style={{ border: '2px solid #333', padding: '2px' }}>
+                  <div style={{ flexDirection: 'column' }}>
+                    {renderBoardRows()}
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <div style={{ fontSize: 48, fontWeight: 700 }}>
+                    {sideToMove === 'w' ? 'White' : 'Black'} to move
+                  </div>
+                  <div style={{ fontSize: 24, opacity: 0.7, marginTop: 12 }}>
+                    Tap to reply with your move
+                  </div>
+                </div>
+              </div>,
+            )}
+          </>
+        )}
+      </PreSatori>
     ),
     { width: 1200, height: 630 }
   );
+
+  imageResponse.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  return imageResponse;
 }

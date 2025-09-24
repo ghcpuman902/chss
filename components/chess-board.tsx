@@ -6,7 +6,7 @@ import { PawnIcon, KnightIcon, BishopIcon, RookIcon, QueenIcon, KingIcon } from 
 import { useRouter } from 'next/navigation';
 import { makeMove, getLegalMoves, generateCode, type ParsedState } from '@/lib/state';
 import { TurnIndicator, type GameInfo } from './turn-indicator';
-import { Button } from './ui/button';
+import { Chess, type Move, type Square } from 'chess.js';
 
 interface ChessBoardProps {
   initialState: ParsedState;
@@ -44,8 +44,8 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
   // Aggregate game info for the TurnIndicator (dynamic island)
   const indicatorInfo: GameInfo = (() => {
-    const chess = new (require('chess.js').Chess)(gameState.fen);
-    const verboseMoves = chess.moves({ verbose: true }) as Array<any>;
+    const chess = new Chess(gameState.fen);
+    const verboseMoves = chess.moves({ verbose: true }) as Move[];
     const isCheck = chess.inCheck ? chess.inCheck() : chess.isCheck();
     const info: GameInfo = {
       fen: gameState.fen,
@@ -55,7 +55,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
       isStalemate: typeof chess.isStalemate === 'function' ? chess.isStalemate() : false,
       isDraw: typeof chess.isDraw === 'function' ? chess.isDraw() : false,
       onlyMove: verboseMoves.length === 1,
-      legalMoves: verboseMoves.map((m: any) => ({ from: m.from, to: m.to, san: m.san, flags: m.flags, promotion: m.promotion })),
+      legalMoves: verboseMoves.map((m: Move) => ({ from: m.from, to: m.to, san: m.san, flags: m.flags, promotion: m.promotion })),
       lastMove,
       code: generateCode(gameState),
       perspective,
@@ -66,8 +66,8 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
   const handleSquareClick = useCallback((square: string) => {
     // If no square is selected, select this square if it has a piece of the current player
     if (!selectedSquare) {
-      const chess = new (require('chess.js').Chess)(gameState.fen);
-      const piece = chess.get(square as any);
+      const chess = new Chess(gameState.fen);
+      const piece = chess.get(square as Square);
 
       if (piece && piece.color === gameState.sideToMove) {
         setSelectedSquare(square);
@@ -111,8 +111,8 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
       }
     } else {
       // Try to select a different piece
-      const chess = new (require('chess.js').Chess)(gameState.fen);
-      const piece = chess.get(square as any);
+      const chess = new Chess(gameState.fen);
+      const piece = chess.get(square as Square);
 
       if (piece && piece.color === gameState.sideToMove) {
         setSelectedSquare(square);
@@ -123,25 +123,31 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         setLegalMoves([]);
       }
     }
-  }, [selectedSquare, legalMoves, gameState, router, onStateChange]);
+  }, [selectedSquare, legalMoves, gameState, onStateChange]);
 
   const handleShare = useCallback(async () => {
     // Prevent sharing before any move has been made
     if (historyRef.current.length <= 1) return;
 
     const url = window.location.href;
-    const shareData = {
+    const shareData: ShareData = {
       title: `${perspective === 'white' ? 'White' : 'Black'} to move`,
       text: "It’s your turn! Open, make your move, and reply-share the link to keep the game going.",
       url,
-    } as const;
+    };
 
-    if (typeof navigator.share === 'function') {
+    type NavigatorWithShare = Navigator & {
+      canShare?: (data?: ShareData) => boolean;
+      share?: (data?: ShareData) => Promise<void>;
+    };
+    const nav = navigator as NavigatorWithShare;
+
+    if (typeof nav.share === 'function') {
       try {
-        if (typeof navigator.canShare === 'function' && !navigator.canShare(shareData as any)) {
+        if (typeof nav.canShare === 'function' && !nav.canShare(shareData)) {
           throw new Error('Share data not supported by this browser');
         }
-        await navigator.share(shareData as any);
+        await nav.share(shareData);
         return;
       } catch (error) {
         console.log('Share failed, falling back to clipboard:', error);
@@ -188,7 +194,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
   // Generate board squares (orientation via iteration order)
   const renderBoard = () => {
-    const chess = new (require('chess.js').Chess)(gameState.fen);
+    const chess = new Chess(gameState.fen);
     const board = chess.board();
     const squares = [] as React.ReactNode[];
 

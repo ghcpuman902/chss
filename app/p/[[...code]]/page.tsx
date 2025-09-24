@@ -9,7 +9,6 @@ export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
   // Decode to get side-to-move → title + OG image path
   const { code } = await props.params;
   const codeString = parseUrlSegment(code);
-  const { p } = await props.searchParams
 
   let title = 'Your move';
   let canonicalForOg = codeString;

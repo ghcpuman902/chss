@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { AnimatedChat } from "@/components/animated-chat"
+import Link from "next/link"
 
 export default function HomePage() {
   return (
@@ -23,11 +24,11 @@ export default function HomePage() {
 
               <div className="space-y-4">
                 <Button size="lg" className="text-lg px-8 py-6" asChild>
-                  <a href="/p/">Start a New Game</a>
+                  <Link href="/p/">Start a New Game</Link>
                 </Button>
                 <div className="text-center lg:text-left">
                   <Button variant="link" className="text-muted-foreground hover:text-foreground" asChild>
-                    <a href="/p/?p=b">or start as black →</a>
+                    <Link href="/p/?p=b">or start as black →</Link>
                   </Button>
                 </div>
               </div>
@@ -91,10 +92,10 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="text-lg px-8 py-6" asChild>
-                <a href="/p/">Start Playing Now</a>
+                <Link href="/p/">Start Playing Now</Link>
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
-                <a href="/p/u:e2e4e7e5g1f3">View Example Game</a>
+                <Link href="/p/u:e2e4e7e5g1f3">View Example Game</Link>
               </Button>
             </div>
           </div>

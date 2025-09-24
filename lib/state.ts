@@ -1,5 +1,7 @@
 // lib/state.ts
-import { Chess } from 'chess.js';
+import { Chess, Move, Square } from 'chess.js';
+// manually cast type for chessmovepromotion
+type ChessMovePromotion = 'n' | 'b' | 'r' | 'q';
 
 // Isomorphic base64url helpers (Edge/browser use atob/btoa; Node uses Buffer)
 const btoaSafe = (str: string) =>
@@ -80,7 +82,7 @@ function applyUciMoves(uci: string): ParsedState {
     const step = promo ? 5 : 4;
     if (from.length < 2 || to.length < 2) break;
     
-    const res = chess.move({ from, to, promotion: promo as any });
+    const res = chess.move({ from, to, promotion: promo as ChessMovePromotion });
     if (!res) throw new Error('Illegal UCI sequence');
     
     i += step;
@@ -138,7 +140,7 @@ export function generateCode(state: ParsedState): string {
 export function makeMove(currentState: ParsedState, from: string, to: string, promotion?: string): MoveResult {
   try {
     const chess = new Chess(currentState.fen);
-    const move = chess.move({ from, to, promotion: promotion as any });
+    const move = chess.move({ from, to, promotion: promotion as ChessMovePromotion });
     
     if (!move) {
       return { success: false, error: 'Invalid move' };
@@ -161,8 +163,8 @@ export function makeMove(currentState: ParsedState, from: string, to: string, pr
 export function getLegalMoves(fen: string, from?: string): string[] {
   try {
     const chess = new Chess(fen);
-    const moves = chess.moves({ square: from as any, verbose: true });
-    return moves.map((move: any) => move.to);
+    const moves = chess.moves({ square: from as Square, verbose: true });
+    return moves.map((move: Move) => move.to);
   } catch {
     return [];
   }
