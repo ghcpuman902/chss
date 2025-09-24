@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   icons: {
     icon: "/Pawn.svg",
   },
+  appleWebApp: {
+    title: "chss.chat",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({

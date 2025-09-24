@@ -1,23 +1,16 @@
 import { ImageResponse } from '@vercel/og';
 import { NextRequest } from 'next/server';
-import loadFont from '@/lib/font-loader';
 import { createElement } from 'react';
 import OGTemplate from './og-template';
 import { parseUrlSegment } from '@/lib/utils';
 
-import unifiedKeys from '@/lib/keys.json';
-
-const fonts = loadFont();
+export const dynamic = 'force-static';
 
 export const config = {
   runtime: 'edge',
 };
 
-export async function generateStaticParams() {
-  // Pre-render top n keys as OG image routes: /og/u-<key>.png
-  const keys = Object.keys(unifiedKeys as Record<string, string>).slice(0, 50);
-  return keys.map((key) => ({ code: [`u-${key}.png`] }));
-}
+// No static params: OG encodes full board state in URL and is immutable
 
 export async function GET(
   _req: NextRequest,
@@ -36,29 +29,11 @@ export async function GET(
       {
         width: 800,
         height: 800,
-        fonts: [
-          ...(fonts?.interNormal
-            ? [
-              {
-                name: "Inter",
-                data: fonts.interNormal,
-                weight: 400 as const,
-                style: "normal" as const,
-              },
-            ]
-            : []),
-          ...(fonts?.interBold
-            ? [
-              {
-                name: "Inter",
-                data: fonts.interBold,
-                weight: 700 as const,
-                style: "normal" as const,
-              },
-            ]
-            : []),
-        ],
         debug: false,
+        headers: {
+          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Content-Type': 'image/png',
+        },
       },
     );
   } catch (e: unknown) {
@@ -71,29 +46,11 @@ export async function GET(
       {
         width: 800,
         height: 800,
-        fonts: [
-          ...(fonts?.interNormal
-            ? [
-              {
-                name: "Inter",
-                data: fonts.interNormal,
-                weight: 400 as const,
-                style: "normal" as const,
-              },
-            ]
-            : []),
-          ...(fonts?.interBold
-            ? [
-              {
-                name: "Inter",
-                data: fonts.interBold,
-                weight: 700 as const,
-                style: "normal" as const,
-              },
-            ]
-            : []),
-        ],
         debug: false,
+        headers: {
+          'Cache-Control': 'public, max-age=31536000, immutable',
+          'Content-Type': 'image/png',
+        },
       },
     );
   }

@@ -130,9 +130,15 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     if (historyRef.current.length <= 1) return;
 
     const url = window.location.href;
+    // Build aligned title, e.g., "Black moved to e6, White to move"
+    let alignedTitle = `${perspective === 'white' ? 'White' : 'Black'} to move`;
+    if (lastMove && lastMove.to) {
+      const movedColor = perspective === 'white' ? 'Black' : 'White';
+      alignedTitle = `${movedColor} moved to ${lastMove.to.toLowerCase()}, ${perspective === 'white' ? 'White' : 'Black'} to move`;
+    }
     const shareData: ShareData = {
-      title: `${perspective === 'white' ? 'White' : 'Black'} to move`,
-      text: "It’s your turn! Open, make your move, and reply-share the link to keep the game going.",
+      title: alignedTitle,
+      text: "Open, make your move, and reply-share to keep the game going.",
       url,
     };
 
@@ -160,7 +166,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     } catch {
       window.prompt('Copy this link', url);
     }
-  }, [perspective]);
+  }, [perspective, lastMove]);
 
   const handleUndo = useCallback(() => {
     // If there is no prior state, do nothing
