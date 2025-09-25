@@ -7,6 +7,8 @@ export default function TurnIndicatorKitchenSinkPage() {
     isCheckmate: false,
     isStalemate: false,
     isDraw: false,
+    outcome: 'ongoing',
+    drawReason: undefined,
     onlyMove: false,
     legalMoves: [],
     lastMove: null,
@@ -32,11 +34,23 @@ export default function TurnIndicatorKitchenSinkPage() {
     },
     {
       label: 'Checkmate (white to move → Black wins)',
-      info: { ...base, sideToMove: 'w', isCheckmate: true, perspective: 'white' }
+      info: { ...base, sideToMove: 'w', isCheckmate: true, outcome: 'checkmate', perspective: 'white' }
     },
     {
       label: 'Stalemate / Draw',
-      info: { ...base, sideToMove: 'b', isStalemate: true, isDraw: true, perspective: 'black' }
+      info: { ...base, sideToMove: 'b', isStalemate: true, isDraw: true, outcome: 'draw', drawReason: 'stalemate', perspective: 'black' }
+    },
+    {
+      label: 'Draw — 50-move rule',
+      info: { ...base, sideToMove: 'w', outcome: 'draw', drawReason: 'fifty-move', perspective: 'white' }
+    },
+    {
+      label: 'Draw — Insufficient material',
+      info: { ...base, sideToMove: 'b', outcome: 'draw', drawReason: 'insufficient', perspective: 'black' }
+    },
+    {
+      label: 'Draw — Threefold repetition',
+      info: { ...base, sideToMove: 'w', outcome: 'draw', drawReason: 'threefold', perspective: 'white' }
     }
   ];
 

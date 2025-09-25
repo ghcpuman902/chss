@@ -33,13 +33,18 @@ import { Handshake } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
+export type Outcome = 'ongoing' | 'checkmate' | 'draw';
+export type DrawReason = 'stalemate' | 'fifty-move' | 'threefold' | 'insufficient' | 'other';
+
 export type GameInfo = {
   fen: string;
   sideToMove: 'w' | 'b';
   isCheck: boolean;
   isCheckmate: boolean;
-  isStalemate: boolean;
-  isDraw: boolean;
+  isStalemate: boolean; // kept for compatibility; prefer outcome/drawReason
+  isDraw: boolean; // kept for compatibility; prefer outcome/drawReason
+  outcome: Outcome;
+  drawReason?: DrawReason;
   onlyMove: boolean;
   legalMoves: Array<{ from: string; to: string; san?: string; flags?: string; promotion?: string }>;
   lastMove: { from: string; to: string } | null;
@@ -55,15 +60,67 @@ export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
   const sideToMove = info.sideToMove;
   const winnerColor = sideToMove === 'w' ? 'black' : 'white';
   const isViewerWinner = info.perspective ? info.perspective === winnerColor : false;
-  const showTooltip = !info.isStalemate && !info.isDraw && (info.isCheckmate || info.isCheck || info.onlyMove);
+
+  // Consolidate endgame handling via outcome + drawReason
+  const isTerminal = info.outcome !== 'ongoing';
+  const isAnyDraw = info.outcome === 'draw';
+  const isCheckmateTerminal = info.outcome === 'checkmate';
+
   const sideLabel = sideToMove === 'w' ? 'White' : 'Black';
-  const tooltipText = info.isCheckmate
-    ? `Checkmate — ${isViewerWinner ? 'You win' : 'They win'}`
+  const endReasonLabel = (() => {
+    if (info.outcome === 'checkmate') return `Checkmate — ${isViewerWinner ? 'You win' : 'They win'}`;
+    if (info.outcome === 'draw') {
+      switch (info.drawReason) {
+        case 'stalemate':
+          return (
+            <div className="text-xs text-center">
+              Draw by stalemate:<br /> 
+              Both sides have no legal moves.
+            </div>
+          );
+        case 'fifty-move':
+          return (
+            <div className="text-xs text-center">
+              Draw by 50-move rule:<br /> 
+              No pawn moves or captures have<br />
+              occurred in the last 50 moves.
+            </div>
+          );
+        case 'threefold':
+          return (
+            <div className="text-xs text-center">
+              Draw by threefold<br />
+              repetition: The same<br /> 
+              position has occurred<br />
+              threetimes.
+            </div>
+          );
+        case 'insufficient':
+          return (
+            <div className="text-xs text-center">
+              Draw by insufficient<br />
+               material: Neither side<br />
+               has enough pieces<br />
+               to checkmate.
+            </div>
+          );
+        default:
+          return 'Draw';
+      }
+    }
+    return '';
+  })();
+
+  const showTooltip = isTerminal
+    ? true
+    : (info.isCheck || info.onlyMove);
+  const tooltipText = isTerminal
+    ? endReasonLabel
     : `${sideLabel}, ${info.isCheck ? 'Your king is in danger!\n Save the king!' : info.onlyMove ? 'there\'s only one move to save your king!' : ''}`;
   
   // Merge isCheck and isCheckmate logic - only difference is translate-y-2 for dead king
-  const isKingInDanger = info.isCheck || info.onlyMove || info.isCheckmate;
-  const isKingDead = info.isCheckmate;
+  const isKingDead = isCheckmateTerminal;
+  const isKingInDanger = info.isCheck || info.onlyMove || isKingDead;
   
   return (
     <Tooltip>
@@ -77,12 +134,18 @@ export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
           )}
           aria-label="Turn indicator"
         >
-          {(info.isStalemate || info.isDraw) ? (
+          {isAnyDraw ? (
             <div className="flex flex-col items-center gap-1">
               <div className="flex items-center justify-center size-6 sm:size-8 rounded-full bg-sky-500 text-white">
                 <Handshake className="size-5 sm:size-6" aria-hidden />
               </div>
-              <div className="text-[10px] text-foreground">Draw</div>
+              <div className="text-[10px] text-foreground w-8 overflow-visible flex flex-col items-center whitespace-nowrap text-center">
+                {info.drawReason === 'stalemate' && 'Stalemate'}
+                {(!info.drawReason || info.drawReason === 'other') && 'Draw'}
+                {info.drawReason === 'fifty-move' && (<>Draw<br />(50-move)</>)}
+                {info.drawReason === 'insufficient' && (<>Draw<br />Insufficient</>)}
+                {info.drawReason === 'threefold' && (<>Draw<br />Threefold</>)}
+              </div>
             </div>
           ) : (
             <>
@@ -95,9 +158,9 @@ export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
               >
                 <div
                   className={cn(
-                    'size-6 sm:size-8 rounded-full overflow-hidden flex items-center justify-center',
+                    'size-6 sm:size-8 rounded-full overflow-hidden flex items-center justify-center relative',
                     isKingInDanger && info.sideToMove === 'w'
-                      ? isKingDead ? 'bg-red-800' : 'bg-red-300 animate-pulse-destructive'
+                      ? isKingDead ? 'bg-red-800' : 'animate-pulse-destructive'
                       : 'bg-gray-500/20'
                   )}
                   role="img"
@@ -105,13 +168,21 @@ export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
                   {isKingInDanger && info.sideToMove === 'w' ? (
                     <KingIcon 
                       className={cn(
-                        "block size-24 chess-piece white brightness-125",
+                        "block size-8 chess-piece white brightness-125",
                         isKingDead ? "translate-y-4" : "cry-for-help"
                       )} 
                       aria-hidden 
                     />
                   ) : (
-                    <PawnIcon className="block size-24 chess-piece white brightness-125" aria-hidden />
+                    <PawnIcon className="block size-8 chess-piece white brightness-125" aria-hidden />
+                  )}
+                  {isKingDead && info.sideToMove === 'w' && (
+                    <KingIcon
+                      className={cn(
+                        'king-ghost block size-8 chess-piece white brightness-125'
+                      )}
+                      aria-hidden
+                    />
                   )}
                 </div>
               </div>
@@ -124,9 +195,9 @@ export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
               >
                 <div
                   className={cn(
-                    'size-6 sm:size-8 rounded-full overflow-hidden flex items-center justify-center',
+                    'size-6 sm:size-8 rounded-full overflow-hidden flex items-center justify-center relative',
                     isKingInDanger && info.sideToMove === 'b'
-                      ? isKingDead ? 'bg-red-800' : 'bg-red-300 animate-pulse-destructive'
+                      ? isKingDead ? 'bg-red-800' : 'animate-pulse-destructive'
                       : 'bg-gray-500/20'
                   )}
                   role="img"
@@ -134,13 +205,21 @@ export const TurnIndicator = ({ info }: TurnIndicatorProps) => {
                   {isKingInDanger && info.sideToMove === 'b' ? (
                     <KingIcon 
                       className={cn(
-                        "block size-24 chess-piece black",
+                        "block size-8 chess-piece black",
                         isKingDead ? "translate-y-4" : "cry-for-help"
                       )} 
                       aria-hidden 
                     />
                   ) : (
-                    <PawnIcon className="block size-24 chess-piece black" aria-hidden />
+                    <PawnIcon className="block size-8 chess-piece black" aria-hidden />
+                  )}
+                  {isKingDead && info.sideToMove === 'b' && (
+                    <KingIcon
+                      className={cn(
+                        'king-ghost block size-8 chess-piece black'
+                      )}
+                      aria-hidden
+                    />
                   )}
                 </div>
               </div>

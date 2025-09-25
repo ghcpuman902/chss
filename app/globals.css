@@ -257,22 +257,20 @@
     will-change: background-color;
   }
 
-  /* Destructive (red) background pulse */
-  @keyframes bg-pulse-destructive {
-
-    0%,
-    100% {
-      background-color: var(--color-red-300);
+  /* Destructive (red) inner shadow pulse */
+  @keyframes shadow-pulse-destructive {
+    0%, 100% {
+      box-shadow: 0 0 6px 1px var(--color-red-700) inset;
     }
-
     50% {
-      background-color: var(--color-red-500);
+      box-shadow: 0 0 10px 4px var(--color-red-700) inset;
     }
   }
 
   .animate-pulse-destructive {
-    animation: bg-pulse-destructive 1.25s ease-in-out infinite;
-    will-change: background-color;
+    animation: shadow-pulse-destructive 0.4s ease-in-out infinite;
+    will-change: box-shadow;
+    background-color: var(--color-red-400);
   }
 }
 
@@ -402,6 +400,60 @@
     73.0% { transform: translateY(calc(var(--ground-y) - 10px)) rotate(-1deg); }
     86.5% { transform: translateY(calc(var(--ground-y) + 1px)) rotate(-1deg); }
     100.0% { transform: translateY(var(--ground-y)) rotate(0); }
+  }
+  
+  /* Ghostly king that rises and drifts when checkmated */
+  .king-ghost {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, calc(-50% + 18px));
+    transform-origin: center bottom;
+    /* Start slightly faint; keyframes will fade more while rising */
+    opacity: 0.55;
+    filter: blur(0px); 
+    animation: ghostAscend 2.6s ease-in infinite;
+    will-change: transform, opacity, filter rotate;
+    pointer-events: none;
+  }
+
+  @keyframes ghostAscend {
+    0% {
+      /* start lower, centered */
+      transform: translate(-50%, calc(-50% + 18px)) scale(1) rotate(0deg);
+      opacity: 0.55;
+      filter: blur(0px);
+    }
+    20% {
+      /* drift left slightly while rising */
+      transform: translate(calc(-50%), calc(-50% + 12px)) scale(1.02) rotate(-5deg);
+      opacity: 0.40;
+      filter: blur(0.4px);
+    }
+    40% {
+      /* drift right */
+      transform: translate(calc(-50%), calc(-50% + 2px)) scale(1.03) rotate(5deg);
+      opacity: 0.32;
+      filter: blur(0.8px);
+    }
+    60% {
+      /* drift left, keep floating up */
+      transform: translate(calc(-50%), calc(-50% - 12px)) scale(1.05) rotate(-5deg);
+      opacity: 0.24;
+      filter: blur(1.2px);
+    }
+    80% {
+      /* drift right again */
+      transform: translate(calc(-50%), calc(-50% - 20px)) scale(1.07) rotate(5deg);
+      opacity: 0.18;
+      filter: blur(1.6px);
+    }
+    100% {
+      /* end higher, reset on loop to start lower again */
+      transform: translate(-50%, calc(-50% - 50px)) scale(1.09) rotate(-5deg);
+      opacity: 0.16;
+      filter: blur(2px);
+    }
   }
   .chess-piece.white {
     @apply text-white;

@@ -5,8 +5,10 @@ import type React from 'react';
 import { PawnIcon, KnightIcon, BishopIcon, RookIcon, QueenIcon, KingIcon } from './pieces';
 import { useRouter } from 'next/navigation';
 import { makeMove, getLegalMoves, generateCode, type ParsedState } from '@/lib/state';
-import { TurnIndicator, type GameInfo } from './turn-indicator';
+import { TurnIndicator, type GameInfo, type Outcome, type DrawReason } from './turn-indicator';
 import { Chess, type Move, type Square } from 'chess.js';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface ChessBoardProps {
   initialState: ParsedState;
@@ -42,6 +44,14 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
   const [canUndo, setCanUndo] = useState<boolean>(false);
   const router = useRouter();
 
+  // Promotion picker state
+  const [promotionOpen, setPromotionOpen] = useState<boolean>(false);
+  const [promotionFrom, setPromotionFrom] = useState<string | null>(null);
+  const [promotionTo, setPromotionTo] = useState<string | null>(null);
+  const [promotionAnchor, setPromotionAnchor] = useState<string | null>(null);
+  const promotionBaseStateRef = useRef<ParsedState | null>(null);
+  const promotionAppliedRef = useRef<boolean>(false);
+
   // Memoize chess instance for read-only queries
   const chessMemo = useMemo(() => new Chess(gameState.fen), [gameState.fen]);
 
@@ -49,13 +59,26 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
   const indicatorInfo: GameInfo = useMemo(() => {
     const verboseMoves = chessMemo.moves({ verbose: true }) as Move[];
     const isCheck = typeof chessMemo.isCheck === 'function' ? chessMemo.isCheck() : (chessMemo.inCheck ? chessMemo.inCheck() : false);
+    const isCheckmate = typeof chessMemo.isCheckmate === 'function' ? chessMemo.isCheckmate() : false;
+    const isStalemate = typeof chessMemo.isStalemate === 'function' ? chessMemo.isStalemate() : false;
+    const isThreefold = typeof (chessMemo as Chess).isThreefoldRepetition === 'function' ? (chessMemo as Chess).isThreefoldRepetition() : false;
+    const isFifty = typeof (chessMemo as Chess).isDrawByFiftyMoves === 'function' ? (chessMemo as Chess).isDrawByFiftyMoves() : false;
+    const isInsufficient = typeof chessMemo.isInsufficientMaterial === 'function' ? chessMemo.isInsufficientMaterial() : false;
+    const isDraw = typeof chessMemo.isDraw === 'function' ? chessMemo.isDraw() : false;
+
+    const outcome: Outcome = isCheckmate ? 'checkmate' : (isStalemate || isDraw || isThreefold || isFifty || isInsufficient) ? 'draw' : 'ongoing';
+    const drawReason: DrawReason | undefined = outcome === 'draw'
+      ? (isStalemate ? 'stalemate' : isFifty ? 'fifty-move' : isThreefold ? 'threefold' : isInsufficient ? 'insufficient' : 'other')
+      : undefined;
     const info: GameInfo = {
       fen: gameState.fen,
       sideToMove: gameState.sideToMove,
       isCheck,
-      isCheckmate: typeof chessMemo.isCheckmate === 'function' ? chessMemo.isCheckmate() : false,
-      isStalemate: typeof chessMemo.isStalemate === 'function' ? chessMemo.isStalemate() : false,
-      isDraw: typeof chessMemo.isDraw === 'function' ? chessMemo.isDraw() : false,
+      isCheckmate,
+      isStalemate,
+      isDraw,
+      outcome,
+      drawReason,
       onlyMove: verboseMoves.length === 1,
       legalMoves: verboseMoves.map((m: Move) => ({ from: m.from, to: m.to, san: m.san, flags: m.flags, promotion: m.promotion })),
       lastMove,
@@ -88,6 +111,22 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
     // Check if this is a legal move
     if (legalMoves.includes(square) && selectedSquare) {
+      // Detect if this move is a promotion; if so, open promotion picker instead of moving immediately
+      try {
+        const verboseMoves = chessMemo.moves({ square: selectedSquare as Square, verbose: true }) as Move[];
+        const candidate = verboseMoves.find((m: Move) => m.to === square);
+        if (candidate && (candidate as Move).promotion) {
+          // Initialize promotion context
+          setPromotionFrom(selectedSquare);
+          setPromotionTo(square);
+          setPromotionAnchor(square);
+          promotionBaseStateRef.current = gameState;
+          promotionAppliedRef.current = false;
+          setPromotionOpen(true);
+          return;
+        }
+      } catch {}
+
       const moveResult = makeMove(gameState, selectedSquare, square);
 
       if (moveResult.success && moveResult.newState) {
@@ -125,20 +164,83 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     }
   }, [selectedSquare, legalMoves, gameState, onStateChange, chessMemo]);
 
+  // Apply a promotion choice; supports re-choosing while popover remains open
+  const handleChoosePromotion = useCallback((piece: 'q' | 'r' | 'b' | 'n') => {
+    if (!promotionFrom || !promotionTo) return;
+
+    // If user already applied a choice while the popover is open, revert to base before re-applying
+    if (promotionAppliedRef.current && historyRef.current.length > 1) {
+      historyRef.current.pop();
+    }
+
+    const base = promotionBaseStateRef.current ?? gameState;
+    const moveResult = makeMove(base, promotionFrom, promotionTo, piece);
+    if (!moveResult.success || !moveResult.newState) return;
+
+    setGameState(moveResult.newState);
+    setLastMove({ from: promotionFrom, to: promotionTo });
+    setSelectedSquare(null);
+    setLegalMoves([]);
+
+    // Maintain history: replace last if re-choosing, else push new
+    historyRef.current.push(moveResult.newState);
+    setCanUndo(historyRef.current.length > 1);
+
+    // Update URL without navigation
+    const newCode = generateCode(moveResult.newState);
+    const newUrl = newCode ? `/p/${encodeURIComponent(newCode)}` : '/p';
+    if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', newUrl);
+    }
+
+    onStateChange?.(moveResult.newState);
+    promotionAppliedRef.current = true;
+  }, [gameState, onStateChange, promotionFrom, promotionTo]);
+
   const handleShare = useCallback(async () => {
     // Prevent sharing before any move has been made
     if (historyRef.current.length <= 1) return;
 
     const url = window.location.href;
+
+    // Derive OG code (same as server) to prefetch and optionally attach image
+    const perspectiveLetter: 'w' | 'b' = perspective === 'white' ? 'w' : 'b';
+    const piecePlacement = gameState.fen.split(' ')[0] ?? '';
+    let board64 = '';
+    for (let i = 0; i < piecePlacement.length; i++) {
+      const ch = piecePlacement[i] as string;
+      if (ch === '/') continue;
+      if (/^[1-8]$/.test(ch)) {
+        const n = Number.parseInt(ch, 10);
+        board64 += '.'.repeat(n);
+      } else {
+        board64 += ch;
+      }
+    }
+    if (board64.length !== 64) {
+      board64 = 'rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR'.replace(/\./g, '.');
+    }
+    const btoaSafe = (s: string) => (typeof btoa === 'function' ? btoa(s) : Buffer.from(s, 'utf8').toString('base64'));
+    const base64urlEncode = (s: string) => btoaSafe(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    const ogPayload = base64urlEncode(`${board64}|${perspectiveLetter}`);
+    const ogCode = `o-${ogPayload}`;
+    const ogUrl = `${window.location.origin}/og/${ogCode}.png`;
+
+    // Warm the OG route behind the scenes (no attachment in share)
+    try {
+      await fetch(ogUrl, { cache: 'force-cache' });
+    } catch {}
+
     // Build aligned title, e.g., "Black moved to e6, White to move"
     let alignedTitle = `${perspective === 'white' ? 'White' : 'Black'} to move`;
     if (lastMove && lastMove.to) {
       const movedColor = perspective === 'white' ? 'Black' : 'White';
       alignedTitle = `${movedColor} moved to ${lastMove.to.toLowerCase()}, ${perspective === 'white' ? 'White' : 'Black'} to move`;
     }
-    const shareData: ShareData = {
+
+    const baseShare: ShareData = {
       title: alignedTitle,
-      text: "Open, make your move, and reply-share to keep the game going.",
+      text: 'Open, make your move, and reply-share to keep the game going.',
       url,
     };
 
@@ -150,23 +252,24 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
     if (typeof nav.share === 'function') {
       try {
-        if (typeof nav.canShare === 'function' && !nav.canShare(shareData)) {
-          throw new Error('Share data not supported by this browser');
+        await nav.share(baseShare);
+        return; // Success
+      } catch (error: unknown) {
+        // If user explicitly cancelled the sheet, do nothing
+        const name = (error as Error)?.name;
+        if (name === 'AbortError') {
+          return;
         }
-        await nav.share(shareData);
+        // For any other share error, do not fallback to copy when Web Share exists
         return;
-      } catch (error) {
-        console.log('Share failed, falling back to clipboard:', error);
       }
     }
 
-    // Fallbacks only if Web Share is unavailable or fails
+    // No Web Share API available → copy the URL to clipboard only
     try {
       await navigator.clipboard.writeText(url);
-    } catch {
-      window.prompt('Copy this link', url);
-    }
-  }, [perspective, lastMove]);
+    } catch {}
+  }, [perspective, lastMove, gameState.fen]);
 
   const handleUndo = useCallback(() => {
     // If there is no prior state, do nothing
@@ -216,7 +319,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         const isLegalMove = legalMoves.includes(square);
         const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
 
-        squares.push(
+        const squareDiv = (
           <div
             key={square}
             className={`chess-square ${isLight ? 'light' : 'dark'} ${isLegalMove ? 'legal-move' : ''} ${isLastMove ? 'last-move' : ''}`}
@@ -244,6 +347,50 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
             </div>
           </div>
         );
+
+        // Wrap with Popover trigger if this is the promotion anchor square
+        if (promotionAnchor === square) {
+          squares.push(
+            <Popover key={`${square}-popover`} open={promotionOpen} onOpenChange={(o) => {
+              setPromotionOpen(o);
+              if (!o) {
+                // Closing: clear context
+                setPromotionAnchor(null);
+                setPromotionFrom(null);
+                setPromotionTo(null);
+                promotionBaseStateRef.current = null;
+                promotionAppliedRef.current = false;
+              }
+            }}>
+              <PopoverTrigger asChild>
+                {squareDiv}
+              </PopoverTrigger>
+              <PopoverContent align="center" side="top" className="w-auto p-2 rounded-xl">
+                <div className="flex items-center gap-2">
+                  {([
+                    { k: 'q', Icon: QueenIcon, label: 'Promote to Queen' },
+                    { k: 'r', Icon: RookIcon, label: 'Promote to Rook' },
+                    { k: 'b', Icon: BishopIcon, label: 'Promote to Bishop' },
+                    { k: 'n', Icon: KnightIcon, label: 'Promote to Knight' },
+                  ] as const).map(({ k, Icon, label }) => (
+                    <button
+                      key={k}
+                      type="button"
+                      aria-label={label}
+                      onClick={(e) => { e.stopPropagation(); handleChoosePromotion(k); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleChoosePromotion(k); } }}
+                      className="h-12 w-12 rounded-full border border-border bg-neutral-200 inset-shadow-xs inset-shadow-neutral-300 hover:bg-muted flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <Icon className={cn( `size-7` , perspective===`white`?`text-white`:`text-black`)} />
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          );
+        } else {
+          squares.push(squareDiv);
+        }
       }
     }
 
@@ -274,21 +421,55 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         </button>
         {(() => {
           const canSharePosition = historyRef.current.length > 1;
-          const isInCheck = indicatorInfo.isCheck;
-          const shareText = canSharePosition 
-            ? isInCheck 
-              ? `Send to ${perspective === 'white' ? 'Black' : 'White'} (in check!)`
-              : `Send to ${perspective === 'white' ? 'Black' : 'White'}`
-            : 'Share';
+
+          const isTerminal = indicatorInfo.outcome !== 'ongoing';
+          const isCheckmateTerminal = indicatorInfo.outcome === 'checkmate';
+          const isAnyDraw = indicatorInfo.outcome === 'draw';
+          const winnerColor = indicatorInfo.sideToMove === 'w' ? 'black' : 'white';
+          const isViewerWinner = perspective === winnerColor;
+
+          let shareText = 'Share';
+          let shareDisabled = !canSharePosition;
+
+          if (isTerminal) {
+            if (isCheckmateTerminal) {
+              if (isViewerWinner) {
+                shareText = 'Checkmate — You win (share to them)';
+                shareDisabled = !canSharePosition ? true : false;
+              } else {
+                shareText = 'Checkmate — They win';
+                shareDisabled = true;
+              }
+            } else if (isAnyDraw) {
+              const reasonMap: Record<DrawReason, string> = {
+                'stalemate': 'Stalemate',
+                'fifty-move': '50-move',
+                'threefold': 'Threefold',
+                'insufficient': 'Insufficient',
+                'other': 'Draw',
+              };
+              const reasonLabel = indicatorInfo.drawReason ? reasonMap[indicatorInfo.drawReason] : 'Draw';
+              shareText = `Draw — ${reasonLabel} (share result)`;
+              shareDisabled = !canSharePosition ? true : false;
+            }
+          } else {
+            const isInCheck = indicatorInfo.isCheck;
+            shareText = canSharePosition
+              ? isInCheck
+                ? `Send to ${perspective === 'white' ? 'Black' : 'White'} (in check!)`
+                : `Send to ${perspective === 'white' ? 'Black' : 'White'}`
+              : 'Share';
+            shareDisabled = !canSharePosition;
+          }
+
           return (
             <button
               onClick={handleShare}
-              disabled={!canSharePosition}
-              aria-disabled={!canSharePosition}
-              className={`px-8 py-3 bg-primary text-primary-foreground rounded-lg font-medium transition-colors ${canSharePosition ? 'hover:bg-primary/90' : 'opacity-50'}`}
+              disabled={shareDisabled}
+              aria-disabled={shareDisabled}
+              className={`px-8 py-3 bg-primary text-primary-foreground rounded-lg font-medium transition-colors ${!shareDisabled ? 'hover:bg-primary/90' : 'opacity-50'}`}
             >
               {shareText}
-              {/* always send to opponent */}
             </button>
           );
         })()}
