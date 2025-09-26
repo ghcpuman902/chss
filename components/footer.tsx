@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const Footer = () => {
   return (
     <footer className="border-t bg-muted/30">
@@ -7,7 +9,7 @@ export const Footer = () => {
             <span className="text-2xl">♟️</span>
             <span className="font-semibold">chss.chat</span>
           </div>
-          <div className="text-sm text-muted-foreground">© 2024 chss.chat. Play chess anywhere, anytime.</div>
+          <div className="flex flex-col items-center md:items-start md:flex-row gap-2 text-sm text-muted-foreground"><span>© {new Date().getFullYear()}</span><span><Link href="https://chss.chat" className="underline">chss.chat</Link></span><span>Play chess with your friends, in any messaging app.</span></div>
         </div>
       </div>
     </footer>

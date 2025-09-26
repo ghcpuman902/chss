@@ -4,6 +4,7 @@ import { parseCode, generateCode } from '@/lib/state';
 import { parseUrlSegment } from '@/lib/utils';
 import { ChessBoard } from '@/components/chess-board';
 import { redirect } from 'next/navigation';
+import { Move } from 'chess.js';
 
 export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
   // Decode to get side-to-move → title + OG image path
@@ -11,33 +12,53 @@ export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
   const codeString = parseUrlSegment(code);
   const { p } = (await (props.searchParams)) || {};
 
-  let title = 'Your move';
+  let title = "Your move";
   let ogCode = '';
   try {
     const parsed = parseCode(codeString);
     const { sideToMove } = parsed;
 
-    // Derive last move destination when UCI is available (raw UCI or unknown u- payload)
+    // Derive last move details (piece + to-square) when UCI is available
     let lastToSquare: string | undefined;
-    if (parsed.uci && parsed.uci.length >= 4) {
-      const u = parsed.uci;
-      // Handle promotion (5-char tail) vs normal (4-char tail)
-      const maybePromo = u.slice(-5);
-      const maybeNormal = u.slice(-4);
-      const promoPattern = /^[a-h][1-8][a-h][1-8][nbrq]$/i;
-      const normalPattern = /^[a-h][1-8][a-h][1-8]$/i;
-      if (promoPattern.test(maybePromo)) {
-        lastToSquare = maybePromo.slice(2, 4).toLowerCase();
-      } else if (normalPattern.test(maybeNormal)) {
-        lastToSquare = maybeNormal.slice(2, 4).toLowerCase();
+    let lastPieceName: string | undefined;
+    // Try to reconstruct from URL when it encodes raw UCI directly
+    const uciCandidate = (() => {
+      if (!codeString) return '';
+      if (codeString.startsWith('u-')) return codeString.slice(2);
+      if (codeString.startsWith('f-')) return '';
+      return codeString;
+    })();
+    const uciPattern = /^([a-h][1-8][a-h][1-8][nbrq]?)+$/i;
+    const useUci = uciCandidate && uciPattern.test(uciCandidate);
+    const uciToSimulate = useUci ? uciCandidate : (parsed.uci || '');
+    if (uciToSimulate && uciToSimulate.length >= 4) {
+      const { Chess } = await import('chess.js');
+      const chess = new Chess();
+      for (let i = 0; i < uciToSimulate.length;) {
+        const from = uciToSimulate.slice(i, i + 2);
+        const to = uciToSimulate.slice(i + 2, i + 4);
+        const next = uciToSimulate[i + 4];
+        const promo = next && /[nbrq]/i.test(next) ? next.toLowerCase() : undefined;
+        const step = promo ? 5 : 4;
+        const res = chess.move({ from, to, promotion: promo as Move['promotion'] });
+        if (!res) break;
+        i += step;
+        if (i >= uciToSimulate.length) {
+          lastToSquare = String(res.to).toLowerCase();
+          const pieceMap: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
+          lastPieceName = pieceMap[String(res.piece).toLowerCase()] || undefined;
+        }
       }
     }
 
-    if (lastToSquare) {
+    if (lastToSquare && lastPieceName) {
       const movedColor = sideToMove === 'w' ? 'Black' : 'White';
-      title = `${movedColor} moved to ${lastToSquare}, ${sideToMove === 'w' ? 'White' : 'Black'} to move`;
+      const nextColor = sideToMove === 'w' ? "white" : "black";
+      title = `${movedColor} ${lastPieceName} to ${lastToSquare}, ${nextColor}'s turn`;
     } else {
-      title = `${sideToMove === 'w' ? 'White' : 'Black'} to move`;
+      // Fallback: we don't know the last move detail (e.g., short u-keys)
+      const nextColor = sideToMove === 'w' ? "White" : "Black";
+      title = `${nextColor}'s turn`;
     }
     // Determine perspective for OG: query param overrides, else side-to-move; empty code -> white
     const perspectiveLetter: 'w' | 'b' = p === 'w' || p === 'b' ? p : (codeString ? sideToMove : 'w');
@@ -88,9 +109,13 @@ export default async function Page(props: PageProps<'/p/[[...code]]'>) {
     };
   }
 
-  // Canonicalize URL to prefer short u- codes when available
+  // Canonicalize URL:
+  // - If incoming looks like raw UCI (keep as-is for detailed titles), do NOT redirect
+  // - Otherwise, prefer short u- codes when available
   const preferred = generateCode(gameState);
-  if (codeString && preferred && codeString !== preferred) {
+  const uciPattern = /^([a-h][1-8][a-h][1-8][nbrq]?)+$/i;
+  const isRawUci = !!codeString && !codeString.startsWith('u-') && !codeString.startsWith('f-') && uciPattern.test(codeString);
+  if (!isRawUci && codeString && preferred && codeString !== preferred) {
     const search = p === 'w' || p === 'b' ? `?p=${p}` : '';
     redirect(`/p/${encodeURIComponent(preferred)}${search}`);
   }

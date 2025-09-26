@@ -4,11 +4,12 @@ import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import type React from 'react';
 import { PawnIcon, KnightIcon, BishopIcon, RookIcon, QueenIcon, KingIcon } from './pieces';
 import { useRouter } from 'next/navigation';
-import { makeMove, getLegalMoves, generateCode, type ParsedState } from '@/lib/state';
+import { makeMove, getLegalMoves, generateCode, parseCode, type ParsedState } from '@/lib/state';
 import { TurnIndicator, type GameInfo, type Outcome, type DrawReason } from './turn-indicator';
 import { Chess, type Move, type Square } from 'chess.js';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { Undo2 } from 'lucide-react';
 
 interface ChessBoardProps {
   initialState: ParsedState;
@@ -36,12 +37,13 @@ const PIECE_COMPONENT: Record<PieceKey, PieceComponentType> = {
 
 export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBoardProps) => {
   const [gameState, setGameState] = useState<ParsedState>(initialState);
-  const [initialPageState] = useState<ParsedState>(initialState);
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [legalMoves, setLegalMoves] = useState<string[]>([]);
   const [lastMove, setLastMove] = useState<{ from: string, to: string } | null>(null);
   const historyRef = useRef<ParsedState[]>([initialState]);
   const [canUndo, setCanUndo] = useState<boolean>(false);
+  const historyStepRef = useRef<number>(0);
+  const initialCodeRef = useRef<string>(generateCode(initialState));
   const router = useRouter();
 
   // Promotion picker state
@@ -129,6 +131,108 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     prewarmOg();
   }, [prewarmOg]);
 
+  // Initialize history state and handle browser back/forward
+  useEffect(() => {
+    const computeLastMoveDetails = async (uci?: string): Promise<{ to?: string; pieceName?: string }> => {
+      try {
+        if (!uci || uci.length < 4) return {};
+        const mod = await import('chess.js');
+        const C = (mod as { Chess: typeof Chess }).Chess;
+        const chess = new C();
+        for (let i = 0; i < uci.length;) {
+          const from = uci.slice(i, i + 2);
+          const to = uci.slice(i + 2, i + 4);
+          const next = uci[i + 4];
+          const promo = next && /[nbrq]/i.test(next) ? next.toLowerCase() : undefined;
+          const step = promo ? 5 : 4;
+          const res = chess.move({ from, to, promotion: promo as Move['promotion'] });
+          if (!res) break;
+          i += step;
+          if (i >= uci.length) {
+            const pieceMap: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
+            return { to: String(res.to).toLowerCase(), pieceName: pieceMap[String(res.piece).toLowerCase()] };
+          }
+        }
+      } catch {}
+      return {};
+    };
+
+    const setDocumentTitle = (state: ParsedState, details?: { to?: string; pieceName?: string }) => {
+      try {
+        const site = 'chss.chat';
+        const nextColorLc = state.sideToMove === 'w' ? 'white' : 'black';
+        if (details && details.to && details.pieceName) {
+          const movedColor = state.sideToMove === 'w' ? 'Black' : 'White';
+          document.title = `${movedColor} ${details.pieceName} to ${details.to}, ${nextColorLc}'s turn | ${site}`;
+        } else {
+          document.title = `${nextColorLc}'s turn | ${site}`;
+        }
+      } catch {}
+    };
+
+    const getCodeFromLocation = (): string => {
+      try {
+        const path = window.location.pathname || '';
+        const prefix = '/p';
+        const idx = path.indexOf(prefix);
+        if (idx === -1) return '';
+        const after = path.slice(idx + prefix.length);
+        if (!after || after === '/') return '';
+        const seg = after.startsWith('/') ? after.slice(1) : after;
+        return decodeURIComponent(seg);
+      } catch {
+        return '';
+      }
+    };
+
+    // Ensure current entry has a baseline state
+    try {
+      if (window.history && window.history.replaceState) {
+        const current = window.history.state as { step?: number; code?: string } | null;
+        if (!current || typeof current.step !== 'number') {
+          window.history.replaceState({ step: 0, code: initialCodeRef.current }, '', window.location.pathname + window.location.search);
+        } else {
+          historyStepRef.current = current.step || 0;
+        }
+        setCanUndo(historyStepRef.current > 0);
+        // Initialize title on mount
+        setDocumentTitle(gameState, undefined);
+      }
+    } catch {}
+
+    const onPopState = (event: PopStateEvent) => {
+      try {
+        const codeStr = getCodeFromLocation();
+        const parsed = parseCode(codeStr);
+        setGameState(parsed);
+        setSelectedSquare(null);
+        setLegalMoves([]);
+        setLastMove(null);
+        // Sync step and in-memory history
+        const newStep = event.state && typeof event.state.step === 'number' ? event.state.step : (codeStr && codeStr !== initialCodeRef.current ? 1 : 0);
+        historyStepRef.current = newStep;
+        // Resize local history buffer to reflect step position
+        const desiredLen = Math.max(1, newStep + 1);
+        if (historyRef.current.length !== desiredLen) {
+          historyRef.current.length = desiredLen;
+        }
+        historyRef.current[desiredLen - 1] = parsed;
+        setCanUndo(historyStepRef.current > 0);
+        onStateChange?.(parsed);
+        prewarmOg();
+        // Update title with best-effort last move details
+        (async () => {
+          const details = await computeLastMoveDetails(parsed.uci);
+          setDocumentTitle(parsed, details);
+        })();
+      } catch {}
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, [onStateChange, prewarmOg, gameState]);
+
   const handleSquareClick = useCallback((square: string) => {
     // If no square is selected, select this square if it has a piece of the current player
     if (!selectedSquare) {
@@ -178,14 +282,22 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
         // Push to in-session history and update undo availability
         historyRef.current.push(moveResult.newState);
-        setCanUndo(historyRef.current.length > 1);
 
-        // Update URL without navigation to preserve in-session orientation
+        // Update URL via pushState so browser back undoes the move
         const newCode = generateCode(moveResult.newState);
         const newUrl = newCode ? `/p/${encodeURIComponent(newCode)}` : '/p';
-        if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
-          window.history.replaceState(null, '', newUrl);
+        if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+          const nextStep = (historyStepRef.current || 0) + 1;
+          historyStepRef.current = nextStep;
+          window.history.pushState({ step: nextStep, code: newCode }, '', newUrl);
         }
+        setCanUndo((historyStepRef.current || 0) > 0);
+
+        // Update page title: moved color is opposite of sideToMove after move
+        try {
+          const movedColor = moveResult.newState.sideToMove === 'w' ? 'Black' : 'White';
+          document.title = `${movedColor} moved to ${square.toLowerCase()} | chss.chat`;
+        } catch {}
 
         // Notify parent component
         onStateChange?.(moveResult.newState);
@@ -227,15 +339,32 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     setLegalMoves([]);
 
     // Maintain history: replace last if re-choosing, else push new
-    historyRef.current.push(moveResult.newState);
-    setCanUndo(historyRef.current.length > 1);
+    if (promotionAppliedRef.current) {
+      // Replace current entry
+      historyRef.current[historyRef.current.length - 1] = moveResult.newState;
+    } else {
+      historyRef.current.push(moveResult.newState);
+    }
 
-    // Update URL without navigation
+    // Update URL using push/replaceState aligned with promotion re-choose behavior
     const newCode = generateCode(moveResult.newState);
     const newUrl = newCode ? `/p/${encodeURIComponent(newCode)}` : '/p';
-    if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
-      window.history.replaceState(null, '', newUrl);
+    if (typeof window !== 'undefined' && window.history) {
+      if (promotionAppliedRef.current && window.history.replaceState) {
+        window.history.replaceState({ step: historyStepRef.current, code: newCode }, '', newUrl);
+      } else if (window.history.pushState) {
+        const nextStep = (historyStepRef.current || 0) + 1;
+        historyStepRef.current = nextStep;
+        window.history.pushState({ step: nextStep, code: newCode }, '', newUrl);
+      }
     }
+    setCanUndo((historyStepRef.current || 0) > 0);
+
+    // Update page title for promotion move
+    try {
+      const movedColor = moveResult.newState.sideToMove === 'w' ? 'Black' : 'White';
+      document.title = `${movedColor} moved to ${promotionTo?.toLowerCase()} | chss.chat`;
+    } catch {}
 
     onStateChange?.(moveResult.newState);
     promotionAppliedRef.current = true;
@@ -293,33 +422,12 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
   }, [perspective, lastMove, prewarmOg]);
 
   const handleUndo = useCallback(() => {
-    // If there is no prior state, do nothing
-    if (historyRef.current.length <= 1) return;
-
-    // Remove current state and step back to previous
-    historyRef.current.pop();
-    const previousState = historyRef.current[historyRef.current.length - 1] ?? initialPageState;
-
-    setGameState(previousState);
-    setSelectedSquare(null);
-    setLegalMoves([]);
-    setLastMove(null);
-
-    // Update undo availability
-    setCanUndo(historyRef.current.length > 1);
-
-    // Update URL without navigation
-    const newCode = generateCode(previousState);
-    const newUrl = newCode ? `/p/${encodeURIComponent(newCode)}` : '/p';
-    if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
-      window.history.replaceState(null, '', newUrl);
-    }
-
-    onStateChange?.(previousState);
-
-    // Prewarm OG for the undone position
-    prewarmOg();
-  }, [initialPageState, onStateChange, prewarmOg]);
+    try {
+      if (typeof window !== 'undefined' && window.history) {
+        window.history.back();
+      }
+    } catch {}
+  }, []);
 
   const handleNewGame = useCallback(() => {
     router.push('/p');
@@ -427,24 +535,54 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
       {/* Board + Side Indicator */
       /* Position indicator absolutely so the board stays centered */}
       <div className="relative mx-auto w-fit">
-        <div className={`chess-board`}>
-          {renderBoard()}
+        <div className="relative group">
+          <div className={`chess-board`}>
+            {renderBoard()}
+          </div>
+          {(() => {
+            const files = (perspective === 'white'
+              ? ['a','b','c','d','e','f','g','h']
+              : ['h','g','f','e','d','c','b','a']);
+            const ranks = (perspective === 'white'
+              ? ['8','7','6','5','4','3','2','1']
+              : ['1','2','3','4','5','6','7','8']);
+            return (
+              <>
+                <div className="pointer-events-none select-none absolute -bottom-5 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                  <div className="flex w-full justify-between text-[10px] sm:text-xs text-foreground/30 px-1">
+                    {files.map((f) => (
+                      <span key={`file-${f}`} className="w-[12.5%] text-center leading-none">{f}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="pointer-events-none select-none absolute top-0 bottom-0 -left-5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                  <div className="flex h-full flex-col justify-between text-[10px] sm:text-xs text-foreground/30 py-1">
+                    {ranks.map((r) => (
+                      <span key={`rank-${r}`} className="h-[12.5%] flex items-center leading-none">{r}</span>
+                    ))}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
           <TurnIndicator info={indicatorInfo} />
       </div>
 
       {/* Action Buttons */}
-      <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+      <div className="mt-6 flex flex-row gap-4 justify-center">
         <button
           onClick={handleUndo}
           disabled={!canUndo}
           aria-disabled={!canUndo}
-          className={`px-8 py-3 border border-border rounded-lg font-medium transition-colors ${canUndo ? 'hover:bg-muted' : 'opacity-50'}`}
+          aria-label="Undo move"
+          className={`px-3 py-3 sm:px-8 border border-border rounded-lg font-medium transition-colors ${canUndo ? 'hover:bg-muted' : 'opacity-50'}`}
         >
-          Undo
+          <Undo2 className="h-5 w-5 sm:hidden" />
+          <span className="hidden sm:inline">Undo</span>
         </button>
         {(() => {
-          const canSharePosition = historyRef.current.length > 1;
+          const canSharePosition = (historyStepRef.current || 0) > 0;
 
           const isTerminal = indicatorInfo.outcome !== 'ongoing';
           const isCheckmateTerminal = indicatorInfo.outcome === 'checkmate';
@@ -491,7 +629,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
               onClick={handleShare}
               disabled={shareDisabled}
               aria-disabled={shareDisabled}
-              className={`px-8 py-3 bg-primary text-primary-foreground rounded-lg font-medium transition-colors ${!shareDisabled ? 'hover:bg-primary/90' : 'opacity-50'}`}
+              className={`px-3 py-3 sm:px-8 bg-primary text-primary-foreground rounded-lg font-medium transition-colors ${!shareDisabled ? 'hover:bg-primary/90' : 'opacity-50'}`}
             >
               {shareText}
             </button>

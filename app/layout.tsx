@@ -17,7 +17,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://chss.chat'),
-  title: "chss.chat",
+  title: {
+    template: '%s | chss.chat',
+    default: 'chss.chat',
+  },
   description: "Play chess over any messaging app. No download, no sign up.",
   icons: {
     icon: "/Pawn.svg",
