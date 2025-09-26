@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import type React from 'react';
 import { PawnIcon, KnightIcon, BishopIcon, RookIcon, QueenIcon, KingIcon } from './pieces';
 import { useRouter } from 'next/navigation';
@@ -88,6 +88,47 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     return info;
   }, [chessMemo, gameState, lastMove, perspective]);
 
+  // Compute OG image URL for the current position and perspective
+  const computeOgUrl = useCallback((): string => {
+    const perspectiveLetter: 'w' | 'b' = perspective === 'white' ? 'w' : 'b';
+    const piecePlacement = gameState.fen.split(' ')[0] ?? '';
+    let board64 = '';
+    for (let i = 0; i < piecePlacement.length; i++) {
+      const ch = piecePlacement[i] as string;
+      if (ch === '/') continue;
+      if (/^[1-8]$/.test(ch)) {
+        const n = Number.parseInt(ch, 10);
+        board64 += '.'.repeat(n);
+      } else {
+        board64 += ch;
+      }
+    }
+    if (board64.length !== 64) {
+      board64 = 'rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR'.replace(/\./g, '.');
+    }
+    const btoaSafe = (s: string) => (typeof btoa === 'function' ? btoa(s) : Buffer.from(s, 'utf8').toString('base64'));
+    const base64urlEncode = (s: string) => btoaSafe(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    const ogPayload = base64urlEncode(`${board64}|${perspectiveLetter}`);
+    const ogCode = `o-${ogPayload}`;
+    return `${window.location.origin}/og/${ogCode}.png`;
+  }, [gameState.fen, perspective]);
+
+  // Fire-and-forget prewarm for OG route, avoids blocking share sheet
+  const lastWarmedOgRef = useRef<string | null>(null);
+  const prewarmOg = useCallback(() => {
+    try {
+      const ogUrl = computeOgUrl();
+      if (lastWarmedOgRef.current === ogUrl) return;
+      lastWarmedOgRef.current = ogUrl;
+      fetch(ogUrl, { cache: 'force-cache', keepalive: true }).catch(() => {});
+    } catch {}
+  }, [computeOgUrl]);
+
+  // Opportunistically warm on state/perspective changes
+  useEffect(() => {
+    prewarmOg();
+  }, [prewarmOg]);
+
   const handleSquareClick = useCallback((square: string) => {
     // If no square is selected, select this square if it has a piece of the current player
     if (!selectedSquare) {
@@ -148,6 +189,9 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
         // Notify parent component
         onStateChange?.(moveResult.newState);
+
+        // Prewarm OG for the new position immediately after the move
+        prewarmOg();
       }
     } else {
       // Try to select a different piece
@@ -162,7 +206,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         setLegalMoves([]);
       }
     }
-  }, [selectedSquare, legalMoves, gameState, onStateChange, chessMemo]);
+  }, [selectedSquare, legalMoves, gameState, onStateChange, chessMemo, prewarmOg]);
 
   // Apply a promotion choice; supports re-choosing while popover remains open
   const handleChoosePromotion = useCallback((piece: 'q' | 'r' | 'b' | 'n') => {
@@ -195,41 +239,18 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
     onStateChange?.(moveResult.newState);
     promotionAppliedRef.current = true;
-  }, [gameState, onStateChange, promotionFrom, promotionTo]);
+
+    // Prewarm OG for the promoted position
+    prewarmOg();
+  }, [gameState, onStateChange, promotionFrom, promotionTo, prewarmOg]);
 
   const handleShare = useCallback(async () => {
     // Prevent sharing before any move has been made
     if (historyRef.current.length <= 1) return;
 
     const url = window.location.href;
-
-    // Derive OG code (same as server) to prefetch and optionally attach image
-    const perspectiveLetter: 'w' | 'b' = perspective === 'white' ? 'w' : 'b';
-    const piecePlacement = gameState.fen.split(' ')[0] ?? '';
-    let board64 = '';
-    for (let i = 0; i < piecePlacement.length; i++) {
-      const ch = piecePlacement[i] as string;
-      if (ch === '/') continue;
-      if (/^[1-8]$/.test(ch)) {
-        const n = Number.parseInt(ch, 10);
-        board64 += '.'.repeat(n);
-      } else {
-        board64 += ch;
-      }
-    }
-    if (board64.length !== 64) {
-      board64 = 'rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR'.replace(/\./g, '.');
-    }
-    const btoaSafe = (s: string) => (typeof btoa === 'function' ? btoa(s) : Buffer.from(s, 'utf8').toString('base64'));
-    const base64urlEncode = (s: string) => btoaSafe(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-    const ogPayload = base64urlEncode(`${board64}|${perspectiveLetter}`);
-    const ogCode = `o-${ogPayload}`;
-    const ogUrl = `${window.location.origin}/og/${ogCode}.png`;
-
-    // Warm the OG route behind the scenes (no attachment in share)
-    try {
-      await fetch(ogUrl, { cache: 'force-cache' });
-    } catch {}
+    // Warm OG non-blocking
+    prewarmOg();
 
     // Build aligned title, e.g., "Black moved to e6, White to move"
     let alignedTitle = `${perspective === 'white' ? 'White' : 'Black'} to move`;
@@ -269,7 +290,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     try {
       await navigator.clipboard.writeText(url);
     } catch {}
-  }, [perspective, lastMove, gameState.fen]);
+  }, [perspective, lastMove, prewarmOg]);
 
   const handleUndo = useCallback(() => {
     // If there is no prior state, do nothing
@@ -295,7 +316,10 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     }
 
     onStateChange?.(previousState);
-  }, [initialPageState, onStateChange]);
+
+    // Prewarm OG for the undone position
+    prewarmOg();
+  }, [initialPageState, onStateChange, prewarmOg]);
 
   const handleNewGame = useCallback(() => {
     router.push('/p');

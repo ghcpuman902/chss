@@ -105,7 +105,7 @@ function applyUciMoves(uci: string): ParsedState {
     i += step;
   }
   
-  return { fen: chess.fen(), sideToMove: chess.turn(), uci };
+  return { fen: chess.fen({ forceEnpassantSquare: true }), sideToMove: chess.turn(), uci };
 }
 
 export function parseCode(code: string): ParsedState {
@@ -186,7 +186,7 @@ export function makeMove(currentState: ParsedState, from: string, to: string, pr
       return { success: false, error: 'Invalid move' };
     }
     
-    const newFen = chess.fen();
+    const newFen = chess.fen({ forceEnpassantSquare: true });
     const newState: ParsedState = {
       fen: newFen,
       sideToMove: chess.turn()
