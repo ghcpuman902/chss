@@ -4,6 +4,7 @@ import "./globals.css";
 import { Footer } from "@/components/footer";
 import { FloatingTitle } from "@/components/floating-title";
 import { AppProviders } from "@/components/providers";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </AppProviders>
+        <Analytics />
       </body>
     </html>
   );
