@@ -2,6 +2,7 @@
 
 import { parseCode, generateCode } from '@/lib/state';
 import { parseUrlSegment } from '@/lib/utils';
+import { buildOgCode } from '@/lib/og-encoding';
 import { ChessBoard } from '@/components/chess-board';
 import { redirect } from 'next/navigation';
 import { Move } from 'chess.js';
@@ -62,29 +63,7 @@ export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
     }
     // Determine perspective for OG: query param overrides, else side-to-move; empty code -> white
     const perspectiveLetter: 'w' | 'b' = p === 'w' || p === 'b' ? p : (codeString ? sideToMove : 'w');
-    // Convert FEN piece placement to 64-char board string (a8..h1)
-    const fen = parsed.fen;
-    const piecePlacement = fen.split(' ')[0] ?? '';
-    let board64 = '';
-    for (let i = 0; i < piecePlacement.length; i++) {
-      const ch = piecePlacement[i] as string;
-      if (ch === '/') continue;
-      if (/^[1-8]$/.test(ch)) {
-        const n = Number.parseInt(ch, 10);
-        board64 += '.'.repeat(n);
-      } else {
-        board64 += ch;
-      }
-    }
-    if (board64.length !== 64) {
-      // Fallback to start position
-      board64 = 'rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR'.replace(/\./g, '.');
-    }
-    // base64url encode without padding
-    const btoaSafe = (s: string) => (typeof btoa === 'function' ? btoa(s) : Buffer.from(s, 'utf8').toString('base64'));
-    const base64urlEncode = (s: string) => btoaSafe(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
-    const payload = base64urlEncode(`${board64}|${perspectiveLetter}`);
-    ogCode = `o-${payload}`;
+    ogCode = buildOgCode(parsed.fen, perspectiveLetter);
   } catch { }
   return {
     title,

@@ -95,7 +95,7 @@ export default function HomePage() {
                 <Link href="/p/">Start Playing Now</Link>
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 py-6" asChild>
-                <Link href="/p/u:e2e4e7e5g1f3">View Example Game</Link>
+                <Link href="/p/e2e4e7e5g1f3">View Example Game</Link>
               </Button>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { FloatingTitle } from "@/components/floating-title";
 import { AppProviders } from "@/components/providers";
 import { Analytics } from "@vercel/analytics/next"
+import { START_OG_CODE } from "@/lib/og-encoding";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,13 +34,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "chss.chat",
     description: "Play chess over any messaging app. No download, no sign up.",
-    images: ["/og/o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|w.png"],
+    images: [`/og/${START_OG_CODE}.png`],
   },
   twitter: {
     card: "summary_large_image",
     title: "chss.chat",
     description: "Play chess over any messaging app. No download, no sign up.",
-    images: ["/og/o-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR|w.png"],
+    images: [`/og/${START_OG_CODE}.png`],
   },
 };
 

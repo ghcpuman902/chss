@@ -301,21 +301,23 @@
     @apply ring-0 bg-blue-200/40;
   }
 
-  /* Legal move indicators */
-  .chess-square.legal-move::after {
-    content: '';
-    @apply absolute inset-0 flex items-center justify-center;
+  /* Last move highlighting (background) — separate from legal dots */
+  .chess-square.last-move {
+    @apply bg-yellow-300/30;
   }
 
+  .chess-square.last-move.light {
+    background-color: color-mix(in srgb, #f0d9b5 70%, #fde047 30%);
+  }
+
+  .chess-square.last-move.dark {
+    background-color: color-mix(in srgb, #b58863 70%, #fde047 30%);
+  }
+
+  /* Legal move indicators (dots) — can coexist with last-move */
   .chess-square.legal-move::after {
     content: '●';
-    @apply text-green-500 text-lg opacity-60;
-  }
-
-  /* Last move highlighting */
-  .chess-square.last-move::after {
-    content: '';
-    @apply absolute inset-0 bg-yellow-300/20;
+    @apply absolute inset-0 flex items-center justify-center text-green-500 text-lg opacity-60 pointer-events-none;
   }
 
   /* Piece styling */
