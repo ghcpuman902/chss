@@ -4,6 +4,8 @@
 # Usage (from repo root):
 #   bash benchmark/run_scoreboard.sh
 #   MONTH=2026-06 bash benchmark/run_scoreboard.sh
+#   JOBS=12 bash benchmark/run_scoreboard.sh          # multicore eval (opt-in)
+#   JOBS=$(sysctl -n hw.ncpu) bash benchmark/run_scoreboard.sh
 #
 set -euo pipefail
 
@@ -16,6 +18,8 @@ TRAIN="${TRAIN:-${ROOT}/data/standard/corpus/hash/${MONTH}.train.compact.jsonl.z
 EVAL="${EVAL:-${ROOT}/data/standard/corpus/hash/${MONTH}.val.compact.jsonl.zst}"
 OUT="${OUT:-${ROOT}/benchmark/results/url_length_hash_val.json}"
 SLIM="${SLIM:-${ROOT}/lib/compression-url-scoreboard.json}"
+# Default single-process; set JOBS for multicore (eval is the bottleneck).
+JOBS="${JOBS:-1}"
 
 if [[ ! -x "$PY" ]]; then
   echo "Missing Python venv at $PY"
@@ -37,10 +41,14 @@ mkdir -p "$(dirname "$OUT")" "$(dirname "$SLIM")"
 echo "=== URL scoreboard $(date) ==="
 echo "train=$TRAIN"
 echo "eval=$EVAL"
+echo "jobs=$JOBS"
 
 "$PY" benchmark/url_length_benchmark.py \
   --train "$TRAIN" \
   --eval "$EVAL" \
+  --jobs "$JOBS" \
+  --validate-suite \
+  --validate-every 2000 \
   --out "$OUT" \
   --slim-out "$SLIM"
 

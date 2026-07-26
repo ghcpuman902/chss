@@ -104,11 +104,17 @@ export const matchPieceIds = (
   });
 
   const seen = new Set<string>();
-  return (result as BoardPiece[]).map((piece) => {
+  const withIds = (result as BoardPiece[]).map((piece) => {
     if (!seen.has(piece.id)) {
       seen.add(piece.id);
       return piece;
     }
     return { ...piece, id: allocId(seen) };
   });
+
+  // Keep a stable DOM order across moves. Rendering in FEN order reorders
+  // siblings when a piece changes rank; React's insertBefore then cancels the
+  // CSS transform transition — which shows up as black (down-board) jumps
+  // while white (up-board) slides, since FEN lists rank 8 first.
+  return withIds.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 };

@@ -57,27 +57,9 @@ const PIECE_COMPONENT: Record<PieceKey, PieceIcon> = {
 
 const FILES = "abcdefgh";
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
-const START_FEN =
-  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const AFTER_E4_FEN =
-  "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
 
 /** Real June 2026 corpus positions used for the loops. */
 const DEMO = {
-  stm: {
-    frames: [
-      {
-        fen: START_FEN,
-        stm: "w" as const,
-        highlights: [] as string[],
-      },
-      {
-        fen: AFTER_E4_FEN,
-        stm: "b" as const,
-        highlights: ["e2", "e4"],
-      },
-    ],
-  },
   ep: {
     frames: [
       {
@@ -145,77 +127,6 @@ const DEMO = {
       },
     ],
   },
-  halfmove: {
-    frames: [
-      {
-        fen: "rnb2b1r/pp1k2pp/2p1B3/6B1/3p4/8/PPP2PPP/RN2R1K1 b - - 3 13",
-        focus: ["d7", "c7", "g5", "f4", "f8", "d6"],
-        highlights: [],
-        clock: 3,
-        note: "quiet",
-      },
-      {
-        fen: "rnb2b1r/ppk3pp/2p1B3/6B1/3p4/8/PPP2PPP/RN2R1K1 w - - 4 14",
-        focus: ["d7", "c7", "g5", "f4", "f8", "d6"],
-        highlights: ["d7", "c7"],
-        clock: 4,
-        note: "quiet",
-      },
-      {
-        fen: "rnb2b1r/ppk3pp/2p1B3/8/3p1B2/8/PPP2PPP/RN2R1K1 b - - 5 14",
-        focus: ["d7", "c7", "g5", "f4", "f8", "d6"],
-        highlights: ["g5", "f4"],
-        clock: 5,
-        note: "quiet",
-      },
-      {
-        fen: "rnb4r/ppk3pp/2pbB3/8/3p1B2/8/PPP2PPP/RN2R1K1 w - - 6 15",
-        focus: ["d7", "c7", "g5", "f4", "f8", "d6"],
-        highlights: ["f8", "d6"],
-        clock: 6,
-        note: "quiet",
-      },
-      {
-        fen: "rnb4r/ppk3pp/2pBB3/8/3p4/8/PPP2PPP/RN2R1K1 b - - 0 15",
-        focus: ["f4", "d6"],
-        highlights: ["f4", "d6"],
-        clock: 0,
-        note: "capture resets",
-      },
-    ],
-  },
-  fullmove: {
-    frames: [
-      {
-        fen: "rn2r1k1/ppp3pp/3bpq2/8/3P2n1/2P2N2/PP2QPPP/RNB2RK1 w - - 1 12",
-        focus: [] as string[],
-        highlights: [] as string[],
-        stm: "w" as const,
-        fullmove: 12,
-      },
-      {
-        fen: "rn2r1k1/ppp3pp/3bpq2/6B1/3P2n1/2P2N2/PP2QPPP/RN3RK1 b - - 2 12",
-        focus: ["c1", "g5"],
-        highlights: ["c1", "g5"],
-        stm: "b" as const,
-        fullmove: 12,
-      },
-      {
-        fen: "rn2r1k1/ppp3pp/3bp1q1/6B1/3P2n1/2P2N2/PP2QPPP/RN3RK1 w - - 3 13",
-        focus: ["f6", "g6"],
-        highlights: ["f6", "g6"],
-        stm: "w" as const,
-        fullmove: 13,
-      },
-      {
-        fen: "rn2r1k1/ppp3pp/3bp1q1/6B1/3P2n1/2P2N1P/PP2QPP1/RN3RK1 b - - 0 13",
-        focus: ["h2", "h3"],
-        highlights: ["h2", "h3"],
-        stm: "b" as const,
-        fullmove: 13,
-      },
-    ],
-  },
 } as const;
 
 /** Link to the playable board for this FEN (empty code = start). */
@@ -264,7 +175,6 @@ type FullBoardProps = {
   epSquare?: string | null;
   reduceMotion?: boolean;
   label: string;
-  focusSide?: "w" | "b" | null;
   href?: string;
 };
 
@@ -275,7 +185,6 @@ const FullBoard = ({
   epSquare = null,
   reduceMotion = false,
   label,
-  focusSide = null,
   href,
 }: FullBoardProps) => {
   const prevPiecesRef = useRef<BoardPiece[] | null>(null);
@@ -290,7 +199,7 @@ const FullBoard = ({
 
   const focusSet = useMemo(() => new Set(focusSquares), [focusSquares]);
   const highlightSet = useMemo(() => new Set(highlights), [highlights]);
-  const hasFocus = focusSet.size > 0 || focusSide !== null;
+  const hasFocus = focusSet.size > 0;
 
   const board = (
     <div
@@ -324,10 +233,7 @@ const FullBoard = ({
         const Icon = PIECE_COMPONENT[key];
         const col = fileIndex(piece.square);
         const row = 8 - Number(piece.square[1]);
-        const focused =
-          !hasFocus ||
-          focusSet.has(piece.square) ||
-          focusSide === piece.color;
+        const focused = !hasFocus || focusSet.has(piece.square);
 
         return (
           <span
@@ -368,9 +274,7 @@ const FullBoard = ({
 };
 
 const InferNote = ({ children }: { children: ReactNode }) => (
-  <p className="text-sm text-foreground/80 mt-2">
-    <span className="font-medium text-foreground">Inferable?</span> {children}
-  </p>
+  <p className="text-sm text-foreground/80 mt-2">{children}</p>
 );
 
 const DemoCard = ({
@@ -400,44 +304,20 @@ const DemoCard = ({
   </li>
 );
 
-const SideToMoveDemo = ({ reduced }: { reduced: boolean }) => {
-  const frames = DEMO.stm.frames;
-  const step = useLoopStep(frames.length, 1600, reduced);
-  const frame = frames[step];
-
-  return (
-    <DemoCard
-      title="Side to move"
-      board={
-        <div className="space-y-2">
-          <FullBoard
-            fen={frame.fen}
-            focusSide={frame.stm}
-            highlights={[...frame.highlights]}
-            reduceMotion={reduced}
-            label="Side to move from the starting position"
-            href={playUrlForFen(frame.fen)}
-          />
-          <p className="font-mono text-xs text-center tabular-nums">
-            <span className="text-muted-foreground">stm </span>
-            <span className="text-foreground font-semibold">{frame.stm}</span>
-          </p>
-        </div>
-      }
-    >
-      <p>
-        This one is simple: whose turn is it? White or Black. The starting
-        position is always White to move. After 1.e4 it is Black&apos;s turn.
-        A share link that omits this field cannot tell the recipient whether
-        they are answering a move or making one.
-      </p>
-      <InferNote>
-        Yes, if you store a move list from the start. The parity of the ply
-        count is the side to move. Not inferable from a board snapshot alone.
-      </InferNote>
-    </DemoCard>
-  );
-};
+const CompactStateNote = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) => (
+  <li className="list-none border-b border-border/60 py-3.5 last:border-0 last:pb-0">
+    <p className="font-medium text-foreground leading-none">{title}</p>
+    <p className="mt-1.5 text-muted-foreground text-[0.95rem] leading-relaxed">
+      {children}
+    </p>
+  </li>
+);
 
 const CastlingDemo = ({ reduced }: { reduced: boolean }) => {
   const frames = DEMO.castle.frames;
@@ -487,8 +367,9 @@ const CastlingDemo = ({ reduced }: { reduced: boolean }) => {
         the opponent intended.
       </p>
       <InferNote>
-        Yes from a full move list from the start (track whether king/rook have
-        moved). No from a mid-game snapshot of pieces alone.
+        Recoverable from a full move path from the start (track whether king and
+        rook have moved). Not recoverable from a mid-game snapshot of pieces
+        alone.
       </InferNote>
     </DemoCard>
   );
@@ -542,110 +423,8 @@ const EnPassantDemo = ({ reduced }: { reduced: boolean }) => {
         a capture that was legal in the real game.
       </p>
       <InferNote>
-        Yes from the previous ply of a move list. No from a static board without
-        knowing that the last move was a double pawn push.
-      </InferNote>
-    </DemoCard>
-  );
-};
-
-const HalfmoveDemo = ({ reduced }: { reduced: boolean }) => {
-  const frames = DEMO.halfmove.frames;
-  const step = useLoopStep(frames.length, 1100, reduced);
-  const frame = frames[step];
-
-  return (
-    <DemoCard
-      title="Halfmove clock"
-      board={
-        <div className="space-y-2">
-          <FullBoard
-            fen={frame.fen}
-            focusSquares={[...frame.focus]}
-            highlights={[...frame.highlights]}
-            reduceMotion={reduced}
-            label="Halfmove clock before a capture resets it"
-            href={playUrlForFen(DEMO.halfmove.frames[3].fen)}
-          />
-          <p className="font-mono text-xs text-center tabular-nums">
-            <span className="text-muted-foreground">halfmove </span>
-            <span
-              className={cn(
-                frame.clock === 0
-                  ? "text-amber-700 dark:text-amber-400 font-semibold"
-                  : "text-foreground",
-              )}
-            >
-              {frame.clock}
-            </span>
-            <span className="text-muted-foreground"> · {frame.note}</span>
-          </p>
-        </div>
-      }
-    >
-      <p>
-        The fifty-move rule says a player may claim a draw if fifty full moves
-        pass with no capture and no pawn move. FEN tracks that with a halfmove
-        clock: it ticks up on quiet piece moves and resets to zero on a capture
-        or pawn push.
-      </p>
-      <p className="mt-2">
-        For casual share links this rarely matters. For exact FEN round-trips,
-        and for engines that honour draw claims, it is part of the position.
-      </p>
-      <InferNote>
-        Yes if you replay from the start and count. No from a snapshot unless
-        you also store the clock (or accept dropping fifty-move accuracy).
-      </InferNote>
-    </DemoCard>
-  );
-};
-
-const FullmoveDemo = ({ reduced }: { reduced: boolean }) => {
-  const frames = DEMO.fullmove.frames;
-  const step = useLoopStep(frames.length, 1200, reduced);
-  const frame = frames[step];
-
-  return (
-    <DemoCard
-      title="Fullmove number"
-      board={
-        <div className="space-y-2">
-          <FullBoard
-            fen={frame.fen}
-            focusSquares={
-              frame.highlights.length > 0 ? [...frame.highlights] : []
-            }
-            highlights={[...frame.highlights]}
-            reduceMotion={reduced}
-            label="Fullmove number ticking in a middlegame"
-            href={playUrlForFen(DEMO.fullmove.frames[0].fen)}
-          />
-          <p className="font-mono text-xs text-center tabular-nums">
-            <span className="text-muted-foreground">fullmove </span>
-            <span className="text-foreground font-semibold">
-              {frame.fullmove}
-            </span>
-            <span className="text-muted-foreground">
-              {" "}
-              · {frame.stm === "w" ? "White" : "Black"} to move
-            </span>
-          </p>
-        </div>
-      }
-    >
-      <p>
-        The fullmove number starts at 1 and increments after Black moves. It is
-        bookkeeping for scoresheets and for bit-identical FEN. It does not
-        change what moves are legal.
-      </p>
-      <p className="mt-2">
-        A reply-share product can usually drop it. Keep it only when you care
-        about reproducing FEN exactly.
-      </p>
-      <InferNote>
-        Yes from a move list (count Black replies). Optional for playability;
-        required only for exact FEN identity.
+        Recoverable from the previous ply of a move path. Not recoverable from a
+        static board without knowing that the last move was a double pawn push.
       </InferNote>
     </DemoCard>
   );
@@ -656,11 +435,22 @@ export const ExtraStateDemos = () => {
 
   return (
     <ul className="mt-6 space-y-0 border-y border-border/60">
-      <SideToMoveDemo reduced={reduced} />
       <CastlingDemo reduced={reduced} />
       <EnPassantDemo reduced={reduced} />
-      <HalfmoveDemo reduced={reduced} />
-      <FullmoveDemo reduced={reduced} />
+      <CompactStateNote title="Side to move">
+        Whose side it is to move. A path from the start recovers this from ply
+        parity. A snapshot must store it, or the recipient cannot tell whether
+        they are answering a move or making one.
+      </CompactStateNote>
+      <CompactStateNote title="Halfmove clock">
+        Counts plies since the last pawn move or capture (50-move claims,
+        automatic 75-move limits). A path can reconstruct it; a FEN-equivalent
+        snapshot must store it. Casual share previews can usually drop it.
+      </CompactStateNote>
+      <CompactStateNote title="Fullmove number">
+        Bookkeeping for scoresheets: starts at 1 and increments after Black
+        moves. It does not change legality, so playable encodings can omit it.
+      </CompactStateNote>
     </ul>
   );
 };

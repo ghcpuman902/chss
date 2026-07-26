@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { Chess } from "chess.js";
 import { MEASURE_DEMO_SAMPLES } from "@/lib/research-url-codecs";
 import { isRawUciString, readUciMoveAt } from "@/lib/uci";
 import { parseCode, START_FEN } from "@/lib/state-core";
@@ -64,16 +65,21 @@ describe("isRawUciString", () => {
 });
 
 describe("MEASURE_DEMO_SAMPLES", () => {
-  it("is a non-empty fixed Italian progression", () => {
-    expect(MEASURE_DEMO_SAMPLES.length).toBeGreaterThan(20);
-    expect(MEASURE_DEMO_SAMPLES[0]!.ply).toBe(1);
-    expect(MEASURE_DEMO_SAMPLES.at(-1)!.ply).toBe(
-      MEASURE_DEMO_SAMPLES.length,
-    );
+  it("is Morphy's Opera Game from start through checkmate", () => {
+    expect(MEASURE_DEMO_SAMPLES.length).toBe(34); // start + 33 plies
+    expect(MEASURE_DEMO_SAMPLES[0]!.ply).toBe(0);
+    expect(MEASURE_DEMO_SAMPLES[0]!.lastMove).toBeNull();
+    expect(MEASURE_DEMO_SAMPLES.at(-1)!.ply).toBe(33);
+    expect(MEASURE_DEMO_SAMPLES.at(-1)!.lastMove).toBe("d1d8");
     for (let i = 1; i < MEASURE_DEMO_SAMPLES.length; i += 1) {
       expect(MEASURE_DEMO_SAMPLES[i]!.ply).toBe(
         MEASURE_DEMO_SAMPLES[i - 1]!.ply + 1,
       );
+      expect(MEASURE_DEMO_SAMPLES[i]!.lastMove).toMatch(
+        /^[a-h][1-8][a-h][1-8][nbrq]?$/,
+      );
     }
+    const chess = new Chess(MEASURE_DEMO_SAMPLES.at(-1)!.fen);
+    expect(chess.isCheckmate()).toBe(true);
   });
 });

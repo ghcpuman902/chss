@@ -8,6 +8,8 @@ export const URL_ORIGIN = "https://chss.chat/p/";
 
 export const LOOKUP_DEPTHS = [2, 4, 6, 8, 10, 12] as const;
 export const LOOKUP_K = 1024;
+export const LOOKUP_MISS = 0;
+export const LOOKUP_HIT = 1;
 
 const PIECE_NIBBLE: Record<string, number> = {
   p: 1,
@@ -20,6 +22,9 @@ const PIECE_NIBBLE: Record<string, number> = {
 
 export type CodecMethod = "packed_uci" | "occupancy" | "lookup_k1024";
 
+/** depth → UCI-prefix → codebook index */
+export type LookupBooks = Record<number, Record<string, number>>;
+
 export type EncodedUrl = {
   method: CodecMethod;
   label: string;
@@ -31,23 +36,29 @@ export type EncodedUrl = {
   urlChars: number;
   /** Payload character count (what the bars scale). */
   chars: number;
+  /** Logical codec bits before byte padding. */
+  bits: number;
 };
 
 export type HybridPick = {
   winner: CodecMethod;
   chars: number;
   payload: string;
+  code: string;
+  bits: number;
 };
 
 export type PositionSample = {
   fen: string;
   ply: number;
   pieceCount: number;
+  /** UCI of the move that produced this position; null on the start frame. */
+  lastMove: string | null;
   candidates: EncodedUrl[];
   hybrid: HybridPick;
 };
 
-class BitWriter {
+export class BitWriter {
   private bits: number[] = [];
 
   write(value: number, width: number) {
@@ -64,6 +75,11 @@ class BitWriter {
     return this.bits.length;
   }
 
+  /** Expose bits for tests / hybrid re-packing. */
+  getBits(): readonly number[] {
+    return this.bits;
+  }
+
   toBytes(): Uint8Array {
     const pad = (8 - (this.bits.length % 8)) % 8;
     const bits = pad ? [...this.bits, ...Array(pad).fill(0)] : this.bits;
@@ -78,6 +94,12 @@ class BitWriter {
     return out;
   }
 }
+
+export const depthIdBits = (depths: readonly number[] = LOOKUP_DEPTHS): number =>
+  Math.max(1, Math.ceil(Math.log2(depths.length)));
+
+export const indexBits = (k: number = LOOKUP_K): number =>
+  Math.max(1, Math.ceil(Math.log2(k)));
 
 const squareIndex = (sq: Square): number =>
   sq.charCodeAt(0) - 97 + (Number(sq[1]) - 1) * 8;
@@ -99,6 +121,9 @@ const codeUrl = (prefix: string, payload: string) => {
     url: `${URL_ORIGIN}${code}`,
   };
 };
+
+const moveUci = (m: Move): string =>
+  `${m.from}${m.to}${m.promotion ?? ""}`;
 
 const castlingNibble = (chess: Chess): number => {
   const fen = chess.fen().split(" ")[2] ?? "-";
@@ -122,7 +147,7 @@ const writeMeta = (w: BitWriter, chess: Chess) => {
   w.write(epNibble(chess), 4);
 };
 
-const packOccupancy = (chess: Chess): BitWriter => {
+export const packOccupancy = (chess: Chess): BitWriter => {
   const w = new BitWriter();
   const pieces: number[] = [];
   const lowBits: number[] = [];
@@ -157,7 +182,26 @@ const packOccupancy = (chess: Chess): BitWriter => {
   return w;
 };
 
-const packUciPath = (moves: Move[]): BitWriter => {
+export const packNaive = (chess: Chess): BitWriter => {
+  const w = new BitWriter();
+  for (let sq = 0; sq < 64; sq += 1) {
+    const file = String.fromCharCode(97 + (sq % 8));
+    const rank = Math.floor(sq / 8) + 1;
+    const square = `${file}${rank}` as Square;
+    const piece = chess.get(square);
+    if (!piece) {
+      w.write(0, 4);
+      continue;
+    }
+    let nibble = PIECE_NIBBLE[piece.type] ?? 0;
+    if (piece.color === "b") nibble |= 8;
+    w.write(nibble, 4);
+  }
+  writeMeta(w, chess);
+  return w;
+};
+
+export const packUciPath = (moves: Move[]): BitWriter => {
   const w = new BitWriter();
   const promoMap: Record<string, number> = { q: 0, r: 1, b: 2, n: 3 };
   for (const m of moves) {
@@ -181,31 +225,54 @@ const hashPrefixIndex = (uciPrefix: string, k: number): number => {
 };
 
 /**
- * Simulated lookup hit at the longest eligible depth.
- * Length structure matches the benchmark; indices are deterministic hashes, not a real book.
+ * Lookup payload with an explicit hit/miss discriminator bit (counted in length).
+ *
+ * - With `books`: real hit/miss against the codebook.
+ * - Without `books`: demo stand-in — longest eligible depth hashes to an index
+ *   (length structure matches a hit; not round-trippable without a book).
  */
-const packLookup = (moves: Move[]): BitWriter => {
-  const depths = LOOKUP_DEPTHS.filter((d) => moves.length >= d);
-  const bestDepth = depths.length > 0 ? depths[depths.length - 1]! : 0;
+export const packLookup = (
+  moves: Move[],
+  books?: LookupBooks,
+): BitWriter => {
   const w = new BitWriter();
-  const depthBits = Math.max(1, Math.ceil(Math.log2(LOOKUP_DEPTHS.length)));
-  const indexBits = Math.max(1, Math.ceil(Math.log2(LOOKUP_K)));
+  const dBits = depthIdBits();
+  const iBits = indexBits();
 
+  if (books) {
+    for (let di = LOOKUP_DEPTHS.length - 1; di >= 0; di -= 1) {
+      const d = LOOKUP_DEPTHS[di]!;
+      if (moves.length < d) continue;
+      const prefix = moves.slice(0, d).map(moveUci).join("");
+      const idx = books[d]?.[prefix];
+      if (idx === undefined) continue;
+      w.write(LOOKUP_HIT, 1);
+      w.write(di, dBits);
+      w.write(idx, iBits);
+      w.appendBits(packUciPath(moves.slice(d)));
+      return w;
+    }
+    w.write(LOOKUP_MISS, 1);
+    w.appendBits(packUciPath(moves));
+    return w;
+  }
+
+  // Demo simulation (no shipped book): hit at longest eligible depth via hash.
+  const eligible = LOOKUP_DEPTHS.filter((d) => moves.length >= d);
+  const bestDepth = eligible.length > 0 ? eligible[eligible.length - 1]! : 0;
   if (bestDepth === 0) {
-    // Miss → packed path only (same size story as benchmark fallback)
-    return packUciPath(moves);
+    w.write(LOOKUP_MISS, 1);
+    w.appendBits(packUciPath(moves));
+    return w;
   }
 
   const depthId = LOOKUP_DEPTHS.indexOf(
     bestDepth as (typeof LOOKUP_DEPTHS)[number],
   );
-  const uciPrefix = moves
-    .slice(0, bestDepth)
-    .map((m) => `${m.from}${m.to}${m.promotion ?? ""}`)
-    .join("");
-
-  w.write(depthId, depthBits);
-  w.write(hashPrefixIndex(uciPrefix, LOOKUP_K), indexBits);
+  const uciPrefix = moves.slice(0, bestDepth).map(moveUci).join("");
+  w.write(LOOKUP_HIT, 1);
+  w.write(depthId, dBits);
+  w.write(hashPrefixIndex(uciPrefix, LOOKUP_K), iBits);
   w.appendBits(packUciPath(moves.slice(bestDepth)));
   return w;
 };
@@ -224,12 +291,13 @@ const pieceCountOf = (chess: Chess): number => {
 export const encodeBestThree = (
   chess: Chess,
   moves: Move[],
+  books?: LookupBooks,
 ): { candidates: EncodedUrl[]; hybrid: HybridPick } => {
   const occupancyBits = packOccupancy(chess);
   const occupancyPayload = base64urlEncodeBytes(occupancyBits.toBytes());
   const occupancy = codeUrl("o-", occupancyPayload);
 
-  const lookupBits = packLookup(moves);
+  const lookupBits = packLookup(moves, books);
   const lookupPayload = base64urlEncodeBytes(lookupBits.toBytes());
   const lookup = codeUrl("d-", lookupPayload);
 
@@ -269,6 +337,7 @@ export const encodeBestThree = (
         url: packed.url,
         urlChars: packed.urlChars,
         chars: packed.chars,
+        bits: packedBits.bitLength,
       },
       {
         method: "occupancy",
@@ -279,6 +348,7 @@ export const encodeBestThree = (
         url: occupancy.url,
         urlChars: occupancy.urlChars,
         chars: occupancy.chars,
+        bits: occupancyBits.bitLength,
       },
       {
         method: "lookup_k1024",
@@ -289,28 +359,41 @@ export const encodeBestThree = (
         url: lookup.url,
         urlChars: lookup.urlChars,
         chars: lookup.chars,
+        bits: lookupBits.bitLength,
       },
     ],
     hybrid: {
       winner: best.key,
       chars: hybrid.chars,
       payload: hybridPayload,
+      code: hybrid.code,
+      bits: hybridBits.bitLength,
     },
   };
 };
 
 /**
- * Italian Game (Giuoco Piano) continuation — deterministic demo.
- * Long enough for path codecs to grow while occupancy stays flatter.
+ * Morphy vs. Duke of Brunswick / Count Isouard (Opera Game, Paris 1858).
+ * Full game from the start position through Rd8# — path grows, board thins.
  */
 export const MEASURE_DEMO_UCI =
-  "e2e4e7e5g1f3b8c6f1c4f8c5c2c3g8f6d2d4e5d4c3d4c5b4b1c3f6e4e1g1b4c3d4d5c3f6f1e1c6e7e1e4d7d6c1g5f6g5f3g5e8g8g5h7g8h7d1h5h7g8e4h4f7f5h5h7g8f7h4h6e7g6h7g6f7g8";
+  "e2e4e7e5g1f3d7d6d2d4c8g4d4e5g4f3d1f3d6e5f1c4g8f6f3b3d8e7b1c3c7c6c1g5b7b5c3b5c6b5c4b5b8d7e1c1a8d8d1d7d8d7h1d1e7e6b5d7f6d7b3b8d7b8d1d8";
 
-/** Snapshot a fixed UCI game after every move (ordered progression). */
+/** Snapshot a fixed UCI game from the start position after every move. */
 export const generateFixedGameSamples = (uci: string): PositionSample[] => {
   const chess = new Chess();
   const moves: Move[] = [];
-  const samples: PositionSample[] = [];
+  const start = encodeBestThree(chess, moves);
+  const samples: PositionSample[] = [
+    {
+      fen: chess.fen({ forceEnpassantSquare: true }),
+      ply: 0,
+      pieceCount: pieceCountOf(chess),
+      lastMove: null,
+      candidates: start.candidates,
+      hybrid: start.hybrid,
+    },
+  ];
 
   for (let i = 0; i < uci.length; ) {
     const chunk = readUciMoveAt(uci, i);
@@ -324,11 +407,13 @@ export const generateFixedGameSamples = (uci: string): PositionSample[] => {
     moves.push(move);
     i += chunk.step;
 
+    const lastMove = `${chunk.from}${chunk.to}${chunk.promotion ?? ""}`;
     const { candidates, hybrid } = encodeBestThree(chess, moves);
     samples.push({
       fen: chess.fen({ forceEnpassantSquare: true }),
       ply: moves.length,
       pieceCount: pieceCountOf(chess),
+      lastMove,
       candidates,
       hybrid,
     });
@@ -337,5 +422,5 @@ export const generateFixedGameSamples = (uci: string): PositionSample[] => {
   return samples;
 };
 
-/** Precomputed “What we measure” loop — no client-side random walks. */
+/** Precomputed “What we measure” loop — one complete game, no random walks. */
 export const MEASURE_DEMO_SAMPLES = generateFixedGameSamples(MEASURE_DEMO_UCI);

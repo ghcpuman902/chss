@@ -1,9 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FC,
+  type SVGProps,
+} from "react";
 import { Pause, Play } from "lucide-react";
-import { buildOgPath, type OgPerspective } from "@/lib/og-encoding";
+import {
+  BishopIcon,
+  KingIcon,
+  KnightIcon,
+  PawnIcon,
+  QueenIcon,
+  RookIcon,
+} from "@/components/pieces";
+import {
+  matchPieceIds,
+  type BoardPiece,
+} from "@/components/research/piece-match";
 import {
   MEASURE_DEMO_SAMPLES,
   type CodecMethod,
@@ -12,6 +29,39 @@ import {
 } from "@/lib/research-url-codecs";
 import { cn } from "@/lib/utils";
 
+type PieceKey =
+  | "wP"
+  | "wN"
+  | "wB"
+  | "wR"
+  | "wQ"
+  | "wK"
+  | "bP"
+  | "bN"
+  | "bB"
+  | "bR"
+  | "bQ"
+  | "bK";
+
+type PieceIcon = FC<SVGProps<SVGSVGElement>>;
+
+const PIECE_COMPONENT: Record<PieceKey, PieceIcon> = {
+  wP: PawnIcon,
+  wN: KnightIcon,
+  wB: BishopIcon,
+  wR: RookIcon,
+  wQ: QueenIcon,
+  wK: KingIcon,
+  bP: PawnIcon,
+  bN: KnightIcon,
+  bB: BishopIcon,
+  bR: RookIcon,
+  bQ: QueenIcon,
+  bK: KingIcon,
+};
+
+const FILES = "abcdefgh";
+const RANKS = [8, 7, 6, 5, 4, 3, 2, 1] as const;
 const FRAME_MS = 700;
 const SAMPLES: PositionSample[] = MEASURE_DEMO_SAMPLES;
 
@@ -29,19 +79,91 @@ const usePrefersReducedMotion = () => {
   return reduced;
 };
 
-const OgMiniBoard = ({ fen }: { fen: string }) => {
-  const stm = (fen.split(" ")[1] === "b" ? "b" : "w") as OgPerspective;
-  const src = buildOgPath(fen, stm);
+const fileIndex = (square: string) => square.charCodeAt(0) - 97;
+
+const MiniBoard = ({
+  fen,
+  lastMove,
+  reduceMotion,
+}: {
+  fen: string;
+  lastMove: string | null;
+  reduceMotion: boolean;
+}) => {
+  const prevPiecesRef = useRef<BoardPiece[] | null>(null);
+  const animate = Boolean(lastMove) && !reduceMotion;
+  const highlights = useMemo(() => {
+    if (!lastMove || lastMove.length < 4) return [] as string[];
+    return [lastMove.slice(0, 2), lastMove.slice(2, 4)];
+  }, [lastMove]);
+  const highlightSet = useMemo(() => new Set(highlights), [highlights]);
+
+  const pieces = useMemo(() => {
+    const move =
+      lastMove && lastMove.length >= 4
+        ? { from: lastMove.slice(0, 2), to: lastMove.slice(2, 4) }
+        : null;
+
+    // Loop reset / start: fresh ids so pieces don't tween home.
+    return matchPieceIds(move ? prevPiecesRef.current : null, fen, move);
+  }, [fen, lastMove]);
+
+  useEffect(() => {
+    prevPiecesRef.current = pieces;
+  }, [pieces]);
 
   return (
-    <Image
-      src={src}
-      alt="Fixed progression board position"
-      width={208}
-      height={208}
-      unoptimized
-      className="block w-full aspect-square border border-border rounded-none bg-muted/30"
-    />
+    <div
+      className="relative border border-border overflow-hidden rounded-none w-full aspect-square"
+      role="img"
+      aria-label="Opera Game board position for the current ply"
+    >
+      <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
+        {RANKS.map((rank) =>
+          FILES.split("").map((file, fi) => {
+            const square = `${file}${rank}`;
+            const isLight = (8 - rank + fi) % 2 === 0;
+            return (
+              <div
+                key={square}
+                className={cn(
+                  "chess-square cursor-default",
+                  isLight ? "light" : "dark",
+                  highlightSet.has(square) && "last-move",
+                )}
+              />
+            );
+          }),
+        )}
+      </div>
+
+      {pieces.map((piece) => {
+        const key = (piece.color + piece.type.toUpperCase()) as PieceKey;
+        const Icon = PIECE_COMPONENT[key];
+        const col = fileIndex(piece.square);
+        const row = 8 - Number(piece.square[1]);
+
+        return (
+          <span
+            key={piece.id}
+            className={cn(
+              "chess-piece absolute inline-flex items-center justify-center pointer-events-none top-0 left-0",
+              piece.color === "w" ? "white" : "black",
+            )}
+            style={{
+              width: "12.5%",
+              height: "12.5%",
+              transform: `translate(${col * 100}%, ${row * 100}%)`,
+              transition: animate
+                ? "transform 420ms cubic-bezier(0.645, 0.045, 0.355, 1)"
+                : "none",
+            }}
+          >
+            <Icon className="block w-[72%] h-[72%]" aria-hidden />
+          </span>
+        );
+      })}
+    </div>
   );
 };
 
@@ -98,7 +220,7 @@ const EncodingRow = ({
         {enc.label}
       </span>
       <span className="font-mono text-[11px] tabular-nums text-muted-foreground shrink-0">
-        {enc.chars}
+        {enc.chars} chars
       </span>
     </div>
     <div
@@ -135,7 +257,7 @@ const HybridMinRow = ({
         </span>
       </span>
       <span className="font-mono text-[11px] tabular-nums text-muted-foreground shrink-0">
-        {chars}
+        {chars} chars
       </span>
     </div>
 
@@ -196,25 +318,38 @@ export const UrlLengthLoopDemo = () => {
     );
   }
 
+  const plyLabel =
+    sample.ply === 0
+      ? "start"
+      : sample.ply === SAMPLES.length - 1
+        ? `ply ${sample.ply} · mate`
+        : `ply ${sample.ply}`;
+
   return (
     <div
       className="space-y-3"
-      aria-label="Board complexity mapped to URL length for the three shortest codecs"
+      aria-label="Opera Game mapped to URL length for the three shortest codecs"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-sm font-medium text-foreground">
           Board → URL length
         </p>
         <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
-          ply {sample.ply}
-          <span className="mx-1.5 text-border">·</span>
-          {sample.pieceCount} pieces
+          <span>{plyLabel}</span>
+          <span className="mx-1.5 text-border" aria-hidden="true">
+            ·
+          </span>
+          <span>{sample.pieceCount} pieces</span>
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[minmax(10rem,13rem)_minmax(0,1fr)] sm:items-start">
         <div className="space-y-2">
-          <OgMiniBoard fen={sample.fen} />
+          <MiniBoard
+            fen={sample.fen}
+            lastMove={sample.lastMove}
+            reduceMotion={reduced}
+          />
           <button
             type="button"
             onClick={handleTogglePlay}

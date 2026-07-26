@@ -45,7 +45,7 @@ Winning = clear numbers people can compare. Hybrid / “pick min” is fine as o
 
 ### Scoreboard snapshot (hash val, 270k games, 1.17M positions)
 
-URL = `https://chss.chat/p/` + code. Lower is better.
+Means are across **sampled checkpoint positions** (plies 2 / 8 / 16 / 32 / 64). Longer games overweight slightly versus a per-game mean. URL = `https://chss.chat/p/` + code. Lower is better.
 
 | Method | Bits | Chars | URL |
 |---|---:|---:|---:|
@@ -60,7 +60,7 @@ URL = `https://chss.chat/p/` + code. Lower is better.
 | Lookup K=1024 + suffix | 192 | 33 | 55 |
 | **Hybrid (min of 3)** | **98** | **17** | **39** |
 
-Opening-only URLs: native UCI ~42, lookup/hybrid ~28, occupancy ~57. gzip loses on short payloads.
+Per-game mean hybrid ≈ **38.5**. At ply 2: native UCI ~30, lookup/hybrid ~28, occupancy ~57. gzip loses on short payloads. Lookup payloads carry an explicit hit/miss discriminator bit.
 
 Script: `benchmark/url_length_benchmark.py`  
 Artifacts: `benchmark/results/url_length_hash_val.json`, `lib/compression-url-scoreboard.json`  
@@ -149,15 +149,17 @@ Deep prefixes diversify fast — practical dictionaries should stay at **ply ≤
 
 ### Phase A bit-floor (100k games, 434k positions)
 
-Sampled at plies 2 / 8 / 16 / 32 / 64. Wall time **~85 s**, peak RSS **~81 MB**, **0** parse errors after board-aware promo parsing.
+Sampled at plies 2 / 8 / 16 / 32 / 64 (checkpoint means, not full phase ranges). Wall time **~85 s**, peak RSS **~81 MB**, **0** parse errors after board-aware promo parsing.
 
-| Codec | All | Opening ≤8 | Early 9–24 | Mid 25–40 | Late 41+ |
+| Codec | All checkpoints | Ply ≤8 | Ply 9–24* | Ply 25–40* | Ply 41+* |
 |---|---:|---:|---:|---:|---:|
 | Full FEN | 491 ±43 | 497 | 519 | 493 | 406 |
 | Trimmed FEN | 456 ±44 | 465 | 487 | 453 | 366 |
 | Naïve 4-bit | **265** | 265 | 265 | 265 | 265 |
 | Occupancy | **186 ±21** | 200 | 192 | 174 | **138** |
 | Packed UCI | 236 ±227 | **60** | 192 | 384 | 768 |
+
+\*Early Phase A also reported bucket means by ply band for exploration; the published URL scoreboard uses only the five checkpoints above.
 
 **Crossover:** packed UCI wins until ~ply 15–16; occupancy wins afterward. Hybrid encoder is the product direction.
 
@@ -218,7 +220,7 @@ Encoding model: `min(dict_prefix+packed_suffix, packed_uci)` + 2-bit codec tag.
 
 Val ≈ test within 0.02% — no overfit on held-out games.
 
-**Product read:** on *full games* (~66 plies) a prefix dictionary only shaves the opening, so mean-bit savings stay single-digit. For **share URLs** (often early/mid positions) the same K=1k–4k book removes 4–8 opening plies ≈ **48–96 bits** before Base64URL. Occupancy still wins deep middlegames — hybrid remains required.
+**Product read:** on *full games* (~66 plies) a prefix dictionary only shaves the opening, so mean-bit savings stay single-digit. For **share URLs** at early checkpoints the same K=1k–4k book removes 4–8 opening plies ≈ **48–96 bits** before Base64URL. Occupancy still wins deep positions — hybrid remains required. Lookup payloads need a frozen/versioned codebook at decode time (no DB, but not free).
 
 Recommended starter codebook: **K=1024 or 4096**, depths `{2,4,6,8,10,12}` (drop 16 — tiny mass).
 

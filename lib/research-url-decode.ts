@@ -2,19 +2,38 @@
  * Decode research URL prefixes (t-/p-/o-/n-/g-/z-/d-/h-) used on the
  * compression scoreboard. Mirrors benchmark/url_length_benchmark.py packing.
  *
- * Lookup hits (d-/h- mode 2 with a real codebook) need a shipped book; without
- * one we treat those payloads as packed-UCI misses (same bytes as p-).
+ * Lookup payloads (d- / hybrid mode 2) start with a discriminator bit:
+ *   0 = miss → remaining bits are a full packed UCI path
+ *   1 = hit  → depth id + dictionary index + packed suffix
+ *
+ * Hit decode requires a codebook index (depth → prefixes by rank). Without
+ * one, hits return null — no heuristic reinterpretation as packed UCI.
  */
 
 import { Chess, type Square } from "chess.js";
 import { gunzipSync } from "fflate";
 import { base64urlDecode, base64urlDecodeBytes } from "@/lib/base64url";
+import {
+  LOOKUP_DEPTHS,
+  LOOKUP_HIT,
+  LOOKUP_K,
+  LOOKUP_MISS,
+  depthIdBits,
+  indexBits,
+} from "@/lib/research-url-codecs";
 import { readUciMoveAt } from "@/lib/uci";
 
 export type ResearchDecoded = {
   fen: string;
   sideToMove: "w" | "b";
   uci?: string;
+};
+
+/** depth → array of UCI prefixes indexed by codebook rank */
+export type LookupIndex = Record<number, string[]>;
+
+export type ResearchDecodeOptions = {
+  lookupIndex?: LookupIndex;
 };
 
 const NIBBLE_TO_PIECE: Record<
@@ -132,8 +151,11 @@ const boardToFen = (
   }
 };
 
-const decodePackedUciBits = (r: BitReader): ResearchDecoded | null => {
-  const chess = new Chess();
+const decodePackedUciBits = (
+  r: BitReader,
+  startFen?: string,
+): ResearchDecoded | null => {
+  const chess = startFen ? new Chess(startFen) : new Chess();
   let uci = "";
   while (r.remaining >= 12) {
     const from = r.read(6);
@@ -164,7 +186,7 @@ const decodePackedUciBits = (r: BitReader): ResearchDecoded | null => {
     });
     if (!move) {
       // Byte padding is zero bits; a1a1 (and similar) is never legal.
-      if (uci) break;
+      if (uci || startFen) break;
       return null;
     }
     uci += `${fromSq}${toSq}${promo ?? ""}`;
@@ -174,6 +196,61 @@ const decodePackedUciBits = (r: BitReader): ResearchDecoded | null => {
     sideToMove: chess.turn(),
     uci,
   };
+};
+
+const applyUciAscii = (uci: string): ResearchDecoded | null => {
+  const chess = new Chess();
+  let i = 0;
+  while (i < uci.length) {
+    const chunk = readUciMoveAt(uci, i);
+    if (!chunk) return null;
+    if (
+      !chess.move({
+        from: chunk.from,
+        to: chunk.to,
+        promotion: chunk.promotion,
+      })
+    ) {
+      return null;
+    }
+    i += chunk.step;
+  }
+  return {
+    fen: chess.fen({ forceEnpassantSquare: true }),
+    sideToMove: chess.turn(),
+    uci,
+  };
+};
+
+const decodeLookupBits = (
+  r: BitReader,
+  lookupIndex?: LookupIndex,
+): ResearchDecoded | null => {
+  if (r.remaining < 1) return null;
+  const flag = r.read(1);
+  if (flag === LOOKUP_MISS) return decodePackedUciBits(r);
+  if (flag !== LOOKUP_HIT) return null;
+
+  const dBits = depthIdBits();
+  const iBits = indexBits();
+  if (r.remaining < dBits + iBits) return null;
+  const depthId = r.read(dBits);
+  if (depthId >= LOOKUP_DEPTHS.length) return null;
+  const depth = LOOKUP_DEPTHS[depthId]!;
+  const idx = r.read(iBits);
+  if (idx >= LOOKUP_K) return null;
+
+  const prefix = lookupIndex?.[depth]?.[idx];
+  if (!prefix) return null; // hit is unambiguous but undecodable without the book
+
+  const prefixDecoded = applyUciAscii(prefix);
+  if (!prefixDecoded?.uci) return null;
+
+  const suffix = decodePackedUciBits(r, prefixDecoded.fen);
+  if (!suffix) return null;
+
+  const fullUci = `${prefixDecoded.uci}${suffix.uci ?? ""}`;
+  return applyUciAscii(fullUci);
 };
 
 const decodeOccupancyBits = (r: BitReader): ResearchDecoded | null => {
@@ -222,30 +299,6 @@ const decodeNaiveBits = (r: BitReader): ResearchDecoded | null => {
   return { fen, sideToMove: meta.turn };
 };
 
-const applyUciAscii = (uci: string): ResearchDecoded | null => {
-  const chess = new Chess();
-  let i = 0;
-  while (i < uci.length) {
-    const chunk = readUciMoveAt(uci, i);
-    if (!chunk) return null;
-    if (
-      !chess.move({
-        from: chunk.from,
-        to: chunk.to,
-        promotion: chunk.promotion,
-      })
-    ) {
-      return null;
-    }
-    i += chunk.step;
-  }
-  return {
-    fen: chess.fen({ forceEnpassantSquare: true }),
-    sideToMove: chess.turn(),
-    uci,
-  };
-};
-
 const gunzipPayload = (payload: string): string | null => {
   try {
     const bytes = base64urlDecodeBytes(payload);
@@ -278,21 +331,46 @@ const readerFromPayload = (payload: string): BitReader | null => {
   return new BitReader(bitsFromBytes(bytes));
 };
 
+/** Build a decode index from an encode-side codebook map. */
+export const lookupBooksToIndex = (
+  books: Record<number, Record<string, number>>,
+): LookupIndex => {
+  const index: LookupIndex = {};
+  for (const [depthStr, map] of Object.entries(books)) {
+    const depth = Number(depthStr);
+    const arr: string[] = [];
+    for (const [prefix, idx] of Object.entries(map)) {
+      arr[idx] = prefix;
+    }
+    index[depth] = arr;
+  }
+  return index;
+};
+
 /**
  * Parse a research codec code (`t-…`, `p-…`, …). Returns null if the prefix
  * is unknown or the payload is invalid.
  */
-export const parseResearchCode = (code: string): ResearchDecoded | null => {
+export const parseResearchCode = (
+  code: string,
+  opts?: ResearchDecodeOptions,
+): ResearchDecoded | null => {
   if (!code || code.length < 3) return null;
   const kind = code.slice(0, 2);
   const payload = code.slice(2);
 
   if (kind === "t-") return decodeTrimFen(payload);
 
-  if (kind === "p-" || kind === "d-") {
+  if (kind === "p-") {
     const r = readerFromPayload(payload);
     if (!r) return null;
     return decodePackedUciBits(r);
+  }
+
+  if (kind === "d-") {
+    const r = readerFromPayload(payload);
+    if (!r) return null;
+    return decodeLookupBits(r, opts?.lookupIndex);
   }
 
   if (kind === "o-") {
@@ -331,8 +409,9 @@ export const parseResearchCode = (code: string): ResearchDecoded | null => {
     const r = readerFromPayload(payload);
     if (!r || r.remaining < 2) return null;
     const mode = r.read(2);
-    if (mode === 0 || mode === 2) return decodePackedUciBits(r);
+    if (mode === 0) return decodePackedUciBits(r);
     if (mode === 1) return decodeOccupancyBits(r);
+    if (mode === 2) return decodeLookupBits(r, opts?.lookupIndex);
     return null;
   }
 

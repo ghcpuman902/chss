@@ -23,6 +23,8 @@ import {
   matchPieceIds,
   type BoardPiece,
 } from "@/components/research/piece-match";
+import { MEASURE_DEMO_UCI } from "@/lib/research-url-codecs";
+import { readUciMoveAt } from "@/lib/uci";
 import { cn } from "@/lib/utils";
 
 type PieceKey =
@@ -45,8 +47,8 @@ type Frame = {
   fen: string;
   uci: string;
   lastMove: string | null;
-  highlights: string[];
   ply: number;
+  pieceCount: number;
 };
 
 const PIECE_COMPONENT: Record<PieceKey, PieceIcon> = {
@@ -65,10 +67,21 @@ const PIECE_COMPONENT: Record<PieceKey, PieceIcon> = {
 };
 
 const FILES = "abcdefgh";
-const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
+const RANKS = [8, 7, 6, 5, 4, 3, 2, 1] as const;
+const FRAME_MS = 700;
 
-/** Italian Game: five plies from the start. */
-const MOVES = ["e2e4", "e7e5", "g1f3", "b8c6", "f1c4"] as const;
+/** Cap UCI preview height; overflow scrolls so a full-game path stays readable. */
+const UCI_PREVIEW_CLASS =
+  "max-h-[calc(3*1.35*0.625rem)] sm:max-h-[calc(3*1.35*0.6875rem)] overflow-y-auto";
+
+const FEN_PREVIEW_CLASS =
+  "min-h-[calc(2*1.35*0.625rem)] sm:min-h-[calc(2*1.35*0.6875rem)]";
+
+const pieceCountOf = (fen: string) =>
+  fen
+    .split(" ")[0]
+    .replace(/\d/g, "")
+    .replace(/\//g, "").length;
 
 const buildFrames = (): Frame[] => {
   const chess = new Chess();
@@ -77,22 +90,30 @@ const buildFrames = (): Frame[] => {
       fen: chess.fen(),
       uci: "",
       lastMove: null,
-      highlights: [],
       ply: 0,
+      pieceCount: pieceCountOf(chess.fen()),
     },
   ];
 
-  for (const uciMove of MOVES) {
-    const from = uciMove.slice(0, 2);
-    const to = uciMove.slice(2, 4);
-    chess.move({ from, to });
-    const uci = frames[frames.length - 1].uci + uciMove;
+  let uci = "";
+  for (let i = 0; i < MEASURE_DEMO_UCI.length; ) {
+    const chunk = readUciMoveAt(MEASURE_DEMO_UCI, i);
+    if (!chunk) break;
+    const move = chess.move({
+      from: chunk.from,
+      to: chunk.to,
+      promotion: chunk.promotion,
+    });
+    if (!move) break;
+    const lastMove = `${chunk.from}${chunk.to}${chunk.promotion ?? ""}`;
+    uci += lastMove;
+    i += chunk.step;
     frames.push({
       fen: chess.fen(),
       uci,
-      lastMove: uciMove,
-      highlights: [from, to],
+      lastMove,
       ply: frames.length,
+      pieceCount: pieceCountOf(chess.fen()),
     });
   }
 
@@ -100,6 +121,7 @@ const buildFrames = (): Frame[] => {
 };
 
 const FRAMES = buildFrames();
+const FINAL_PLY = FRAMES.length - 1;
 
 const usePrefersReducedMotion = () => {
   const [reduced, setReduced] = useState(false);
@@ -115,24 +137,23 @@ const usePrefersReducedMotion = () => {
   return reduced;
 };
 
-const STEP_MS = 1400;
-
 const fileIndex = (square: string) => square.charCodeAt(0) - 97;
 
 const MiniBoard = ({
   fen,
-  highlights,
   lastMove,
   reduceMotion,
 }: {
   fen: string;
-  highlights: string[];
-  /** Null on the starting frame — fresh ids, no slide-back animation. */
   lastMove: string | null;
   reduceMotion: boolean;
 }) => {
   const prevPiecesRef = useRef<BoardPiece[] | null>(null);
   const animate = Boolean(lastMove) && !reduceMotion;
+  const highlights = useMemo(() => {
+    if (!lastMove || lastMove.length < 4) return [] as string[];
+    return [lastMove.slice(0, 2), lastMove.slice(2, 4)];
+  }, [lastMove]);
   const highlightSet = useMemo(() => new Set(highlights), [highlights]);
 
   const pieces = useMemo(() => {
@@ -141,7 +162,6 @@ const MiniBoard = ({
         ? { from: lastMove.slice(0, 2), to: lastMove.slice(2, 4) }
         : null;
 
-    // Loop reset / start: new identities so pieces don't tween home.
     return matchPieceIds(move ? prevPiecesRef.current : null, fen, move);
   }, [fen, lastMove]);
 
@@ -151,9 +171,9 @@ const MiniBoard = ({
 
   return (
     <div
-      className="relative border border-border overflow-hidden rounded-none w-full aspect-square max-w-[14rem] mx-auto"
+      className="relative border border-border overflow-hidden rounded-none w-full aspect-square"
       role="img"
-      aria-label="Board position for the current FEN and UCI example"
+      aria-label="Opera Game board position for the current FEN and UCI"
     >
       <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
         {RANKS.map((rank) =>
@@ -184,8 +204,8 @@ const MiniBoard = ({
           <span
             key={piece.id}
             className={cn(
-              "absolute inline-flex items-center justify-center pointer-events-none top-0 left-0",
-              piece.color === "w" ? "text-white" : "text-gray-800",
+              "chess-piece absolute inline-flex items-center justify-center pointer-events-none top-0 left-0",
+              piece.color === "w" ? "white" : "black",
             )}
             style={{
               width: "12.5%",
@@ -204,57 +224,59 @@ const MiniBoard = ({
   );
 };
 
-const LONGEST_FEN = FRAMES.reduce(
-  (longest, frame) => (frame.fen.length > longest.length ? frame.fen : longest),
-  "",
-);
-const LONGEST_UCI = FRAMES[FRAMES.length - 1]?.uci ?? "";
-
 const EncodingRow = ({
   label,
   value,
   accent,
   emptyLabel,
-  reserveValue,
+  scrollable,
 }: {
   label: string;
   value: string;
   accent?: string;
   emptyLabel: string;
-  /** Longest value across frames — keeps the box height stable while animating. */
-  reserveValue: string;
+  /** When true, wrap to a capped height then scroll (UCI path growth). */
+  scrollable?: boolean;
 }) => {
   const base = accent ? value.slice(0, -accent.length) : value;
   const hasValue = value.length > 0;
-  const reserveText =
-    reserveValue.length >= emptyLabel.length ? reserveValue : emptyLabel;
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!scrollable || !scrollRef.current) return;
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [scrollable, value]);
 
   return (
     <div className="space-y-1 min-w-0">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-          {label}
-        </span>
-        <span className="font-mono text-[11px] tabular-nums text-muted-foreground w-[4.5rem] text-right">
+        <span className="text-xs text-foreground">{label}</span>
+        <span
+          className="font-mono text-[11px] tabular-nums text-muted-foreground shrink-0"
+          aria-label={
+            hasValue ? `${value.length} characters` : "empty"
+          }
+        >
           {hasValue ? `${value.length} chars` : "—"}
         </span>
       </div>
-      <div className="relative font-mono text-[11px] sm:text-xs leading-snug break-all rounded-none border bg-muted/40 px-2.5 py-2">
-        <p className="invisible select-none" aria-hidden="true">
-          {reserveText}
-        </p>
-        <p className="absolute inset-0 px-2.5 py-2">
-          {hasValue ? (
-            <>
-              <span className="text-foreground/70">{base}</span>
-              {accent ? (
-                <span className="text-foreground font-semibold">{accent}</span>
-              ) : null}
-            </>
-          ) : (
-            <span className="text-muted-foreground">{emptyLabel}</span>
-          )}
-        </p>
+      <div
+        ref={scrollRef}
+        className={cn(
+          "font-mono text-[10px] sm:text-[11px] leading-[1.35] break-all",
+          scrollable ? UCI_PREVIEW_CLASS : cn("overflow-hidden", FEN_PREVIEW_CLASS),
+        )}
+      >
+        {hasValue ? (
+          <p>
+            <span className="text-foreground/70">{base}</span>
+            {accent ? (
+              <span className="text-foreground font-semibold">{accent}</span>
+            ) : null}
+          </p>
+        ) : (
+          <p className="text-muted-foreground">{emptyLabel}</p>
+        )}
       </div>
     </div>
   );
@@ -273,12 +295,12 @@ export const FenUciMappingDemo = () => {
     if (!playing || reduced || FRAMES.length <= 1) return;
     const id = window.setInterval(() => {
       setStep((s) => (s + 1) % FRAMES.length);
-    }, STEP_MS);
+    }, FRAME_MS);
     return () => window.clearInterval(id);
   }, [playing, reduced]);
 
-  const frame = FRAMES[step];
-  const prevUci = step > 0 ? FRAMES[step - 1].uci : "";
+  const frame = FRAMES[step] ?? FRAMES[0];
+  const prevUci = step > 0 ? (FRAMES[step - 1]?.uci ?? "") : "";
   const accent = frame.uci.slice(prevUci.length);
 
   const handleSliderChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -290,67 +312,78 @@ export const FenUciMappingDemo = () => {
     setPlaying((prev) => !prev);
   };
 
+  const plyLabel =
+    frame.ply === 0
+      ? "start"
+      : frame.ply === FINAL_PLY
+        ? `ply ${frame.ply} · mate`
+        : `ply ${frame.ply}`;
+
   return (
-    <aside
-      className="space-y-3 sticky top-6"
-      aria-label="Animated mapping from board to FEN and UCI"
+    <div
+      className="space-y-3"
+      aria-label="Opera Game mapped to FEN state and UCI path length"
     >
-      <MiniBoard
-        fen={frame.fen}
-        highlights={frame.highlights}
-        lastMove={frame.lastMove}
-        reduceMotion={reduced}
-      />
-
-      <EncodingRow
-        label="FEN"
-        value={frame.fen}
-        emptyLabel="empty"
-        reserveValue={LONGEST_FEN}
-      />
-      <EncodingRow
-        label="UCI"
-        value={frame.uci}
-        accent={accent || undefined}
-        emptyLabel="(start · empty path)"
-        reserveValue={LONGEST_UCI}
-      />
-
-      <div className="flex items-center gap-2">
-        <input
-          type="range"
-          min={0}
-          max={FRAMES.length - 1}
-          step={1}
-          value={step}
-          onChange={handleSliderChange}
-          aria-label="Scrub through game plies"
-          aria-valuetext={
-            frame.ply === 0
-              ? "Starting position"
-              : `Ply ${frame.ply} of ${MOVES.length}${frame.lastMove ? `, ${frame.lastMove}` : ""}`
-          }
-          className="fen-uci-scrubber flex-1 min-w-0 h-1.5 appearance-none cursor-pointer bg-muted accent-primary rounded-none"
-        />
-        <button
-          type="button"
-          onClick={handleTogglePlay}
-          aria-label={playing ? "Pause animation" : "Play animation"}
-          aria-pressed={playing}
-          className="shrink-0 inline-flex size-7 items-center justify-center border border-border bg-background text-foreground hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {playing ? (
-            <Pause className="size-3.5" aria-hidden />
-          ) : (
-            <Play className="size-3.5" aria-hidden />
-          )}
-        </button>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-medium text-foreground">Board → FEN / UCI</p>
+        <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
+          <span>{plyLabel}</span>
+          <span className="mx-1.5 text-border" aria-hidden="true">
+            ·
+          </span>
+          <span>{frame.pieceCount} pieces</span>
+        </p>
       </div>
 
-      <p className="text-[11px] text-muted-foreground leading-snug">
-        Italian Game, five moves. Drag to scrub; play/pause on the right. FEN
-        rewrites the whole state each ply; UCI only appends to the history.
-      </p>
-    </aside>
+      <div className="grid gap-3 sm:grid-cols-[minmax(10rem,13rem)_minmax(0,1fr)] sm:items-start">
+        <div className="space-y-2">
+          <MiniBoard
+            fen={frame.fen}
+            lastMove={frame.lastMove}
+            reduceMotion={reduced}
+          />
+          <button
+            type="button"
+            onClick={handleTogglePlay}
+            aria-label={playing ? "Pause animation" : "Play animation"}
+            aria-pressed={playing}
+            className="inline-flex size-7 items-center justify-center border border-border bg-background text-foreground hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {playing ? (
+              <Pause className="size-3.5" aria-hidden />
+            ) : (
+              <Play className="size-3.5" aria-hidden />
+            )}
+          </button>
+        </div>
+
+        <div className="min-w-0 space-y-2">
+          <EncodingRow label="FEN" value={frame.fen} emptyLabel="empty" />
+          <EncodingRow
+            label="UCI path"
+            value={frame.uci}
+            accent={accent || undefined}
+            emptyLabel="(start · empty path)"
+            scrollable
+          />
+        </div>
+      </div>
+
+      <input
+        type="range"
+        min={0}
+        max={FINAL_PLY}
+        step={1}
+        value={step}
+        onChange={handleSliderChange}
+        aria-label="Scrub through Opera Game plies"
+        aria-valuetext={
+          frame.ply === 0
+            ? "Starting position"
+            : `Ply ${frame.ply} of ${FINAL_PLY}${frame.lastMove ? `, ${frame.lastMove}` : ""}`
+        }
+        className="fen-uci-scrubber w-full h-1.5 appearance-none cursor-pointer bg-muted accent-primary rounded-none"
+      />
+    </div>
   );
 };

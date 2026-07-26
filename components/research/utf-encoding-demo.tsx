@@ -243,16 +243,16 @@ export const UtfEncodingDemo = () => {
     <figure className="my-6 border border-border rounded-sm overflow-hidden">
       <div className="grid sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
         <div className="flex flex-col gap-3 p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-2 min-h-6">
+          <div className="flex flex-col gap-1 min-h-6">
             <label
               htmlFor={charsId}
               className="text-xs uppercase tracking-wide text-muted-foreground"
             >
-              Characters
+              Displayed glyphs
             </label>
             {decoded.ok ? (
               <span className="font-mono text-xs text-muted-foreground truncate">
-                {formatCodePoints(decoded.codePoints)}
+                Code points · {formatCodePoints(decoded.codePoints)}
               </span>
             ) : bitCount > 0 ? (
               <span className="text-xs text-amber-800 dark:text-amber-200 truncate">
@@ -302,15 +302,15 @@ export const UtfEncodingDemo = () => {
         </div>
 
         <div className="flex flex-col gap-3 p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-2 min-h-6">
+          <div className="flex flex-col gap-1.5 min-h-6 sm:flex-row sm:items-center sm:justify-between">
             <label
               htmlFor={bitsId}
               className="text-xs uppercase tracking-wide text-muted-foreground"
             >
-              Bits
+              Encoded bits
             </label>
             <div
-              className="inline-flex border border-border rounded-sm overflow-hidden"
+              className="inline-flex border border-border rounded-sm overflow-hidden self-start"
               role="group"
               aria-label="Bit group width"
             >
@@ -353,22 +353,26 @@ export const UtfEncodingDemo = () => {
 
           <div
             id={`${bitsId}-meta`}
-            className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground"
+            className="flex flex-col gap-1 text-xs text-muted-foreground"
           >
             <span className="tabular-nums">
-              {bitCount} bits · {lineCount}{" "}
+              {bitCount} bits
+              <span className="mx-1.5 text-border" aria-hidden="true">
+                ·
+              </span>
+              {lineCount}{" "}
               {encoding === "utf8"
                 ? lineCount === 1
-                  ? "byte"
-                  : "bytes"
+                  ? "UTF-8 byte"
+                  : "UTF-8 bytes"
                 : lineCount === 1
-                  ? "code unit"
-                  : "code units"}
+                  ? "UTF-16 code unit"
+                  : "UTF-16 code units"}
             </span>
             {units.length > 0 ? (
               <span
-                className="font-mono tabular-nums truncate"
-                title="Hex per line"
+                className="font-mono tabular-nums break-all"
+                title="Hex per unit"
               >
                 {units.map((u) => unitHex(u, width)).join(" · ")}
               </span>
@@ -376,6 +380,23 @@ export const UtfEncodingDemo = () => {
           </div>
         </div>
       </div>
+      <figcaption className="border-t border-border px-4 sm:px-5 py-3 text-sm text-muted-foreground leading-relaxed">
+        {decoded.ok && chars.length > 0 ? (
+          <>
+            Serialised URL characters for this input in a path context:{" "}
+            <code className="text-xs text-foreground break-all">
+              {encodeURIComponent(chars)}
+            </code>
+            . Browsers may still display the glyph; the serialised form is what
+            travels in the URL.
+          </>
+        ) : (
+          <>
+            Pick a glyph to compare displayed characters, code points, UTF-8
+            bytes, UTF-16 units, and serialised URL characters.
+          </>
+        )}
+      </figcaption>
     </figure>
   );
 };

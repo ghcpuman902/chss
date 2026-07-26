@@ -1,0 +1,715 @@
+  return (
+    <main className="container mx-auto max-w-3xl px-4 py-12 md:py-16 [font-family:var(--font-geist-sans),ui-sans-serif,system-ui,sans-serif]">
+      <p className="text-sm text-muted-foreground mb-6">
+        <Link
+          href="/"
+          className="underline underline-offset-2 hover:text-foreground"
+        >
+          chss.chat
+        </Link>
+        <span className="mx-2">/</span>
+        research
+      </p>
+
+      <header className="space-y-4 mb-12">
+        <p className="text-sm tracking-wide uppercase text-muted-foreground">
+          Compression research · draft
+        </p>
+        <h1 className="font-serif text-5xl md:text-6xl leading-[1.05] tracking-tighter text-balance">
+          How small can a chess share link get?
+        </h1>
+        <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
+          You make a move. You want to send the board to a friend. The URL has
+          to carry a legal position through WhatsApp with no database on the
+          far side. Pasteable. Self-contained. As short as we can honestly make
+          it.
+        </p>
+      </header>
+
+      <article className="space-y-16 text-[1.05rem] leading-relaxed">
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Isn&apos;t a chess position just 64 squares?
+          </h2>
+          <p>
+            That is the obvious starting point. Empty or occupied, and if
+            occupied, which coloured piece. The picture looks complete.
+          </p>
+          <BoardStateDiagram />
+          <p>
+            Except the board is hiding things from us. Whose turn it is.
+            Whether each side may still castle. Whether an en passant capture
+            is legal this ply. Those rights are not paint on the squares. They
+            are rules that depend on how the game arrived here.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            What is the board not showing us?
+          </h2>
+          <p>
+            For encoding, three nested levels of &quot;the position&quot; matter:
+          </p>
+          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+            <li>
+              <span className="text-foreground">Playable position.</span>{" "}
+              Placement, side to move, castling rights, and en passant. Enough
+              for legal replies. Trimmed FEN and occupancy aim here.
+            </li>
+            <li>
+              <span className="text-foreground">FEN-equivalent snapshot.</span>{" "}
+              Playable state plus the halfmove clock and fullmove number. Full
+              FEN lives here.
+            </li>
+            <li>
+              <span className="text-foreground">Exact continuing game history.</span>{" "}
+              A path of moves from the start. Enough for repetition claims and
+              automatic draw outcomes a mid-game snapshot alone cannot recover.
+            </li>
+          </ul>
+          <p>
+            Tap a board below to open that position in chss.chat. Some of the
+            invisible state only reappears if you keep the journey, not just the
+            destination.
+          </p>
+          <ExtraStateDemos />
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Why not store the FEN?
+          </h2>
+          <p>
+            FEN is the standard answer. Readable text. Every chess library
+            speaks it. Put it in a URL behind{" "}
+            <code className="text-sm">f-</code>, Base64URL-encoded, and you are
+            done. That is what chss.chat already ships for arbitrary snapshots.
+          </p>
+          <p>
+            It is also surprisingly expensive once you count the full pasteable
+            link. Slashes, spaces, and clock digits all become URL characters.
+            Dropping the halfmove and fullmove fields trims a little for share
+            previews that only need a playable board. The string is still
+            text-shaped. It never approaches a packed binary row.
+          </p>
+          <p className="text-muted-foreground">
+            On the held-out scoreboard below, native FEN averages about{" "}
+            <span className="font-mono text-foreground">
+              {format(nativeUrl, 0)}
+            </span>{" "}
+            characters for a complete{" "}
+            <code className="text-sm text-foreground">chss.chat/p/…</code> URL.
+            Trimmed FEN shaves a handful. We are still in the triple digits.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Can we just assign every square four bits?
+          </h2>
+          <p>
+            Sure. Empty or a coloured piece type fits in a nibble. Add a few
+            bits for side, castling, and en passant. Always 265 bits before
+            Base64URL. Simple. Never adaptive. Prefix{" "}
+            <code className="text-sm">n-</code>.
+          </p>
+          <p>
+            Then notice the empty squares. Most of the board is air. A 64-bit
+            occupancy mask says which squares are filled; each occupied square
+            then gets a 4-bit piece. Empty costs one bit in the mask instead of
+            four in the grid. That is Occupancy + Pieces (
+            <code className="text-sm">o-</code>). Size tracks piece count, not
+            ply count. Middlegames and endgames stay near the same URL length
+            while path codecs keep growing.
+          </p>
+          <p>
+            Giving every legal position a flat index sounds like the theoretical
+            floor. It only treats every position as equally likely. Human games
+            are anything but uniform. Openings recur; middlegames fan out. A
+            compact fixed ranking can approach a strong worst-case length. It is
+            not the same as a short average on real shares.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            What if we store the journey instead of the destination?
+          </h2>
+          <p>
+            Here is the pivot. Are we describing what the board looks like now,
+            or explaining how it got there?
+          </p>
+          <p>
+            A UCI-style path is concatenated coordinate moves:{" "}
+            <code className="text-sm">e2e4e7e5…</code>. The decoder replays from
+            the start. Early in a game that is almost free. Native{" "}
+            <code className="text-sm">u-</code> is already URL-safe ASCII. Packed{" "}
+            <code className="text-sm">p-</code> squeezes each move into 12 bits
+            (plus promotion bits) and Base64URL-encodes the stream.
+          </p>
+          <p>
+            Scrub Morphy&apos;s Opera Game below. FEN rewrites the whole state
+            each ply. The UCI-style path only appends the next coordinate move.
+          </p>
+          <FenUciMappingDemo />
+          <p>
+            Path codecs win while games are short. Somewhere in the teens of
+            plies, the growing journey usually loses to a fixed-size occupancy
+            snapshot. That crossover is the whole reason a hybrid encoder
+            exists.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Why does gzip make tiny strings longer?
+          </h2>
+          <p>
+            When a payload &quot;should compress,&quot; people reach for gzip.
+            On a share URL it arrives with its own suitcase. The header alone is
+            larger than a short opening path, and Base64URL expands the
+            compressed bytes again. Eight ASCII moves become a longer URL than
+            native <code className="text-sm">u-</code>. Full FEN under gzip is
+            the worst mean row on this scoreboard. Kept as a control so
+            &quot;just gzip it&quot; has a measured answer.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Why do fewer bits sometimes produce more characters?
+          </h2>
+          <p>
+            Bits are not the product metric. People paste the full URL: origin,
+            path, payload. Long links wrap, truncate, and feel like spam.
+            Characters outside a small alphabet become{" "}
+            <code className="text-sm">%xx</code>. Base64&apos;s{" "}
+            <code className="text-sm">+</code>/<code className="text-sm">/</code>{" "}
+            are hostile in paths, so most packed rows use Base64URL (
+            <code className="text-sm">-</code>/<code className="text-sm">_</code>
+            ), at four characters per three bytes. Three targets get blurred:
+            minimum bits, minimum encoded characters, and minimum characters in
+            the pasteable link. The third is what we score.
+          </p>
+          <p>
+            We count a complete{" "}
+            <code className="text-sm">chss.chat</code> share URL so the
+            comparison stays concrete. The same length trade-offs apply to path
+            segments, query params, QR codes, and other apps. The fixed route
+            and short codec prefixes are dispatch, not wasted payload. Changing
+            them is not the research question.
+          </p>
+          <p>
+            Once we count characters, it is tempting to imagine that a clever
+            Unicode symbol could carry a huge chunk of data. Try it.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Can Unicode cheat the scoreboard?
+          </h2>
+          <p>
+            How many bits should one character hold? Pick a symbol below. Watch
+            the code point, the UTF-8 bytes, and what happens when that symbol
+            enters a URL path. A visible character, its code point, its encoded
+            bytes, and what survives percent-encoding can all disagree.
+          </p>
+          <UtfEncodingDemo />
+          <p>
+            The alphabet is part of the codec. URL-safe ASCII stays short and
+            predictable. &quot;All Unicode&quot; does not.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Can human predictability become part of the codec?
+          </h2>
+          <p>
+            Openings people actually play are not a surprise. Train a codebook
+            of the K={meta.lookup_k} most frequent UCI prefixes at depths{" "}
+            {meta.lookup_depths.join(", ")} on the hash-train split. A hit
+            replaces those opening plies with a depth id and a 10-bit index. A
+            miss falls back to the full packed path. Every{" "}
+            <code className="text-sm">d-</code> payload starts with a
+            discriminator bit so decode is unambiguous.
+          </p>
+          <p>
+            Decode needs no network. The decoder must ship the same frozen
+            codebook. Version it, or old links break. That dependency is the
+            cost of moving information into the decoder. Research-only prefix
+            today; product decode does not yet ship the book.
+          </p>
+          <LookupCodebookSample />
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Where does history stop winning?
+          </h2>
+          <p>
+            Before the numbers: make a bet. Which wins at ply 2? At ply 64?
+            When does a growing path lose to a board snapshot? Can a dictionary
+            beat both in the opening?
+          </p>
+          <p>
+            Path-based encodings start cheap and grow with every move.
+            Board-state encodings stay relatively stable and may shrink after
+            captures. Dictionaries help when openings are predictable. A hybrid
+            that encodes packed path, occupancy, and lookup, then keeps the
+            smallest of those three, should ride the cheap side of that curve.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Demo: Morphy&apos;s Opera Game from the starting position through
+            mate, with URL length for each ply. Held-out sample:{" "}
+            {meta.games.toLocaleString()} games ·{" "}
+            {meta.positions.toLocaleString()} positions at plies{" "}
+            {meta.ply_points.join(", ")} · codebook from hash-train.
+          </p>
+          <UrlLengthLoopDemo />
+          <p>
+            Same codecs, measured only at sampled checkpoints, not every move
+            in a phase range. Early columns favour paths and lookup. Later
+            columns favour occupancy. Hybrid hugs the cheaper explanation.
+            Cell tint: greener = shorter in that column.
+          </p>
+          <div className="overflow-x-auto -mx-4 px-4">
+            <table className="w-full min-w-[40rem] text-sm border-collapse">
+              <caption className="caption-top text-left text-muted-foreground mb-3">
+                Mean URL length at plies {CHECKPOINTS.map((c) => c.ply).join(", ")}.
+                Numbers: mean ± σ [min–max]. Sampled checkpoints only.
+              </caption>
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="py-2 pr-3 font-medium">Method</th>
+                  {CHECKPOINTS.map((p) => (
+                    <th
+                      key={p.key}
+                      className="py-2 px-2 font-medium text-right"
+                    >
+                      {p.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.map((row) => (
+                  <tr key={row.method} className="border-b border-border/60">
+                    <td className="py-2.5 pr-3">
+                      <MethodNameLink method={row.method} label={row.label} />
+                    </td>
+                    {CHECKPOINTS.map((p) => {
+                      const cell = byPly?.[row.method]?.[p.key];
+                      const scale = checkpointUrlSpreads.find(
+                        (s) => s.key === p.key,
+                      );
+                      return (
+                        <PhaseCell
+                          key={p.key}
+                          spread={metricSpread(
+                            cell?.url ?? 0,
+                            cell?.url_min,
+                            cell?.url_max,
+                            cell?.url_std,
+                          )}
+                          scaleMin={checkpointUrlScaleMin}
+                          scaleMax={checkpointUrlScaleMax}
+                          heatMin={scale?.heatMin ?? 0}
+                          heatMax={scale?.heatMax ?? 0}
+                        />
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-muted-foreground">
+            At ply 2, hybrid and lookup sit near 25 characters while occupancy
+            still carries a full board near 57. By ply 32, occupancy and hybrid
+            converge near 52, and packed paths have ballooned past 80. The
+            surprise is mild: lookup stays close to hybrid early, then loses
+            once openings leave the book.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            So which representation actually wins?
+          </h2>
+          <p>
+            This benchmark is not a proof of the shortest chess encoding
+            possible. It compares a practical family of state, path, dictionary,
+            and hybrid approaches on sampled positions from real games.
+          </p>
+          <p>
+            Across sampled checkpoint positions, hybrid lands around{" "}
+            <span className="font-mono text-foreground">
+              {format(bestUrl, 0)}
+            </span>{" "}
+            URL characters versus roughly {format(nativeUrl, 0)} for native FEN.
+            Occupancy + Pieces is the shortest single non-hybrid codec we
+            tested, about{" "}
+            <span className="font-mono text-foreground">
+              {format(occupancyUrl, 0)}
+            </span>
+            . Equal-weighting games instead gives hybrid about{" "}
+            <span className="font-mono text-foreground">
+              {format(bestPerGameUrl, 1)}
+            </span>
+            . Production today uses{" "}
+            <code className="text-sm">f-</code> /{" "}
+            <code className="text-sm">u-</code> and a no-codebook{" "}
+            <code className="text-sm">h-</code> (
+            <code className="text-sm">min(packed, occupancy)</code>). The{" "}
+            <code className="text-sm">d-</code> row and the scoreboard hybrid
+            that also tries lookup are research codecs.
+          </p>
+
+          <div className="overflow-x-auto -mx-4 px-4">
+            <table className="w-full min-w-[28rem] text-sm border-collapse">
+              <caption className="caption-top text-left text-muted-foreground mb-3">
+                Mean across sampled checkpoint positions, not an average full
+                game. URL includes{" "}
+                <code className="text-xs">{meta.url_origin}</code>. Overlay
+                reads mean ± σ [min–max]. Tall band = min–max; mid = ±σ;
+                coloured bar = mean.{" "}
+                <span className="inline-flex items-center gap-3 ml-1">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className={`inline-block size-2 rounded-sm ${METRIC_BAR.bits}`}
+                      aria-hidden="true"
+                    />
+                    Bits
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className={`inline-block size-2 rounded-sm ${METRIC_BAR.chars}`}
+                      aria-hidden="true"
+                    />
+                    Chars
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      className={`inline-block size-2 rounded-sm ${METRIC_BAR.url}`}
+                      aria-hidden="true"
+                    />
+                    URL
+                  </span>
+                </span>
+              </caption>
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="py-2 pr-3 font-medium w-[38%]">Method</th>
+                  <th className="py-2 pl-2 font-medium">Bits / Chars / URL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {FAMILY_ORDER.map((family) => {
+                  const rows = table.filter((r) => r.family === family);
+                  return rows.map((row, i) => (
+                    <tr
+                      key={row.method}
+                      className="border-b border-border/60"
+                    >
+                      <td className="py-3 pr-3 align-middle">
+                        {i === 0 ? (
+                          <span className="block text-xs text-muted-foreground mb-0.5">
+                            {FAMILY_LABEL[family]}
+                          </span>
+                        ) : null}
+                        <MethodNameLink
+                          method={row.method}
+                          label={row.label}
+                        />
+                      </td>
+                      <td className="py-3 pl-2 align-middle">
+                        <div className="flex flex-col gap-1.5">
+                          <MetricBarRow
+                            label="Bits"
+                            spread={enrichSpread(
+                              row.method,
+                              "bits",
+                              row.bits,
+                              row.bits_min,
+                              row.bits_max,
+                              row.bits_std,
+                            )}
+                            max={maxBitsScale}
+                            barClass={METRIC_BAR.bits}
+                          />
+                          <MetricBarRow
+                            label="Chars"
+                            spread={enrichSpread(
+                              row.method,
+                              "chars",
+                              row.chars,
+                              row.chars_min,
+                              row.chars_max,
+                              row.chars_std,
+                            )}
+                            max={maxCharsScale}
+                            barClass={METRIC_BAR.chars}
+                          />
+                          <MetricBarRow
+                            label="URL"
+                            spread={enrichSpread(
+                              row.method,
+                              "url",
+                              row.url,
+                              row.url_min,
+                              row.url_max,
+                              row.url_std,
+                            )}
+                            max={maxUrl}
+                            barClass={METRIC_BAR.url}
+                            highlight={row.url === bestUrl}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ));
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="space-y-5" aria-labelledby="method-compare-heading">
+          <h2
+            id="method-compare-heading"
+            className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance"
+          >
+            A compact map of the bets
+          </h2>
+          <p>
+            Each row is a bet about what to store. Expand a method for the
+            mechanism and a real example link. Examples use{" "}
+            <span className="font-medium text-foreground">{DEMO_SAN}</span>{" "}
+            (<code className="text-sm">{DEMO_UCI}</code>) unless noted.
+          </p>
+          <div className="overflow-x-auto -mx-4 px-4">
+            <table className="w-full min-w-[36rem] text-sm border-collapse">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="py-2 pr-3 font-medium">Method</th>
+                  <th className="py-2 pr-3 font-medium">Kind</th>
+                  <th className="py-2 pr-3 font-medium text-right">Bits</th>
+                  <th className="py-2 pr-3 font-medium text-right">Chars</th>
+                  <th className="py-2 pr-3 font-medium text-right">URL</th>
+                  <th className="py-2 pr-3 font-medium">Depends on</th>
+                  <th className="py-2 font-medium">Keeps</th>
+                </tr>
+              </thead>
+              <tbody>
+                {table.map((row) => {
+                  const kind = METHOD_KIND[row.method];
+                  return (
+                    <tr key={row.method} className="border-b border-border/60">
+                      <td className="py-2.5 pr-3">
+                        <MethodNameLink
+                          method={row.method}
+                          label={row.label}
+                        />
+                      </td>
+                      <td className="py-2.5 pr-3 text-muted-foreground">
+                        {kind?.kind ?? row.family}
+                      </td>
+                      <td className="py-2.5 pr-3 font-mono tabular-nums text-right">
+                        {format(row.bits, 0)}
+                      </td>
+                      <td className="py-2.5 pr-3 font-mono tabular-nums text-right">
+                        {format(row.chars, 0)}
+                      </td>
+                      <td className="py-2.5 pr-3 font-mono tabular-nums text-right">
+                        {format(row.url, 0)}
+                      </td>
+                      <td className="py-2.5 pr-3 text-muted-foreground">
+                        {kind?.depends ?? "n/a"}
+                      </td>
+                      <td className="py-2.5 text-muted-foreground">
+                        {kind?.keeps ?? "n/a"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="space-y-0">
+            {METHOD_DETAILS.map((detail) => (
+              <MethodExplainBlock
+                key={detail.id}
+                detail={detail}
+                row={table.find((r) => r.method === detail.method)}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            What should we try next?
+          </h2>
+          <p>
+            On over a million checkpoint positions, native FEN sits around{" "}
+            <span className="font-mono">{format(nativeUrl, 0)}</span> URL
+            characters. Occupancy nearly halves that to about{" "}
+            <span className="font-mono">{format(occupancyUrl, 0)}</span>.
+            Hybrid that picks among packed path, occupancy, and opening lookup
+            reaches about{" "}
+            <span className="font-mono">{format(bestUrl, 0)}</span> as a
+            checkpoint mean, or about{" "}
+            <span className="font-mono">{format(bestPerGameUrl, 1)}</span>{" "}
+            when each game is weighted equally. Small enough to feel like a
+            product choice.
+          </p>
+          <p>
+            The deeper result is not a single winner. There is no universally
+            shortest description. The best representation depends on whether
+            the history is short, the board is sparse, or the opening is
+            familiar. Compression here is choosing the right explanation for
+            each position, not finding one magical codec.
+          </p>
+          <p>
+            What we have not tried yet, and would belong in a later bake-off
+            rather than this scoreboard: ranking each move among the legal ones
+            instead of packing from/to squares; a variable-length piece stream
+            after occupancy; packing bits into a URL-safe alphabet without
+            waiting for byte boundaries; specialised chess-position research
+            encodings from the literature. Chess960 and crazyhouse would move
+            the numbers again. The URL constraints would not.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Reproduce
+          </h2>
+          <p>
+            The scoreboard is not a black box. Anyone can rebuild it from the
+            public Lichess dump and the scripts in this repository. The product
+            metric is pasteable URL length; the pipeline exists so that claim
+            can be checked, not trusted.
+          </p>
+          <p>
+            Full commands, disk estimates, and sampling details live in{" "}
+            <a
+              href="https://github.com/ghcpuman902/chss/tree/main/benchmark"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              benchmark/README.md
+            </a>{" "}
+            on{" "}
+            <a
+              href="https://github.com/ghcpuman902/chss"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              github.com/ghcpuman902/chss
+            </a>
+            . The short path is below.
+          </p>
+
+          <h3 className="font-serif text-xl tracking-tight pt-2">
+            1. Clone and install
+          </h3>
+          <p className="text-muted-foreground">
+            You need Python 3.11+,{" "}
+            <code className="text-sm text-foreground">zstd</code> /
+            <code className="text-sm text-foreground">zstdcat</code>, roughly
+            30&nbsp;GB free disk, and about 5&nbsp;GB+ free RAM while the
+            month is streaming.
+          </p>
+          <pre className="overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm font-mono leading-snug">
+            {`git clone https://github.com/ghcpuman902/chss.git
+cd chss
+python3 -m venv .venv-benchmark
+.venv-benchmark/bin/pip install -r benchmark/requirements.txt`}
+          </pre>
+
+          <h3 className="font-serif text-xl tracking-tight pt-2">
+            2. Download a Lichess month
+          </h3>
+          <p className="text-muted-foreground">
+            Standard rated games are{" "}
+            <a
+              href="https://database.lichess.org/"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              CC0 on database.lichess.org
+            </a>
+            . The published table used June 2026 (~26&nbsp;GB compressed,
+            86.5M games). Do not fully decompress it. The scripts stream with{" "}
+            <code className="text-sm text-foreground">zstdcat</code>.
+          </p>
+          <pre className="overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm font-mono leading-snug">
+            {`mkdir -p data/standard
+curl -L --continue-at - \\
+  -o data/standard/lichess_db_standard_rated_2026-06.pgn.zst \\
+  https://database.lichess.org/standard/lichess_db_standard_rated_2026-06.pgn.zst`}
+          </pre>
+
+          <h3 className="font-serif text-xl tracking-tight pt-2">
+            3. Stream, convert, and split
+          </h3>
+          <p className="text-muted-foreground">
+            One helper runs the three passes: full-month frequency aggregate,
+            a 3% hash sample of games turned into compact UCI JSONL, then a
+            deterministic train / val / test split. On our machine (Apple M3
+            Pro, 18&nbsp;GB), that corpus pipeline took about 1&nbsp;h&nbsp;45&nbsp;m
+            wall time, roughly an hour for the aggregate and about 41&nbsp;minutes
+            for the hash extract.
+          </p>
+          <pre className="overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm font-mono leading-snug">
+            {`bash benchmark/run_corpus.sh`}
+          </pre>
+          <p className="text-sm text-muted-foreground">
+            Outputs land under{" "}
+            <code className="text-xs text-foreground">
+              data/standard/corpus/hash/
+            </code>{" "}
+            as zstd-compressed train / val / test JSONL. Once those exist you
+            can delete the raw{" "}
+            <code className="text-xs text-foreground">.pgn.zst</code> to free
+            ~26&nbsp;GB.
+          </p>
+
+          <h3 className="font-serif text-xl tracking-tight pt-2">
+            4. Rebuild the scoreboard
+          </h3>
+          <p className="text-muted-foreground">
+            Train the K=1024 opening codebook on the train split, evaluate at
+            plies 2 / 8 / 16 / 32 / 64 on val, and write the slim JSON the page
+            reads.
+          </p>
+          <pre className="overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm font-mono leading-snug">
+            {`bash benchmark/run_scoreboard.sh
+
+# same as:
+.venv-benchmark/bin/python benchmark/url_length_benchmark.py \\
+  --train data/standard/corpus/hash/2026-06.train.compact.jsonl.zst \\
+  --eval data/standard/corpus/hash/2026-06.val.compact.jsonl.zst \\
+  --out benchmark/results/url_length_hash_val.json \\
+  --slim-out lib/compression-url-scoreboard.json`}
+          </pre>
+          <p>
+            You should land near the same ranking: hybrid around{" "}
+            <span className="font-mono">{format(bestUrl, 0)}</span> URL
+            characters as a checkpoint mean, occupancy around{" "}
+            <span className="font-mono">{format(occupancyUrl, 0)}</span>,
+            native FEN around{" "}
+            <span className="font-mono">{format(nativeUrl, 0)}</span>. Exact
+            floats can shift a little with toolchain versions; the order should
+            not.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Design notes and earlier bake-off logs:{" "}
+            <code className="text-xs">doc/chess-url-compression.md</code>.
+          </p>
+        </section>
+      </article>
+    </main>
+  );
+}
