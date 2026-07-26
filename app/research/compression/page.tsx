@@ -90,7 +90,7 @@ const METHOD_KIND: Record<
   native_fen: {
     kind: "State",
     depends: "None beyond chess.js",
-    keeps: "FEN-equivalent snapshot",
+    keeps: "Complete FEN state",
   },
   native_uci: {
     kind: "Path",
@@ -98,9 +98,9 @@ const METHOD_KIND: Record<
     keeps: "Full path from start",
   },
   trim_fen: {
-    kind: "State",
+    kind: "Variant",
     depends: "None beyond chess.js",
-    keeps: "Playable snapshot",
+    keeps: "Playable fields only (no clocks)",
   },
   packed_uci: {
     kind: "Path",
@@ -110,12 +110,12 @@ const METHOD_KIND: Record<
   occupancy: {
     kind: "State",
     depends: "None beyond chess.js",
-    keeps: "Playable snapshot",
+    keeps: "Complete FEN state",
   },
   naive_4bit: {
     kind: "State",
     depends: "None beyond chess.js",
-    keeps: "Playable snapshot",
+    keeps: "Complete FEN state",
   },
   gzip_uci: {
     kind: "Path",
@@ -125,7 +125,7 @@ const METHOD_KIND: Record<
   gzip_fen: {
     kind: "State",
     depends: "gzip + chess.js",
-    keeps: "FEN-equivalent snapshot",
+    keeps: "Complete FEN state",
   },
   lookup_k1024: {
     kind: "Frequency",
@@ -135,7 +135,7 @@ const METHOD_KIND: Record<
   hybrid_min: {
     kind: "Hybrid",
     depends: "Codebook if lookup wins",
-    keeps: "Path or playable snapshot",
+    keeps: "Path or complete FEN state",
   },
 };
 
@@ -161,8 +161,8 @@ const METHOD_DETAILS: MethodDetail[] = [
   {
     id: "method-native-fen",
     method: "native_fen",
-    how: "Stores the full FEN string, Base64URL-encoded, behind the production prefix f-. The decoder Base64URL-decodes and loads the position with chess.js. Identical to what chss.chat ships for arbitrary snapshots today.",
-    when: "Use when you already have a mid-game FEN and no move path, or when interoperability with standard FEN matters. Every slash, space, field, and clock digit still has to pass through Base64URL.",
+    how: "Stores the full FEN string, then Base64URL-encodes it for a path-safe payload. The decoder Base64URL-decodes and loads the position with chess.js.",
+    when: "Use when you already have a mid-game FEN and no move path, or when interoperability with standard FEN matters. Every slash, space, field, and clock digit still has to pass through the URL alphabet.",
     examples: [
       {
         label: DEMO_SAN,
@@ -174,8 +174,8 @@ const METHOD_DETAILS: MethodDetail[] = [
   {
     id: "method-native-uci",
     method: "native_uci",
-    how: "Appends raw UCI move text after u- with no further encoding. e2e4e7e5 is already URL-safe ASCII, so the payload is the move string itself. The decoder replays from the start position.",
-    when: "Cheap and clear early in a game. Grows by four characters per ply (five on promotions), so deep middlegames and endgames become long paste targets. That is the production move-path format today.",
+    how: "Appends raw UCI move text with no further encoding. e2e4e7e5 is already URL-safe ASCII, so the payload is the move string itself. The decoder replays from the start position.",
+    when: "Included for the early-game edge only: openings and short games can be surprisingly compact. Grows by four characters per ply (five on promotions), stores full history, and is not the long-term share format.",
     examples: [
       {
         label: DEMO_SAN,
@@ -192,21 +192,21 @@ const METHOD_DETAILS: MethodDetail[] = [
   {
     id: "method-trim-fen",
     method: "trim_fen",
-    how: "Same as native FEN, but drops the halfmove clock and fullmove number before Base64URL. Those fields matter for draw-claim clocks and move-number bookkeeping; most share previews can rebuild a playable board without them.",
-    when: "A small win over full FEN when you insist on a state snapshot. Still text-shaped, so it never approaches the packed rows.",
+    how: "Base64URL of FEN with the halfmove clock and fullmove number dropped. The result can restore a playable board, but not the original counters on its own.",
+    when: "Useful as a lower bound on those two fields. Without a recovery rule, it describes less state than full FEN. It is also still text-shaped, so it never approaches the packed rows.",
     examples: [
       {
         label: DEMO_SAN,
         code: "t-cm5icWtibnIvcHBwcDFwcHAvOC80cDMvNFAzLzgvUFBQUDFQUFAvUk5CUUtCTlIgdyBLUWtxIC0",
-        note: "Trimmed to board + side + castling + en passant. Saves a handful of characters vs f-.",
+        note: "Restores the board and immediate move rights, but not the original counters.",
       },
     ],
   },
   {
     id: "method-packed-uci",
     method: "packed_uci",
-    how: "A path again, but each move is 12 bits (from-square + to-square) plus 2 bits when a promotion appears. Because the decoder replays the board, it knows when a move must include a promotion choice. The bit stream is Base64URL-encoded behind p-.",
-    when: "Wins while games are short. By ply 16, the packed path is already roughly level with occupancy on average. Hybrid exists largely to catch that crossover.",
+    how: "A path again, but each move is 12 bits (from-square + to-square) plus 2 bits when a promotion appears. Because the decoder replays the board, it knows when a move must include a promotion choice. The bit stream is then Base64URL-encoded.",
+    when: "Wins while games are short. By ply 16, the packed path is already roughly level with occupancy on average. Hybrid exists largely to catch that crossover; packed UCI is not a serious late-game candidate on its own.",
     examples: [
       {
         label: DEMO_SAN,
@@ -223,46 +223,46 @@ const METHOD_DETAILS: MethodDetail[] = [
   {
     id: "method-occupancy",
     method: "occupancy",
-    how: "A 64-bit occupancy mask (which squares are filled), then a 4-bit piece nibble per occupied square, then side-to-move, castling, and en passant. No move list. Prefix o-. Size tracks piece count, not ply count.",
+    how: "A 64-bit occupancy mask (which squares are filled), then a 4-bit piece nibble per occupied square, then FEN-complete meta: side to move, castling, en passant, halfmove clock, and fullmove number. No move list. Size tracks piece count, not ply count.",
     when: "Among the standalone codecs, occupancy has the shortest overall mean on this held-out validation scoreboard. Middlegames and endgames stay near the same URL length while path codecs keep growing. Weak only in the opening, where a short path or dictionary entry is smaller.",
     examples: [
       {
         label: DEMO_SAN,
-        code: "o-EADv___vABBCNWMkEREREZmZmZnKveus-AA",
-        note: "Still ~57 URL characters with 32 pieces. By ply 64, occupancy averages about 46 characters because captures have removed pieces.",
+        code: "o-EADv___vABBCNWMkEREREZmZmZnKveus-AAAQA",
+        note: "219 bits with 32 pieces plus clocks → 60 URL characters. By ply 64, occupancy shortens as captures remove pieces.",
       },
     ],
   },
   {
     id: "method-naive-4bit",
     method: "naive_4bit",
-    how: "Every square gets a fixed 4-bit cell (empty or coloured piece), plus nine bits of side to move, castling, and en passant. Always 265 bits before Base64URL. Prefix n-.",
-    when: "A useful baseline for “store the grid literally.” Occupancy beats it because empty squares cost one bit in the mask instead of four in the grid. Included as a literal-grid baseline against which occupancy can be measured.",
+    how: "Every square gets a fixed 4-bit cell (empty or coloured piece), plus 27 bits of FEN-complete meta. Always 283 bits before Base64URL.",
+    when: "A useful baseline for “store the grid literally.” Occupancy beats it because empty squares cost one bit in the mask instead of four in the grid.",
     examples: [
       {
         label: DEMO_SAN,
-        code: "n-QjVjJBERAREAAAAAAAAQAAAAkAAAAAAAmZkJmcq966z6gA",
-        note: "Fixed 68-character URL on every position. Simple, never adaptive.",
+        code: "n-QjVjJBERAREAAAAAAAAQAAAAkAAAAAAAmZkJmcq966z4AABA",
+        note: "Fixed 70-character URL on every position. Simple, never adaptive.",
       },
     ],
   },
   {
     id: "method-gzip-uci",
     method: "gzip_uci",
-    how: "gzip the raw UCI ASCII string at maximum compression, then Base64URL the bytes behind g-. Same idea people reach for when a payload “should compress.”",
+    how: "gzip the raw UCI ASCII string at maximum compression, then Base64URL the bytes. Same idea people reach for when a payload “should compress.”",
     when: "Almost always loses on share URLs. The gzip header alone is larger than a short opening path, and Base64URL expands the compressed bytes again. Even on long paths, generic gzip remains far behind the chess-aware packed representation in this benchmark.",
     examples: [
       {
         label: DEMO_SAN,
         code: "g-H4sIAAAAAAAC_0s1SjVJNU81BQCH6qitCAAAAA",
-        note: "Two coordinate moves become a 60-character URL. Native u- was 30.",
+        note: "Two coordinate moves become a 60-character URL. The raw move string was 30.",
       },
     ],
   },
   {
     id: "method-gzip-fen",
     method: "gzip_fen",
-    how: "gzip the full FEN text, Base64URL, prefix z-. Same compressor tax as gzip(UCI), applied to a string that is already short and low-redundancy.",
+    how: "gzip the full FEN text, then Base64URL. Same compressor tax as gzip(UCI), applied to a string that is already short and low-redundancy.",
     when: "gzip(FEN) produces the longest mean URL in this benchmark. Kept as a control so “just gzip it” has a measured answer.",
     examples: [
       {
@@ -275,8 +275,8 @@ const METHOD_DETAILS: MethodDetail[] = [
   {
     id: "method-lookup",
     method: "lookup_k1024",
-    how: "Human openings repeat. A hit replaces familiar opening plies with a depth id and a 10-bit index, then appends any packed suffix. A miss stores the complete packed path. Every d- payload starts with one discriminator bit (1 = hit, 0 = miss), counted in both logical length and the Base64URL payload. The benchmark book keeps a separate list of up to K = 1024 prefixes at each of depths 2, 4, 6, 8, 10, and 12 on the hash-train split; the index is fixed at 10 bits because each depth has at most 1,024 entries. Decode needs no network or remote fetch, but the decoder must ship the same frozen codebook; version it or old links break.",
-    when: "Shines on openings people actually play. On the held-out validation split it lands near occupancy in the overall mean, but wins hard at plies 2 and 8 in the sampled checkpoints, where a short path is already small and occupancy still carries a full board. Research-only prefix today; product decode does not yet ship the book.",
+    how: "Human openings repeat. A hit replaces familiar opening plies with a depth id and a 10-bit index, then appends any packed suffix. A miss stores the complete packed path. Every lookup payload starts with one discriminator bit (1 = hit, 0 = miss), counted in both logical length and the Base64URL payload. The benchmark book keeps a separate list of up to K = 1024 prefixes at each of depths 2, 4, 6, 8, 10, and 12 on the hash-train split; the index is fixed at 10 bits because each depth has at most 1,024 entries. Decode needs no network or remote fetch, but the decoder must ship the same frozen codebook; version it or old links break.",
+    when: "Shines on openings people actually play. On the held-out validation split it lands near occupancy in the overall mean, but wins hard at plies 2 and 8 in the sampled checkpoints, where a short path is already small and occupancy still carries a full board.",
     examples: [
       {
         label: `${DEMO_SAN}, book hit`,
@@ -289,35 +289,22 @@ const METHOD_DETAILS: MethodDetail[] = [
   {
     id: "method-hybrid",
     method: "hybrid_min",
-    how: "For each position, encode packed UCI, occupancy, and lookup, then keep the smallest of those three. A 2-bit mode tag rides in front of the winning payload under h-. The decoder reads the tag and dispatches. This scoreboard hybrid includes lookup; production h- today is only min(packed, occupancy), with no codebook.",
-    when: "Wins across these tested positions and methods. Early games pick path or dictionary; later games pick occupancy. Mean URL falls to about 39 characters with a maximum of 57 characters in this sampled benchmark (an observed max, not a formal upper bound). The largest observed samples select a representation close to occupancy plus the mode tag.",
+    how: "For each position, encode packed UCI, occupancy, and lookup, then keep the smallest of those three. A 2-bit mode tag rides in front of the winning payload. The decoder reads the tag and dispatches. This scoreboard hybrid includes lookup; a production-style hybrid without a codebook is only min(packed, occupancy).",
+    when: "Wins across these tested positions and methods. Early games pick path or dictionary; later games pick occupancy. Mean URL falls to about 40 characters with a maximum of 60 characters in this sampled benchmark (an observed max, not a formal upper bound). The largest observed samples select a representation close to occupancy plus the mode tag.",
     examples: [
       {
         label: `${DEMO_SAN}, picks lookup`,
         code: "h-oAA",
-        note: "Two-bit mode selects lookup. Shorter than p- alone; much shorter than forcing occupancy.",
+        note: "Two-bit mode selects lookup. Shorter than packed path alone; much shorter than forcing occupancy.",
       },
       {
-        label: "Sicilian ~18 plies, picks occupancy",
-        code: "h-RAW92lr8jkQRUYRExESIxmZupuZnK3OgAA",
-        note: "Mode selects occupancy. URL stays near 56 instead of a 60+ character move path.",
+        label: "Sicilian ~19 plies, picks occupancy",
+        code: "h-RA2z6yZ-jkQZDQRFREiMRmZupq5mc3sYAIBQ",
+        note: "Mode selects occupancy. URL stays near 58 instead of a growing move path.",
       },
     ],
   },
 ];
-
-const METHOD_PREFIX: Record<string, string> = {
-  native_fen: "f-",
-  native_uci: "u-",
-  trim_fen: "t-",
-  packed_uci: "p-",
-  occupancy: "o-",
-  naive_4bit: "n-",
-  gzip_uci: "g-",
-  gzip_fen: "z-",
-  lookup_k1024: "d-",
-  hybrid_min: "h-",
-};
 
 /**
  * Tiny codebook sample for the method card: openings repeat.
@@ -404,6 +391,16 @@ const CROSSOVER_METHODS = [
   "occupancy",
   "lookup_k1024",
   "hybrid_min",
+] as const;
+
+const BASELINE_METHODS = [
+  "native_fen",
+  "native_uci",
+  "packed_uci",
+  "occupancy",
+  "naive_4bit",
+  "gzip_uci",
+  "gzip_fen",
 ] as const;
 
 const methodAnchorId = (method: string) =>
@@ -729,10 +726,7 @@ const MethodExplainBlock = ({
       </span>
       {row ? (
         <span className="text-sm text-muted-foreground font-mono tabular-nums">
-          {format(row.url, 0)} mean URL chars ·{" "}
-          <code className="text-foreground">
-            {METHOD_PREFIX[detail.method] ?? "?"}
-          </code>
+          {format(row.url, 0)} mean URL chars
         </span>
       ) : null}
     </summary>
@@ -927,7 +921,7 @@ export default function CompressionResearchPage() {
     table.find((r) => r.family === "raw")?.url ??
     100;
   const occupancyUrl =
-    table.find((r) => r.method === "occupancy")?.url ?? 54;
+    table.find((r) => r.method === "occupancy")?.url ?? 57;
   const perGameTable = (
     scoreboard as { summary_table_per_game?: ScoreRow[] }
   ).summary_table_per_game;
@@ -970,10 +964,11 @@ export default function CompressionResearchPage() {
           How small can a chess share link get?
         </h1>
         <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
-          You make a move. You want to send the board to a friend. The URL has
-          to carry a legal position through WhatsApp with no database on the
-          far side. Pasteable. Self-contained. As short as we can honestly make
-          it.
+          chss.chat shares a chess board as a link, with no account or database
+          on the far side. You make a move, paste the URL into WhatsApp, and
+          your friend sees the same game from the other side. That leaves one
+          question: how short can the link become while still carrying the game
+          with it?
         </p>
       </header>
 
@@ -989,10 +984,9 @@ export default function CompressionResearchPage() {
           </p>
           <BoardStateDiagram />
           <p>
-            Except the board is hiding things from us. Whose side it is to move.
-            Whether each side may still castle. Whether an en passant capture
-            is legal this ply. That state is not painted on the squares. It
-            depends on how the game arrived here.
+            Except the picture is not quite enough to resume the same game.
+            Some rules depend on what happened before this moment, and that
+            information is not painted on the squares.
           </p>
         </section>
 
@@ -1001,29 +995,11 @@ export default function CompressionResearchPage() {
             The board has invisible state
           </h2>
           <p>
-            For encoding, three nested levels of &quot;the position&quot; matter:
-          </p>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-            <li>
-              <strong className="font-medium text-foreground">Playable position.</strong>{" "}
-              Placement, side to move, castling rights, and en passant. Enough
-              for legal replies. Trimmed FEN and occupancy aim here.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">FEN-equivalent snapshot.</strong>{" "}
-              Playable state plus the halfmove clock and fullmove number. Full
-              FEN lives here.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">Exact continuing game history.</strong>{" "}
-              A path of moves from the start. Enough to recover repetition claims
-              and automatic draw outcomes that a mid-game snapshot alone cannot.
-            </li>
-          </ul>
-          <p>
-            Tap a board below to open that position in chss.chat. A move path
-            can reconstruct some of this automatically. A snapshot has to carry
-            it explicitly.
+            Put the pieces in the same places and two boards can still behave
+            differently. Castling and en passant are the clearest examples: the
+            boards replay what happened just before, or what becomes legal next.
+            Side to move and the two move counters are harder to show visually,
+            so those are named in text below.
           </p>
           <ExtraStateDemos />
         </section>
@@ -1033,83 +1009,87 @@ export default function CompressionResearchPage() {
             Should we store the board, or the moves?
           </h2>
           <p>
-            Two familiar building blocks sit side by side. Scrub through
-            Morphy&apos;s Opera Game: FEN rewrites the whole state each ply; a
-            UCI-style path only appends the next coordinate move.
+            Watch how the two common representations evolve during a standard
+            game, such as Morphy&apos;s Opera Game.
           </p>
           <FenUciMappingDemo />
           <p>
-            FEN is readable <strong>state</strong>. Every chess library speaks
-            it. Put it behind <code className="text-sm">f-</code>,
-            Base64URL-encoded, and you have a snapshot. That is what chss.chat
-            ships for arbitrary positions today. Readability costs bytes. Every
-            slash, space, field, and clock digit still has to pass through
-            Base64URL. Trimmed FEN drops the halfmove and fullmove fields and
-            saves a handful. On the held-out validation scoreboard, native FEN
-            still averages about{" "}
+            The first string is <strong>FEN</strong>, the standard readable
+            snapshot used by chess libraries. It records the pieces, whose turn
+            it is, castling and en passant rights, and two move counters. Those
+            extra fields are how the text preserves a game that the 64 squares
+            cannot describe alone. Once every slash, space, and digit has to
+            live in a URL, though, a FEN share averages about{" "}
             <span className="font-mono text-foreground">
               {format(nativeUrl, 0)}
             </span>{" "}
-            characters for a complete{" "}
-            <code className="text-sm text-foreground">chss.chat/p/…</code> URL.
+            characters in the held-out benchmark.
           </p>
           <p>
-            A UCI-style path is the <strong>move path</strong>: concatenated
-            coordinate moves such as <code className="text-sm">e2e4e7e5…</code>.
-            The decoder replays from the start. Early in a game that is almost
-            free. Native <code className="text-sm">u-</code> is already
-            URL-safe ASCII. Packed <code className="text-sm">p-</code> squeezes
-            each move into 12 bits (plus promotion bits) and Base64URL-encodes
-            the stream.
+            FEN includes those fields for different reasons. Side to move,
+            castling rights, and en passant can change which move is legal next.
+            The halfmove clock carries the fifty-move rule, while the fullmove
+            number preserves move numbering. Together they make one snapshot
+            sufficient to restore the standard state used by chess software.
+            Later, we will ask whether a more specialised encoding can derive
+            any of that state instead of spelling it all out.
           </p>
           <p>
-            Path encodings win while games are short. By ply 16, packed history
-            and occupancy are roughly level on average; after that, the growing
-            path falls behind quickly. That crossover is why a hybrid encoder
-            exists. Both native formats are still text-shaped, though. The next
-            bets pack the same ideas into bits.
-          </p>
-        </section>
-
-        <section className="space-y-5">
-          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            Can we just assign every square four bits?
-          </h2>
-          <p>
-            Sure. Empty or a coloured piece type fits in a nibble. Add a few
-            bits for side to move, castling, and en passant. Always 265 bits
-            before Base64URL. Simple. Never adaptive. Prefix{" "}
-            <code className="text-sm">n-</code>.
+            The second string is the <strong>UCI move path</strong>: coordinate
+            moves such as <code className="text-sm">e2e4e7e5…</code>. Replaying
+            it from the starting board recovers the same state without writing
+            each field separately. It begins wonderfully short, then grows with
+            every move and preserves more history than a board preview needs.
           </p>
           <p>
-            Then notice the empty squares. Most of the board is air. A 64-bit
-            occupancy mask says which squares are filled; each occupied square
-            then gets a 4-bit piece. Empty costs one bit in the mask instead of
-            four in the grid. That is Occupancy + Pieces (
-            <code className="text-sm">o-</code>). Size tracks piece count, not
-            ply count. Middlegames and endgames stay near the same URL length
-            while path codecs keep growing.
+            That early advantage is why paths remain in the comparison. For an
+            opening or a short game, the move list can be smaller than a packed
+            board. Later, its unbounded growth becomes the problem. This gives
+            us two useful ideas to compress: the state we have now, or the route
+            that brought us here.
           </p>
         </section>
 
         <section className="space-y-5">
           <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            Surely gzip can make it smaller?
+            Packing the grid into bits
           </h2>
           <p>
-            gzip works best when it has enough material to find repeated
-            patterns and enough payload to repay its own header.
+            The most literal binary approach gives every square a four-bit cell
+            for empty or a coloured piece type, then adds bits for side to move,
+            castling, en passant, halfmove clock, and fullmove number. The
+            payload is always 283 bits before the URL alphabet. It never adapts
+            to how empty the board becomes.
           </p>
           <p>
-            A chess share payload gives gzip very little room to do that. UCI
-            paths do contain structure, but each individual share string is too
-            short for generic gzip to exploit efficiently. The gzip header alone
-            can outweigh the opening moves, and Base64URL expands the compressed
-            bytes again before they sit in a URL. Two coordinate moves become a
-            longer link than native <code className="text-sm">u-</code>.{" "}
-            gzip(FEN) produces the longest mean URL in this benchmark. Kept as a
-            control so &quot;just gzip it&quot; has a measured answer: on these
-            strings, gzip makes the pasteable URL longer.
+            Most of the board is air, though, and that is where Occupancy +
+            Pieces wins. A 64-bit mask marks which squares are filled; each
+            occupied square then gets a four-bit piece. Empty costs one bit in
+            the mask instead of four in the grid. The same FEN-complete meta
+            rides at the end. Size now tracks piece count rather than ply count,
+            so middlegames and endgames stay near the same URL length while path
+            codecs keep growing.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Generic compression does not save the day
+          </h2>
+          <p>
+            gzip works best when it has enough material to find repeated patterns
+            and enough payload to repay its own header. A chess share string
+            gives it very little of either.
+          </p>
+          <p>
+            Move lists do contain structure, but each individual share is too
+            short for generic gzip to exploit efficiently. The header alone can
+            outweigh the opening moves, and turning the compressed bytes into a
+            URL-safe alphabet expands them again. Two coordinate moves become a
+            longer link than the raw move string. gzip(FEN) produces the longest
+            mean URL in this benchmark. It stays as a control so &quot;just gzip
+            it&quot; has a measured answer: on these strings, gzip makes the
+            pasteable URL longer.
           </p>
         </section>
 
@@ -1119,10 +1099,10 @@ export default function CompressionResearchPage() {
           </h2>
           <p>
             A codec has at least three lengths. Logical bits are the information
-            written before padding. Payload characters are what survive
-            Base64URL, or raw ASCII for native UCI. Full URL length includes the
-            origin, route, prefix, and payload: the thing someone actually pastes
-            into WhatsApp.
+            written before padding. Payload characters are what survive a
+            URL-safe alphabet, or raw ASCII for a plain move list. Full URL
+            length includes the origin, route, and payload: the thing someone
+            actually pastes into WhatsApp.
           </p>
           <p>
             Those three do not move in lockstep. A bitstream is first rounded to
@@ -1142,28 +1122,15 @@ export default function CompressionResearchPage() {
             ) so the payload stays path-safe.
           </p>
           <p>
-            For a product like chss.chat, the third length is the target. We
-            score a complete share URL so the comparison stays concrete. The
-            fixed route and short codec prefixes are dispatch, not wasted
-            payload. Changing them is not the research question. The same
+            We score a complete share URL so the comparison stays concrete. The
+            fixed route is scaffolding, not the research question. The same
             trade-offs apply to path segments, query params, QR codes, and other
             apps.
           </p>
           <p>
             If the score is characters rather than bits, a dense Unicode symbol
-            looks like a cheat code. Try it.
-          </p>
-        </section>
-
-        <section className="space-y-5">
-          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            Can Unicode cheat the scoreboard?
-          </h2>
-          <p>
-            How many bits should one character hold? Pick a symbol below. Watch
-            the displayed glyph, its code point, the UTF-8 bytes, the UTF-16
-            code units, and what survives serialisation in a URL path. A visible
-            character, its code point, its encoded bytes, and percent-encoding
+            can look like a cheat. The demo below shows why the displayed glyph,
+            its code point, its encoded bytes, and what survives in a URL path
             can all disagree.
           </p>
           <UtfEncodingDemo />
@@ -1176,158 +1143,18 @@ export default function CompressionResearchPage() {
 
         <section className="space-y-5">
           <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            What if the decoder already knows common openings?
+            The first comparison
           </h2>
           <p>
-            Human openings repeat. Instead of spelling out a familiar first
-            dozen moves, the URL can point to an opening the decoder already
-            knows, then append only the unfamiliar suffix.
-          </p>
-          <p>
-            The benchmark builds a separate list of up to{" "}
-            <span className="font-mono text-foreground">K = {meta.lookup_k}</span>{" "}
-            prefixes at each of depths {meta.lookup_depths.join(", ")}. A
-            dictionary hit stores the depth, index, and packed suffix. A miss
-            stores the complete packed path. One discriminator bit tells the
-            decoder which form it received. Prefix{" "}
-            <code className="text-sm">d-</code>.
-          </p>
-          <p>
-            No database or remote fetch is needed, but the codebook must ship
-            with the decoder and remain frozen or versioned. The URL gets shorter
-            by moving shared knowledge into the software; the link itself does
-            not carry the dictionary. Research-only prefix today; product decode
-            does not yet ship the book. The book contains familiar prefixes such
-            as <code className="text-sm">e2e4e7e5</code>, the Sicilian{" "}
-            <code className="text-sm">e2e4c7c5</code>, and longer recurring lines
-            such as an Open Sicilian. Expand the lookup method card below for
-            three concrete codebook rows.
-          </p>
-        </section>
-
-        <section className="space-y-5">
-          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            Where does history stop winning?
-          </h2>
-          <p>
-            Before seeing the numbers, make a bet. At ply 2, should we describe
-            the entire board or replay two moves? At ply 64, should we replay the
-            whole move path or record the pieces that remain?
-          </p>
-          <p>
-            Path-based encodings start cheap and grow with every move.
-            Board-state encodings stay relatively stable and may shrink after
-            captures. Dictionaries help when openings are predictable. A hybrid
-            that encodes packed path, occupancy, and lookup, then keeps the
-            smallest of those three, should ride the cheap side of that curve.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Demo: Morphy&apos;s Opera Game from the starting position through
-            mate, with URL length for each ply. Held-out sample:{" "}
-            {meta.games.toLocaleString()} games ·{" "}
-            {meta.positions.toLocaleString()} positions at plies{" "}
-            {meta.ply_points.join(", ")} · codebook from hash-train.
-          </p>
-          <UrlLengthLoopDemo />
-          <p>
-            Same codecs, measured only at sampled checkpoints. Early columns
-            favour paths and lookup. Later columns favour occupancy. Hybrid hugs
-            the cheaper explanation. Cell tint: greener = shorter in that column.
-          </p>
-          <div className="overflow-x-auto -mx-4 px-4">
-            <table className="w-full min-w-[32rem] text-sm border-collapse">
-              <caption className="caption-top text-left text-muted-foreground mb-3">
-                Mean URL length at plies {CHECKPOINTS.map((c) => c.ply).join(", ")}.
-                Four codecs that show the crossover. Full distributions live in
-                the aggregate scoreboard below.
-              </caption>
-              <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="py-2 pr-3 font-medium">Method</th>
-                  {CHECKPOINTS.map((p) => (
-                    <th
-                      key={p.key}
-                      className="py-2 px-2 font-medium text-right"
-                    >
-                      {p.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {crossoverTable.map((row) => (
-                  <tr key={row.method} className="border-b border-border/60">
-                    <td className="py-2.5 pr-3">
-                      <MethodNameLink method={row.method} label={row.label} />
-                    </td>
-                    {CHECKPOINTS.map((p) => {
-                      const cell = byPly?.[row.method]?.[p.key];
-                      const scale = crossoverUrlSpreads.find(
-                        (s) => s.key === p.key,
-                      );
-                      return (
-                        <PhaseCell
-                          key={p.key}
-                          spread={metricSpread(cell?.url ?? 0)}
-                          scaleMin={0}
-                          scaleMax={1}
-                          heatMin={scale?.heatMin ?? 0}
-                          heatMax={scale?.heatMax ?? 0}
-                          meanOnly
-                        />
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-muted-foreground">
-            At ply 2, hybrid and lookup sit near 25 characters while occupancy
-            still carries a full board near 57. By ply 32, occupancy and hybrid
-            converge near 52, and packed paths have ballooned past 80. The
-            crossover is now visible. Opening history is cheap because it is
-            short or familiar. Later, occupancy wins because the board no longer
-            cares how many moves it took to get there. Lookup shadows the hybrid
-            in the opening, then occupancy takes over as the path diverges from
-            familiar openings and paths grow.
-          </p>
-        </section>
-
-        <section className="space-y-5">
-          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            The hybrid keeps the cheapest explanation
-          </h2>
-          <p>
-            This benchmark is not a proof of the shortest chess encoding
-            possible. It compares a practical family of state, path, dictionary,
-            and hybrid approaches on sampled positions from real games. Across
-            sampled checkpoint positions, hybrid lands around{" "}
-            <span className="font-mono text-foreground">
-              {format(bestUrl, 0)}
-            </span>{" "}
-            URL characters versus roughly {format(nativeUrl, 0)} for native FEN.
-            Among the standalone codecs, occupancy has the shortest overall mean
-            at about{" "}
+            The benchmark samples positions from real Lichess games and measures
+            the complete URL, not just the payload. Occupancy lands around{" "}
             <span className="font-mono text-foreground">
               {format(occupancyUrl, 0)}
-            </span>
-            .{" "}
-            <span className="text-muted-foreground">
-              Equal-weighting games instead of checkpoint observations changes
-              the hybrid mean only slightly, from about {format(bestUrl, 0)} to{" "}
-              {format(bestPerGameUrl, 1)} characters.
-            </span>
+            </span>{" "}
+            URL characters as a standalone mean, against roughly{" "}
+            {format(nativeUrl, 0)} for native FEN. Packed paths win early and
+            lose later. gzip loses throughout.
           </p>
-          <p>
-            Production today uses <code className="text-sm">f-</code> /{" "}
-            <code className="text-sm">u-</code> and a no-codebook{" "}
-            <code className="text-sm">h-</code> (
-            <code className="text-sm">min(packed, occupancy)</code>). The{" "}
-            <code className="text-sm">d-</code> row and the scoreboard hybrid
-            that also tries lookup are research codecs.
-          </p>
-
           <div className="overflow-x-auto -mx-4 px-4">
             <table className="w-full min-w-[28rem] text-sm border-collapse">
               <caption className="caption-top text-left text-muted-foreground mb-3">
@@ -1373,7 +1200,12 @@ export default function CompressionResearchPage() {
               </thead>
               <tbody>
                 {FAMILY_ORDER.map((family) => {
-                  const rows = table.filter((r) => r.family === family);
+                  const rows = table.filter(
+                    (r) =>
+                      r.family === family &&
+                      (BASELINE_METHODS as readonly string[]).includes(r.method),
+                  );
+                  if (rows.length === 0) return null;
                   return (
                     <Fragment key={family}>
                       <tr className="border-b border-border/40 bg-muted/20">
@@ -1451,6 +1283,238 @@ export default function CompressionResearchPage() {
               mid band = ±σ; coloured bar = mean.
             </p>
           </div>
+          <p>
+            Among the standalone codecs, occupancy has the shortest overall
+            mean. It stores the current state without growing with the move
+            count. The remaining question is whether the decoder can sometimes
+            avoid storing even that much.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            What can the decoder infer?
+          </h2>
+          <p>
+            A shorter state encoding can exploit what the current arrangement
+            makes impossible. It cannot treat hidden state as if the pieces
+            uniquely determine it. The paired boards near the beginning show
+            exactly where that assumption fails.
+          </p>
+          <ul className="list-disc pl-5 space-y-3 text-muted-foreground">
+            <li>
+              <strong className="font-medium text-foreground">
+                Castling rights are partly constrained.
+              </strong>{" "}
+              If a king or rook is absent from its home square, that castling
+              right is certainly gone. If both have returned home, the board
+              still cannot reveal whether they moved earlier. The encoder can
+              omit impossible rights, but must distinguish the remaining cases.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">
+                En passant is usually impossible, but not always inferable.
+              </strong>{" "}
+              Pawn geometry and side to move sharply limit when a target square
+              could exist. When the geometry permits one, identical pieces can
+              still result from a one-square or two-square pawn move. The
+              relevant detail of the previous move remains genuinely hidden.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">
+                Side to move is generally independent.
+              </strong>{" "}
+              Some arrangements constrain which side could legally move, but
+              many are valid with either player to move. A general snapshot
+              therefore needs to preserve the distinction.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">
+                Neither move counter has an exact answer on the board.
+              </strong>{" "}
+              The same pieces can appear after different numbers of quiet plies
+              and at different fullmove numbers. Common values can receive
+              shorter codes, but recovering the original values requires
+              carrying equivalent information somewhere in the state payload.
+            </li>
+          </ul>
+          <p>
+            The useful saving is conditional: avoid bits when the board proves a
+            value, and encode the ambiguity when it does not. Simply deleting a
+            field produces a different state rather than a better compression
+            of the same one.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            What if the decoder already knows common openings?
+          </h2>
+          <p>
+            Human openings repeat. Instead of spelling out a familiar first
+            dozen moves, the URL can point to an opening the decoder already
+            knows, then append only the unfamiliar suffix. The information still
+            restores a full path, and therefore a full FEN state; the savings
+            come from moving shared knowledge into the software.
+          </p>
+          <p>
+            The benchmark builds a separate list of up to{" "}
+            <span className="font-mono text-foreground">K = {meta.lookup_k}</span>{" "}
+            opening prefixes at each of depths {meta.lookup_depths.join(", ")}.
+            A dictionary hit stores the depth, index, and packed suffix. A miss
+            stores the complete packed path. One discriminator bit tells the
+            decoder which form it received. No network fetch is required, but
+            the codebook must ship with the decoder and remain frozen or
+            versioned, or old links break.
+          </p>
+          <p>
+            Familiar lines such as <code className="text-sm">e2e4e7e5</code>, the
+            Sicilian <code className="text-sm">e2e4c7c5</code>, and longer Open
+            Sicilian stretches land in the book. Expand the lookup method card
+            below for three concrete codebook rows.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            Where does history stop winning?
+          </h2>
+          <p>
+            Paths start cheap and grow with every move. Board-state encodings
+            stay relatively stable and may shrink after captures. Dictionaries
+            help when openings are predictable. A hybrid that tries packed path,
+            occupancy, and lookup, then keeps the smallest, rides the cheap side
+            of that curve. The path option is there for the opening edge, not as
+            the late-game default.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Morphy&apos;s Opera Game from the starting position through mate,
+            with URL length for each ply. Held-out sample:{" "}
+            {meta.games.toLocaleString()} games ·{" "}
+            {meta.positions.toLocaleString()} positions at plies{" "}
+            {meta.ply_points.join(", ")} · codebook from hash-train.
+          </p>
+          <UrlLengthLoopDemo />
+          <p>
+            Measured only at sampled checkpoints, the same pattern appears in
+            the table. Early columns favour paths and lookup. Later columns
+            favour occupancy. Hybrid hugs the cheaper explanation. Greener cells
+            are shorter within each column.
+          </p>
+          <div className="overflow-x-auto -mx-4 px-4">
+            <table className="w-full min-w-[32rem] text-sm border-collapse">
+              <caption className="caption-top text-left text-muted-foreground mb-3">
+                Mean URL length at plies {CHECKPOINTS.map((c) => c.ply).join(", ")}.
+                Four codecs that show the crossover once dictionaries and hybrid
+                selection are allowed.
+              </caption>
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="py-2 pr-3 font-medium">Method</th>
+                  {CHECKPOINTS.map((p) => (
+                    <th
+                      key={p.key}
+                      className="py-2 px-2 font-medium text-right"
+                    >
+                      {p.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {crossoverTable.map((row) => (
+                  <tr key={row.method} className="border-b border-border/60">
+                    <td className="py-2.5 pr-3">
+                      <MethodNameLink method={row.method} label={row.label} />
+                    </td>
+                    {CHECKPOINTS.map((p) => {
+                      const cell = byPly?.[row.method]?.[p.key];
+                      const scale = crossoverUrlSpreads.find(
+                        (s) => s.key === p.key,
+                      );
+                      return (
+                        <PhaseCell
+                          key={p.key}
+                          spread={metricSpread(cell?.url ?? 0)}
+                          scaleMin={0}
+                          scaleMax={1}
+                          heatMin={scale?.heatMin ?? 0}
+                          heatMax={scale?.heatMax ?? 0}
+                          meanOnly
+                        />
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-muted-foreground">
+            At ply 2, hybrid and lookup sit near 25 characters while occupancy
+            still carries a full board near 60. By ply 32, occupancy and hybrid
+            converge near 55, and packed paths have ballooned past 80. Opening
+            history is cheap because it is short or familiar. Later, occupancy
+            wins because the board no longer cares how many moves it took to get
+            there.
+          </p>
+          <p>
+            Across sampled checkpoint positions, hybrid lands around{" "}
+            <span className="font-mono text-foreground">
+              {format(bestUrl, 0)}
+            </span>{" "}
+            URL characters versus roughly {format(nativeUrl, 0)} for native FEN.
+            Equal-weighting games instead of checkpoint observations changes the
+            hybrid mean only slightly, from about {format(bestUrl, 0)} to{" "}
+            {format(bestPerGameUrl, 1)} characters. The hybrid is not a proof of
+            the shortest chess encoding possible. It is the practical result of
+            choosing the cheapest truthful explanation for each position.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            How far could a dictionary go?
+          </h2>
+          <p>
+            The opening book suggests an extreme version of the same idea. If
+            the decoder contained every possible position, the URL could be
+            little more than an index. Common positions could receive the
+            shortest indices, while rare positions would receive longer ones.
+            That is the theoretical direction in which a frequency-aware codec
+            points.
+          </p>
+          <p>
+            The decoder would be doing most of the work. Tromp and Österlund
+            estimate about{" "}
+            <a
+              href="https://github.com/tromp/ChessPositionRanking"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              4.8 × 10<sup>44</sup> legal chess positions
+            </a>
+            . Even if real games visit only a tiny fraction of them, a complete
+            catalogue is far beyond anything a web client could sensibly ship.
+          </p>
+          <p>
+            Our corpus shows where the smaller version stops paying. At depth 2,
+            a 1,024-entry book covers essentially every observed opening prefix.
+            By depth 8, more than 600,000 prefixes appear and the same book covers
+            about a quarter of them by frequency. At depth 12, over 1.5 million
+            appear and coverage falls below 5%. The first few moves repeat;
+            middlegames quickly fan out.
+          </p>
+          <p>
+            That makes a full position database a useful limit, but not a useful
+            product. The practical hybrid keeps the small, high-value opening
+            book and falls back to packed moves or occupancy when a game leaves
+            it. Its mean link is about{" "}
+            <span className="font-mono text-foreground">
+              {format(bestUrl, 0)}
+            </span>{" "}
+            characters in this benchmark. It does not reach the theoretical
+            minimum, but it captures the useful part of the idea without making
+            every link depend on an encyclopaedia.
+          </p>
         </section>
 
         <section className="space-y-5" aria-labelledby="method-compare-heading">
@@ -1464,9 +1528,7 @@ export default function CompressionResearchPage() {
             Each row is a bet about what to store. Expand a method for the
             mechanism and a real example link. Examples use{" "}
             <span className="font-medium text-foreground">{DEMO_SAN}</span>{" "}
-            (<code className="text-sm">{DEMO_UCI}</code>) unless noted. Mean
-            full URL is the corpus checkpoint average; bits and payload lengths
-            live in the aggregate scoreboard above.
+            (<code className="text-sm">{DEMO_UCI}</code>) unless noted.
           </p>
           <div className="overflow-x-auto -mx-4 px-4">
             <table className="w-full min-w-[32rem] text-sm border-collapse">
@@ -1523,31 +1585,22 @@ export default function CompressionResearchPage() {
 
         <section className="space-y-5">
           <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            One position, several truthful descriptions
-          </h2>
-          <p>
-            Native FEN describes the destination in readable text. A move path
-            describes how we got there. Occupancy ignores the path and records
-            only what remains. A dictionary recognises a familiar route.
-          </p>
-          <p>
-            The hybrid wins because it does not insist that one description must
-            always be best. Early positions are cheap as history; later positions
-            are cheap as state; familiar openings are cheap as references.
-            Compression here is choosing the cheapest truthful explanation for
-            each position.
-          </p>
-        </section>
-
-        <section className="space-y-5">
-          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            What should we try next?
+            What to try next
           </h2>
           <ul className="list-disc pl-5 space-y-3 text-muted-foreground">
             <li>
               <strong className="font-medium text-foreground">Smarter paths.</strong>{" "}
               Rank each move among legal moves rather than storing source and
               destination squares.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">
+                Compressed move sequences.
+              </strong>{" "}
+              Measure whether UCI or PGN becomes more competitive once wrapped in
+              Zstandard or Brotli as well as gzip. Raw gzip already loses on
+              short share strings; a fuller bake-off would still keep the
+              comparison honest.
             </li>
             <li>
               <strong className="font-medium text-foreground">Smarter snapshots.</strong>{" "}
@@ -1568,6 +1621,34 @@ export default function CompressionResearchPage() {
               URL-safety and character-count constraints would still apply.
             </li>
           </ul>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            How chss.chat multiplexes formats
+          </h2>
+          <p>
+            The compression question is which representation is smallest. The
+            product question is how one app ships several of them behind one
+            route. chss.chat answers that with a short letter prefix before the
+            payload: <code className="text-sm">f-</code> for full FEN,{" "}
+            <code className="text-sm">u-</code> for raw UCI,{" "}
+            <code className="text-sm">t-</code> for trimmed FEN,{" "}
+            <code className="text-sm">p-</code> for packed moves,{" "}
+            <code className="text-sm">o-</code> for occupancy,{" "}
+            <code className="text-sm">n-</code> for the naive 4-bit grid, and so
+            on. The decoder reads the prefix and dispatches.
+          </p>
+          <p>
+            Production today uses <code className="text-sm">f-</code> /{" "}
+            <code className="text-sm">u-</code> and a no-codebook{" "}
+            <code className="text-sm">h-</code> that keeps{" "}
+            <code className="text-sm">min(packed, occupancy)</code>. The
+            dictionary row and the scoreboard hybrid that also tries lookup are
+            research codecs. Prefixes are dispatch, not the representation.
+            Changing them is not the research question; finding the smallest
+            trustworthy payload is.
+          </p>
         </section>
 
         <section className="space-y-5">

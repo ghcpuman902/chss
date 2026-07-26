@@ -44,14 +44,15 @@ const EXAMPLES: {
   { name: "packed_uci", code: "p-Mc0k", expectE4E5: true, urlLen: 26 },
   {
     name: "occupancy",
-    code: "o-EADv___vABBCNWMkEREREZmZmZnKveus-AA",
+    code: "o-EADv___vABBCNWMkEREREZmZmZnKveus-AAAQA",
     expectE4E5: true,
-    urlLen: 57,
+    urlLen: 60,
   },
   {
     name: "naive_4bit",
-    code: "n-QjVjJBERAREAAAAAAAAQAAAAkAAAAAAAmZkJmcq966z6gA",
+    code: "n-QjVjJBERAREAAAAAAAAQAAAAkAAAAAAAmZkJmcq966z4AABA",
     expectE4E5: true,
+    urlLen: 70,
   },
   {
     name: "gzip_uci",
@@ -79,7 +80,7 @@ const EXAMPLES: {
   },
   {
     name: "hybrid_sicilian",
-    code: "h-RAW92lr8jkQRUYRExESIxmZupuZnK3OgAA",
+    code: "h-RA2z6yZ-jkQZDQRFREiMRmZupq5mc3sYAIBQ",
   },
   {
     name: "italian_uci",

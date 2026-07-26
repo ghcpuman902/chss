@@ -51,14 +51,14 @@ Means are across **sampled checkpoint positions** (plies 2 / 8 / 16 / 32 / 64). 
 |---|---:|---:|---:|
 | Native FEN (Base64URL) | 491 | 82 | **104** |
 | Native UCI (ASCII) | 627 | 78 | **100** |
-| Trimmed FEN | 456 | 76 | 98 |
+| Trimmed FEN (playable-only variant) | 456 | 76 | 98 |
 | Packed UCI path | 235 | 39 | 61 |
-| Occupancy + pieces | 186 | 32 | 54 |
-| Naïve 4-bit grid | 265 | 46 | 68 |
+| Occupancy + pieces (FEN-complete) | 204 | 35 | 57 |
+| Naïve 4-bit grid | 283 | 48 | 70 |
 | gzip(UCI) → Base64URL | 588 | 98 | 120 |
 | gzip(FEN) → Base64URL | 613 | 103 | 125 |
-| Lookup K=1024 + suffix | 192 | 33 | 55 |
-| **Hybrid (min of 3)** | **98** | **17** | **39** |
+| Lookup K=1024 + suffix | 193 | 33 | 55 |
+| **Hybrid (min of 3)** | **104** | **18** | **40** |
 
 Per-game mean hybrid ≈ **38.5**. At ply 2: native UCI ~30, lookup/hybrid ~28, occupancy ~57. gzip loses on short payloads. Lookup payloads carry an explicit hit/miss discriminator bit.
 

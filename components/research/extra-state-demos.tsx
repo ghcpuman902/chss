@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -9,6 +10,7 @@ import {
   type ReactNode,
   type SVGProps,
 } from "react";
+import { Pause, Play } from "lucide-react";
 import {
   BishopIcon,
   KingIcon,
@@ -21,7 +23,6 @@ import {
   matchPieceIds,
   type BoardPiece,
 } from "@/components/research/piece-match";
-import { generateCode } from "@/lib/state-core";
 import { cn } from "@/lib/utils";
 
 type PieceKey =
@@ -58,155 +59,114 @@ const PIECE_COMPONENT: Record<PieceKey, PieceIcon> = {
 const FILES = "abcdefgh";
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
 
-/** Real June 2026 corpus positions used for the loops. */
-const DEMO = {
-  ep: {
-    frames: [
-      {
-        fen: "rnbq1rk1/ppp1p1bp/3p1np1/3P1p2/2P2B1P/4PN2/PP3PP1/RN1QKB1R b KQ - 0 7",
-        focus: ["e7", "e5", "d5"],
-        highlights: [],
-        ep: null as string | null,
-        tag: "ep -",
-      },
-      {
-        fen: "rnbq1rk1/ppp1p1bp/3p1np1/3P1p2/2P2B1P/4PN2/PP3PP1/RN1QKB1R b KQ - 0 7",
-        focus: ["e7", "e5", "d5"],
-        highlights: ["e7", "e5"],
-        ep: null,
-        tag: "… e7e5",
-      },
-      {
-        fen: "rnbq1rk1/ppp3bp/3p1np1/3Ppp2/2P2B1P/4PN2/PP3PP1/RN1QKB1R w KQ e6 0 8",
-        focus: ["e5", "d5", "e6"],
-        highlights: ["e7", "e5"],
-        ep: "e6",
-        tag: "ep e6",
-      },
-      {
-        fen: "rnbq1rk1/ppp3bp/3p1np1/3Ppp2/2P2B1P/4PN2/PP3PP1/RN1QKB1R w KQ e6 0 8",
-        focus: ["e5", "d5", "e6"],
-        highlights: ["d5", "e6"],
-        ep: "e6",
-        tag: "ep e6 · capture?",
-      },
-      {
-        fen: "rnbq1rk1/ppp3bp/3pPnp1/5p2/2P2B1P/4PN2/PP3PP1/RN1QKB1R b KQ - 0 8",
-        focus: ["e6", "d5", "e5"],
-        highlights: ["d5", "e6"],
-        ep: null,
-        tag: "ep -",
-      },
-    ],
-  },
-  castle: {
-    frames: [
-      {
-        fen: "rn1qkb1r/1pp2ppp/p3pn2/3p4/2PP4/5BP1/PP2PP1P/RNBQK2R w KQkq - 0 7",
-        focus: ["e1", "g1", "h1", "f1"],
-        highlights: [],
-        rights: "KQkq",
-      },
-      {
-        fen: "rn1qkb1r/1pp2ppp/p3pn2/3p4/2PP4/5BP1/PP2PP1P/RNBQK2R w KQkq - 0 7",
-        focus: ["e1", "g1", "h1", "f1"],
-        highlights: ["e1", "g1", "h1", "f1"],
-        rights: "KQkq",
-      },
-      {
-        fen: "rn1qkb1r/1pp2ppp/p3pn2/3p4/2PP4/5BP1/PP2PP1P/RNBQ1RK1 b kq - 1 7",
-        focus: ["e1", "g1", "h1", "f1"],
-        highlights: ["e1", "g1", "h1", "f1"],
-        rights: "kq",
-      },
-      {
-        fen: "rn1qkb1r/1pp2ppp/p3pn2/3p4/2PP4/5BP1/PP2PP1P/RNBQ1RK1 b kq - 1 7",
-        focus: ["e1", "g1", "h1", "f1"],
-        highlights: [],
-        rights: "kq",
-      },
-    ],
-  },
-} as const;
+const CASTLING_PLACEMENT =
+  "rn1qkb1r/1pp2ppp/p3pn2/3p4/2PP4/5BP1/PP2PP1P/RNBQK2R";
+const CASTLING_KING_AWAY =
+  "rn1qkb1r/1pp2ppp/p3pn2/3p4/2PP4/5BP1/PP2PP1P/RNBQ1K1R";
+const CASTLING_CASTLED =
+  "rn1qkb1r/1pp2ppp/p3pn2/3p4/2PP4/5BP1/PP2PP1P/RNBQ1RK1";
+const EN_PASSANT_PLACEMENT =
+  "rnbq1rk1/ppp3bp/3p1np1/3Ppp2/2P2B1P/4PN2/PP3PP1/RN1QKB1R";
+const BEFORE_EN_PASSANT_SINGLE =
+  "rnbq1rk1/ppp3bp/3ppnp1/3P1p2/2P2B1P/4PN2/PP3PP1/RN1QKB1R";
+const BEFORE_EN_PASSANT_DOUBLE =
+  "rnbq1rk1/ppp1p1bp/3p1np1/3P1p2/2P2B1P/4PN2/PP3PP1/RN1QKB1R";
+const AFTER_EN_PASSANT_CAPTURE =
+  "rnbq1rk1/ppp3bp/3pPnp1/5p2/2P2B1P/4PN2/PP3PP1/RN1QKB1R";
 
-/** Link to the playable board for this FEN (empty code = start). */
-const playUrlForFen = (fen: string) => {
-  const sideToMove = (fen.split(" ")[1] as "w" | "b") || "w";
-  const code = generateCode({ fen, sideToMove });
-  return code ? `/p/${code}` : "/p";
-};
-
-const usePrefersReducedMotion = () => {
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handleChange = () => setReduced(mq.matches);
-    handleChange();
-    mq.addEventListener("change", handleChange);
-    return () => mq.removeEventListener("change", handleChange);
-  }, []);
-
-  return reduced;
-};
-
-const useLoopStep = (length: number, ms: number, paused = false) => {
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    if (paused || length <= 1) return;
-    const id = window.setInterval(() => {
-      setStep((s) => (s + 1) % length);
-    }, ms);
-    return () => window.clearInterval(id);
-  }, [length, ms, paused]);
-
-  return paused ? 0 : step;
-};
+const FRAME_MS = 1100;
 
 const fileIndex = (square: string) => square.charCodeAt(0) - 97;
 
-const EMPTY_SQUARES: string[] = [];
+const usePrefersReducedMotion = () => {
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = () => setReducedMotion(mediaQuery.matches);
+
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return reducedMotion;
+};
+
+type BoardFrame = {
+  fen: string;
+  label: string;
+};
+
+const useBoardLoop = (frameCount: number, reducedMotion: boolean) => {
+  const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [skipTransition, setSkipTransition] = useState(false);
+
+  useEffect(() => {
+    if (reducedMotion) setPlaying(false);
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    if (!playing || reducedMotion || frameCount <= 1) return;
+
+    const interval = window.setInterval(() => {
+      setStep((currentStep) => {
+        const nextStep = (currentStep + 1) % frameCount;
+        if (nextStep === 0) {
+          setSkipTransition(true);
+        }
+        return nextStep;
+      });
+    }, FRAME_MS);
+
+    return () => window.clearInterval(interval);
+  }, [frameCount, playing, reducedMotion]);
+
+  useEffect(() => {
+    if (!skipTransition) return;
+    setSkipTransition(false);
+  }, [skipTransition, step]);
+
+  const handleTogglePlay = () => {
+    setPlaying((current) => !current);
+  };
+
+  return { step, playing, handleTogglePlay, skipTransition };
+};
 
 type FullBoardProps = {
   fen: string;
-  focusSquares?: string[];
-  highlights?: string[];
-  epSquare?: string | null;
-  reduceMotion?: boolean;
   label: string;
-  href?: string;
+  reducedMotion?: boolean;
+  animate?: boolean;
 };
+
+const PIECE_TRANSITION =
+  "transform 420ms cubic-bezier(0.645, 0.045, 0.355, 1), opacity 220ms ease";
 
 const FullBoard = ({
   fen,
-  focusSquares = EMPTY_SQUARES,
-  highlights = EMPTY_SQUARES,
-  epSquare = null,
-  reduceMotion = false,
   label,
-  href,
+  reducedMotion = false,
+  animate = true,
 }: FullBoardProps) => {
-  const prevPiecesRef = useRef<BoardPiece[] | null>(null);
+  const previousPiecesRef = useRef<BoardPiece[] | null>(null);
   const pieces = useMemo(
-    () => matchPieceIds(prevPiecesRef.current, fen),
-    [fen],
+    () =>
+      matchPieceIds(animate ? previousPiecesRef.current : null, fen),
+    [animate, fen],
   );
 
-  useEffect(() => {
-    prevPiecesRef.current = pieces;
+  useLayoutEffect(() => {
+    previousPiecesRef.current = pieces;
   }, [pieces]);
 
-  const focusSet = useMemo(() => new Set(focusSquares), [focusSquares]);
-  const highlightSet = useMemo(() => new Set(highlights), [highlights]);
-  const hasFocus = focusSet.size > 0;
-
-  const board = (
+  return (
     <div
-      className="relative border border-border overflow-hidden rounded-none shrink-0 w-[11.5rem] h-[11.5rem] sm:w-[13rem] sm:h-[13rem]"
-      role={href ? undefined : "img"}
-      aria-hidden={href ? true : undefined}
-      aria-label={href ? undefined : label}
+      className="relative aspect-square w-full overflow-hidden border border-border"
+      role="img"
+      aria-label={label}
     >
       <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
         {RANKS.map((rank) =>
@@ -219,8 +179,6 @@ const FullBoard = ({
                 className={cn(
                   "chess-square cursor-default",
                   isLight ? "light" : "dark",
-                  highlightSet.has(square) && "last-move",
-                  epSquare === square && "legal-move",
                 )}
               />
             );
@@ -233,7 +191,6 @@ const FullBoard = ({
         const Icon = PIECE_COMPONENT[key];
         const col = fileIndex(piece.square);
         const row = 8 - Number(piece.square[1]);
-        const focused = !hasFocus || focusSet.has(piece.square);
 
         return (
           <span
@@ -241,15 +198,13 @@ const FullBoard = ({
             className={cn(
               "chess-piece absolute inline-flex items-center justify-center pointer-events-none top-0 left-0",
               piece.color === "w" ? "white" : "black",
-              focused ? "opacity-100" : "opacity-[0.28]",
             )}
             style={{
               width: "12.5%",
               height: "12.5%",
               transform: `translate(${col * 100}%, ${row * 100}%)`,
-              transition: reduceMotion
-                ? "none"
-                : "transform 420ms cubic-bezier(0.645, 0.045, 0.355, 1), opacity 280ms ease",
+              transition:
+                reducedMotion || !animate ? "none" : PIECE_TRANSITION,
             }}
           >
             <Icon className="block w-[72%] h-[72%]" aria-hidden />
@@ -258,48 +213,79 @@ const FullBoard = ({
       })}
     </div>
   );
+};
 
-  if (!href) return board;
+const InteractiveBoardPanel = ({
+  frames,
+  reducedMotion,
+  controlLabel,
+}: {
+  frames: BoardFrame[];
+  reducedMotion: boolean;
+  controlLabel: string;
+}) => {
+  const { step, playing, handleTogglePlay, skipTransition } = useBoardLoop(
+    frames.length,
+    reducedMotion,
+  );
+  const frame = frames[step] ?? frames[0];
 
   return (
-    <a
-      href={href}
-      className="block rounded-none outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-      aria-label={`${label}. Open this position in chss.chat.`}
-      title="Open this position in chss.chat"
-    >
-      {board}
-    </a>
+    <div className="min-w-0">
+      <FullBoard
+        fen={frame.fen}
+        label={frame.label}
+        reducedMotion={reducedMotion}
+        animate={!skipTransition}
+      />
+      <div className="mt-2 flex items-start gap-2">
+        <button
+          type="button"
+          onClick={handleTogglePlay}
+          aria-label={
+            playing
+              ? `Pause ${controlLabel} animation`
+              : `Play ${controlLabel} animation`
+          }
+          aria-pressed={playing}
+          className="inline-flex size-7 shrink-0 items-center justify-center border border-border bg-background text-foreground hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {playing ? (
+            <Pause className="size-3.5" aria-hidden />
+          ) : (
+            <Play className="size-3.5" aria-hidden />
+          )}
+        </button>
+        <p
+          className="min-h-8 flex-1 pt-0.5 text-xs leading-snug text-muted-foreground"
+          aria-live="polite"
+        >
+          {frame.label}
+        </p>
+      </div>
+    </div>
   );
 };
 
-const InferNote = ({ children }: { children: ReactNode }) => (
-  <p className="text-sm text-foreground/80 mt-2">{children}</p>
-);
-
-const DemoCard = ({
+const StateComparison = ({
   title,
+  leftPanel,
+  rightPanel,
   children,
-  board,
 }: {
   title: string;
+  leftPanel: ReactNode;
+  rightPanel: ReactNode;
   children: ReactNode;
-  board: ReactNode;
 }) => (
   <li className="list-none border-b border-border/60 py-5 first:pt-0 last:border-0 last:pb-0">
-    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-      <div className="sm:w-[14rem] flex flex-col items-center sm:items-start gap-1.5">
-        {board}
-        <p className="text-[10px] text-muted-foreground">
-          Tap board to play this position
-        </p>
-      </div>
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <p className="font-medium text-foreground leading-none">{title}</p>
-        <div className="text-muted-foreground text-[0.98rem] leading-relaxed">
-          {children}
-        </div>
-      </div>
+    <p className="font-medium text-foreground">{title}</p>
+    <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-5">
+      {leftPanel}
+      {rightPanel}
+    </div>
+    <div className="mt-3 text-muted-foreground text-[0.98rem] leading-relaxed">
+      {children}
     </div>
   </li>
 );
@@ -319,137 +305,137 @@ const CompactStateNote = ({
   </li>
 );
 
-const CastlingDemo = ({ reduced }: { reduced: boolean }) => {
-  const frames = DEMO.castle.frames;
-  const step = useLoopStep(frames.length, 1100, reduced);
-  const frame = frames[step];
+const CastlingComparison = ({
+  reducedMotion,
+}: {
+  reducedMotion: boolean;
+}) => {
+  const leftFrames: BoardFrame[] = [
+    {
+      fen: `${CASTLING_KING_AWAY} b kq - 1 7`,
+      label: "White king steps to g1",
+    },
+    {
+      fen: `${CASTLING_PLACEMENT} w kq - 0 7`,
+      label:
+        "The king moved earlier; back on e1, but castling is lost",
+    },
+  ];
+  const rightFrames: BoardFrame[] = [
+    {
+      fen: `${CASTLING_PLACEMENT} w KQkq - 0 7`,
+      label: "King and rook still on their home squares",
+    },
+    {
+      fen: `${CASTLING_CASTLED} b kq - 1 7`,
+      label: "White castles kingside",
+    },
+  ];
 
   return (
-    <DemoCard
+    <StateComparison
       title="Castling rights"
-      board={
-        <div className="space-y-2">
-          <FullBoard
-            fen={frame.fen}
-            focusSquares={[...frame.focus]}
-            highlights={[...frame.highlights]}
-            reduceMotion={reduced}
-            label="Castling rights before White castles kingside"
-            href={playUrlForFen(DEMO.castle.frames[0].fen)}
-          />
-          <p className="font-mono text-xs text-center tabular-nums">
-            <span className="text-muted-foreground">rights </span>
-            <span
-              className={cn(
-                frame.rights === "kq"
-                  ? "text-amber-700 dark:text-amber-400"
-                  : "text-foreground",
-              )}
-            >
-              {frame.rights}
-            </span>
-          </p>
-        </div>
+      leftPanel={
+        <InteractiveBoardPanel
+          frames={leftFrames}
+          reducedMotion={reducedMotion}
+          controlLabel="castling history"
+        />
+      }
+      rightPanel={
+        <InteractiveBoardPanel
+          frames={rightFrames}
+          reducedMotion={reducedMotion}
+          controlLabel="castling move"
+        />
       }
     >
-      <p>
-        Castling is a special king move: the king slides two squares toward a
-        rook, and that rook jumps to the square the king crossed. You may only
-        do it if neither the king nor that rook has moved earlier in the game,
-        the squares between them are empty, and the king is not in check and
-        does not pass through or land on a checked square.
-      </p>
-      <p className="mt-2">
-        That history is invisible on the board. A king and rook can sit on their
-        home squares after wandering away and back, yet castling is gone forever.
-        So the rights (KQkq in FEN) are real game state, not decoration: without
-        them a link can show a legal-looking board that still forbids the reply
-        the opponent intended.
-      </p>
-      <InferNote>
-        Recoverable from a full move path from the start (track whether king and
-        rook have moved). Not recoverable from a mid-game snapshot of pieces
-        alone.
-      </InferNote>
-    </DemoCard>
+      Both sides begin with the same arrangement. The left board replays the
+      hidden history that removed White&apos;s right to castle; the right board
+      shows the move that remains legal when that history never happened.
+    </StateComparison>
   );
 };
 
-const EnPassantDemo = ({ reduced }: { reduced: boolean }) => {
-  const frames = DEMO.ep.frames;
-  const step = useLoopStep(frames.length, 1000, reduced);
-  const frame = frames[step];
+const EnPassantComparison = ({
+  reducedMotion,
+}: {
+  reducedMotion: boolean;
+}) => {
+  const leftFrames: BoardFrame[] = [
+    {
+      fen: `${BEFORE_EN_PASSANT_SINGLE} b KQ - 0 8`,
+      label: "Black pawn on e6",
+    },
+    {
+      fen: `${EN_PASSANT_PLACEMENT} w KQ - 0 8`,
+      label: "Black plays e6–e5; no en passant capture",
+    },
+  ];
+  const rightFrames: BoardFrame[] = [
+    {
+      fen: `${BEFORE_EN_PASSANT_DOUBLE} b KQ - 0 7`,
+      label: "Black pawn on e7",
+    },
+    {
+      fen: `${EN_PASSANT_PLACEMENT} w KQ e6 0 8`,
+      label: "Black plays e7–e5; en passant target on e6",
+    },
+    {
+      fen: `${AFTER_EN_PASSANT_CAPTURE} b KQ - 0 8`,
+      label: "White captures d5×e6 on the empty square",
+    },
+  ];
 
   return (
-    <DemoCard
-      title="En passant availability"
-      board={
-        <div className="space-y-2">
-          <FullBoard
-            fen={frame.fen}
-            focusSquares={[...frame.focus]}
-            highlights={[...frame.highlights]}
-            epSquare={frame.ep}
-            reduceMotion={reduced}
-            label="En passant available after a double pawn push"
-            href={playUrlForFen(
-              "rnbq1rk1/ppp3bp/3p1np1/3Ppp2/2P2B1P/4PN2/PP3PP1/RN1QKB1R w KQ e6 0 8",
-            )}
-          />
-          <p className="font-mono text-xs text-center tabular-nums">
-            <span
-              className={cn(
-                frame.ep
-                  ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-foreground",
-              )}
-            >
-              {frame.tag}
-            </span>
-          </p>
-        </div>
+    <StateComparison
+      title="En passant"
+      leftPanel={
+        <InteractiveBoardPanel
+          frames={leftFrames}
+          reducedMotion={reducedMotion}
+          controlLabel="one-square pawn advance"
+        />
+      }
+      rightPanel={
+        <InteractiveBoardPanel
+          frames={rightFrames}
+          reducedMotion={reducedMotion}
+          controlLabel="two-square pawn advance"
+        />
       }
     >
-      <p>
-        When a pawn advances two squares and lands beside an enemy pawn, that
-        enemy may capture it &quot;in passing&quot; as if it had moved only one
-        square. The chance lasts for one reply only. After any other move, the
-        opportunity expires.
-      </p>
-      <p className="mt-2">
-        Two pawns side by side on the 4th/5th rank look the same whether the
-        double-step just happened or happened ten moves ago. Encoding must
-        record the ephemeral target square (or clear it) or the recipient loses
-        a capture that was legal in the real game.
-      </p>
-      <InferNote>
-        Recoverable from the previous ply of a move path. Not recoverable from a
-        static board without knowing that the last move was a double pawn push.
-      </InferNote>
-    </DemoCard>
+      Both sides end on the same pawn arrangement. The left pawn advanced one
+      square from e6; the right pawn jumped two squares from e7. Only the second
+      case leaves a one-move capture on e6.
+    </StateComparison>
   );
 };
 
 export const ExtraStateDemos = () => {
-  const reduced = usePrefersReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
 
   return (
     <ul className="mt-6 space-y-0 border-y border-border/60">
-      <CastlingDemo reduced={reduced} />
-      <EnPassantDemo reduced={reduced} />
+      <CastlingComparison reducedMotion={reducedMotion} />
+      <EnPassantComparison reducedMotion={reducedMotion} />
+
       <CompactStateNote title="Side to move">
-        Whose side it is to move. A path from the start recovers this from ply
-        parity. A snapshot must store it, or the recipient cannot tell whether
-        they are answering a move or making one.
+        Whose turn it is. The same arrangement can belong to either player, so a
+        snapshot has to say who moves next.
       </CompactStateNote>
       <CompactStateNote title="Halfmove clock">
-        Counts plies since the last pawn move or capture (50-move claims,
-        automatic 75-move limits). A path can reconstruct it; a FEN-equivalent
-        snapshot must store it. Casual share previews can usually drop it.
+        Counts each player&apos;s turn since the last pawn move or capture. A
+        player can claim a draw when the count reaches 100 under the fifty-move
+        rule, and the game is automatically drawn at 150 under the
+        seventy-five-move rule unless the final move is checkmate. The pieces
+        alone do not reveal this count.
       </CompactStateNote>
       <CompactStateNote title="Fullmove number">
-        Bookkeeping for scoresheets: starts at 1 and increments after Black
-        moves. It does not change legality, so playable encodings can omit it.
+        Numbers the turns in a written game. It starts at 1 and increases after
+        each Black move, matching the move numbers used in scoresheets and chess
+        notation. The rules do not use this number to decide whether a move is
+        legal.
       </CompactStateNote>
     </ul>
   );

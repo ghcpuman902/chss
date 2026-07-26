@@ -99,11 +99,11 @@ describe("research URL decode via parseCode (legacy fixtures)", () => {
       uci: "e2e4e7e5g1f3b8c6f1c4g8f6",
     },
     {
-      code: "o-EADv___vABBCNWMkEREREZmZmZnKveus-oA",
+      code: "o-EADv___vABBCNWMkEREREZmZmZnKveus-AAAQA",
       core: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -",
     },
     {
-      code: "n-QjVjJBERAREAAAAAAAAQAAAAkAAAAAAAmZkJmcq966z6gA",
+      code: "n-QjVjJBERAREAAAAAAAAQAAAAkAAAAAAAmZkJmcq966z4AABA",
       core: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq -",
     },
     {
@@ -155,10 +155,10 @@ describe("research codec round-trips", () => {
       expect(parseResearchCode(packed)?.uci).toBe(uci);
 
       const occ = `o-${b64urlBytes(packOccupancy(chess).toBytes())}`;
-      expect(fenCore(parseResearchCode(occ)!.fen)).toBe(core);
+      expect(parseResearchCode(occ)!.fen).toBe(fen);
 
       const naive = `n-${b64urlBytes(packNaive(chess).toBytes())}`;
-      expect(fenCore(parseResearchCode(naive)!.fen)).toBe(core);
+      expect(parseResearchCode(naive)!.fen).toBe(fen);
 
       expect(parseResearchCode(encodeGzipUci(uci))?.uci).toBe(uci);
       expect(fenCore(parseResearchCode(encodeGzipFen(fen))!.fen)).toBe(core);

@@ -11,6 +11,11 @@ export const LOOKUP_K = 1024;
 export const LOOKUP_MISS = 0;
 export const LOOKUP_HIT = 1;
 
+/** FEN-complete meta: side + castling + ep + halfmove + fullmove. */
+export const HALFMOVE_BITS = 8;
+export const FULLMOVE_BITS = 10;
+export const META_BITS = 1 + 4 + 4 + HALFMOVE_BITS + FULLMOVE_BITS; // 27
+
 const PIECE_NIBBLE: Record<string, number> = {
   p: 1,
   n: 2,
@@ -145,6 +150,17 @@ const writeMeta = (w: BitWriter, chess: Chess) => {
   w.write(chess.turn() === "w" ? 1 : 0, 1);
   w.write(castlingNibble(chess), 4);
   w.write(epNibble(chess), 4);
+  const parts = chess.fen().split(" ");
+  const halfmove = Math.min(
+    Math.max(0, Number.parseInt(parts[4] ?? "0", 10) || 0),
+    (1 << HALFMOVE_BITS) - 1,
+  );
+  const fullmove = Math.min(
+    Math.max(0, Number.parseInt(parts[5] ?? "1", 10) || 1),
+    (1 << FULLMOVE_BITS) - 1,
+  );
+  w.write(halfmove, HALFMOVE_BITS);
+  w.write(fullmove, FULLMOVE_BITS);
 };
 
 export const packOccupancy = (chess: Chess): BitWriter => {

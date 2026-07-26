@@ -5,14 +5,17 @@ Product scoreboard: method × mean bits × mean payload chars × mean URL length
 Methods (research prefixes — only f-/u- match production today):
   native_fen      f- + Base64URL(full FEN)          — current FEN share path
   native_uci      u- + raw ASCII UCI                — current move-path share
-  trim_fen        t- + Base64URL(trimmed FEN)
+  trim_fen        t- + Base64URL(trimmed FEN; playable-only variant)
   packed_uci      p- + Base64URL(packed path bits)
-  occupancy       o- + Base64URL(occupancy bits)
-  naive_4bit      n- + Base64URL(fixed 265-bit grid)
+  occupancy       o- + Base64URL(occupancy + FEN-complete meta)
+  naive_4bit      n- + Base64URL(fixed 283-bit grid: 256 + 27 meta)
   gzip_uci        g- + Base64URL(gzip(raw UCI))
   gzip_fen        z- + Base64URL(gzip(full FEN))
   lookup_k1024    d- + Base64URL(lookup payload with hit/miss discriminator)
   hybrid_min      h- + shortest of packed_uci / occupancy / lookup
+
+Main comparison assumes complete FEN state (placement, side, castling, ep,
+halfmove, fullmove). trim_fen is a labelled playable-only variant.
 
 Lookup payload (unambiguous):
   bit 0 = 0 → miss: remaining bits are a full packed UCI path
@@ -74,7 +77,11 @@ METHOD_ORDER = (
 METHOD_META = {
     "native_fen": {"family": "raw", "prefix": "f-", "label": "Native FEN (Base64URL)"},
     "native_uci": {"family": "raw", "prefix": "u-", "label": "Native UCI (ASCII)"},
-    "trim_fen": {"family": "raw", "prefix": "t-", "label": "Trimmed FEN (Base64URL)"},
+    "trim_fen": {
+        "family": "raw",
+        "prefix": "t-",
+        "label": "Trimmed FEN (playable-only variant)",
+    },
     "packed_uci": {"family": "packed", "prefix": "p-", "label": "Packed UCI path"},
     "occupancy": {"family": "packed", "prefix": "o-", "label": "Occupancy + pieces"},
     "naive_4bit": {"family": "packed", "prefix": "n-", "label": "Naïve 4-bit grid"},
@@ -240,15 +247,51 @@ def castling_nibble(board: chess.Board) -> int:
 
 
 def ep_nibble(board: chess.Board) -> int:
-    if board.ep_square is None:
+    """Encode the FEN en-passant field (not the raw ep_square, which may be set when FEN shows '-')."""
+    ep = board.fen().split(" ")[3]
+    if not ep or ep == "-":
         return 0
-    return chess.square_file(board.ep_square) + 1
+    return ord(ep[0]) - ord("a") + 1
+
+
+# FEN-complete meta: side + castling + ep + halfmove + fullmove (matches full FEN).
+HALFMOVE_BITS = 8   # 0..255
+FULLMOVE_BITS = 10  # 0..1023
+META_BITS = 1 + 4 + 4 + HALFMOVE_BITS + FULLMOVE_BITS  # 27
 
 
 def write_meta(w: BitWriter, board: chess.Board) -> None:
     w.write(1 if board.turn == chess.WHITE else 0, 1)
     w.write(castling_nibble(board), 4)
     w.write(ep_nibble(board), 4)
+    w.write(min(board.halfmove_clock, (1 << HALFMOVE_BITS) - 1), HALFMOVE_BITS)
+    w.write(min(board.fullmove_number, (1 << FULLMOVE_BITS) - 1), FULLMOVE_BITS)
+
+
+def read_meta(r: BitReader, board: chess.Board) -> None:
+    turn = chess.WHITE if r.read(1) == 1 else chess.BLACK
+    castling = r.read(4)
+    ep = r.read(4)
+    halfmove = r.read(HALFMOVE_BITS)
+    fullmove = r.read(FULLMOVE_BITS)
+    board.turn = turn
+    board.castling_rights = 0
+    if castling & 1:
+        board.castling_rights |= chess.BB_H1
+    if castling & 2:
+        board.castling_rights |= chess.BB_A1
+    if castling & 4:
+        board.castling_rights |= chess.BB_H8
+    if castling & 8:
+        board.castling_rights |= chess.BB_A8
+    if ep == 0:
+        board.ep_square = None
+    else:
+        file = ep - 1
+        rank = 5 if turn == chess.WHITE else 2
+        board.ep_square = chess.square(file, rank)
+    board.halfmove_clock = halfmove
+    board.fullmove_number = max(1, fullmove)
 
 
 PIECE_NIBBLE = {
@@ -429,6 +472,11 @@ def fen_core(board: chess.Board) -> str:
     return " ".join(board.fen().split(" ")[:4])
 
 
+def fen_full(board: chess.Board) -> str:
+    """Complete FEN (placement + side + castling + ep + halfmove + fullmove)."""
+    return board.fen()
+
+
 def board_from_moves(moves: list[chess.Move]) -> chess.Board:
     board = chess.Board()
     for m in moves:
@@ -437,7 +485,7 @@ def board_from_moves(moves: list[chess.Move]) -> chess.Board:
 
 
 def decode_occupancy(r: BitReader) -> str | None:
-    if r.remaining < 64 + 9:
+    if r.remaining < 64 + META_BITS:
         return None
     low = r.read(32)
     high = r.read(32)
@@ -446,7 +494,7 @@ def decode_occupancy(r: BitReader) -> str | None:
         bit = (low >> sq) & 1 if sq < 32 else (high >> (sq - 32)) & 1
         if bit:
             occ_count += 1
-    if r.remaining < occ_count * 4 + 9:
+    if r.remaining < occ_count * 4 + META_BITS:
         return None
     board = chess.Board(None)
     for sq in range(64):
@@ -458,33 +506,15 @@ def decode_occupancy(r: BitReader) -> str | None:
         if piece is None:
             return None
         board.set_piece_at(sq, chess.Piece(piece[0], piece[1]))
-    turn = chess.WHITE if r.read(1) == 1 else chess.BLACK
-    castling = r.read(4)
-    ep = r.read(4)
-    board.turn = turn
-    board.castling_rights = 0
-    if castling & 1:
-        board.castling_rights |= chess.BB_H1
-    if castling & 2:
-        board.castling_rights |= chess.BB_A1
-    if castling & 4:
-        board.castling_rights |= chess.BB_H8
-    if castling & 8:
-        board.castling_rights |= chess.BB_A8
-    if ep == 0:
-        board.ep_square = None
-    else:
-        file = ep - 1
-        rank = 5 if turn == chess.WHITE else 2
-        board.ep_square = chess.square(file, rank)
     try:
-        return fen_core(board)
+        read_meta(r, board)
+        return fen_full(board)
     except Exception:
         return None
 
 
 def decode_naive(r: BitReader) -> str | None:
-    if r.remaining < 256 + 9:
+    if r.remaining < 256 + META_BITS:
         return None
     board = chess.Board(None)
     for sq in range(64):
@@ -495,27 +525,9 @@ def decode_naive(r: BitReader) -> str | None:
         if piece is None:
             return None
         board.set_piece_at(sq, chess.Piece(piece[0], piece[1]))
-    turn = chess.WHITE if r.read(1) == 1 else chess.BLACK
-    castling = r.read(4)
-    ep = r.read(4)
-    board.turn = turn
-    board.castling_rights = 0
-    if castling & 1:
-        board.castling_rights |= chess.BB_H1
-    if castling & 2:
-        board.castling_rights |= chess.BB_A1
-    if castling & 4:
-        board.castling_rights |= chess.BB_H8
-    if castling & 8:
-        board.castling_rights |= chess.BB_A8
-    if ep == 0:
-        board.ep_square = None
-    else:
-        file = ep - 1
-        rank = 5 if turn == chess.WHITE else 2
-        board.ep_square = chess.square(file, rank)
     try:
-        return fen_core(board)
+        read_meta(r, board)
+        return fen_full(board)
     except Exception:
         return None
 
@@ -613,11 +625,12 @@ def roundtrip_encoded(
 ) -> str | None:
     """Return an error string if any codec fails to round-trip; else None."""
     expected_core = fen_core(board)
+    expected_full = fen_full(board)
     expected_uci = moves_to_uci_ascii(path_moves)
 
     # native FEN
     fen = base64.urlsafe_b64decode(encs["native_fen"].code[2:] + "==")
-    if fen_core(chess.Board(fen.decode())) != expected_core:
+    if fen_full(chess.Board(fen.decode())) != expected_full:
         return "native_fen"
 
     # native UCI
@@ -625,7 +638,7 @@ def roundtrip_encoded(
     if err or moves_to_uci_ascii(got) != expected_uci:
         return "native_uci"
 
-    # trim FEN
+    # trim FEN — playable-only variant (core fields only; not FEN-complete)
     trim = base64.urlsafe_b64decode(encs["trim_fen"].code[2:] + "==").decode()
     if " ".join(trim.split(" ")[:4]) != expected_core:
         return "trim_fen"
@@ -636,12 +649,12 @@ def roundtrip_encoded(
     if got is None or moves_to_uci_ascii(got) != expected_uci:
         return "packed_uci"
 
-    # occupancy / naive — state guarantee (FEN core)
+    # occupancy / naive — FEN-complete state
     r = BitReader.from_bytes(base64.urlsafe_b64decode(encs["occupancy"].code[2:] + "=="))
-    if decode_occupancy(r) != expected_core:
+    if decode_occupancy(r) != expected_full:
         return "occupancy"
     r = BitReader.from_bytes(base64.urlsafe_b64decode(encs["naive_4bit"].code[2:] + "=="))
-    if decode_naive(r) != expected_core:
+    if decode_naive(r) != expected_full:
         return "naive_4bit"
 
     # gzip
@@ -649,7 +662,7 @@ def roundtrip_encoded(
     if gzip.decompress(gz).decode() != expected_uci:
         return "gzip_uci"
     gz = base64.urlsafe_b64decode(encs["gzip_fen"].code[2:] + "==")
-    if fen_core(chess.Board(gzip.decompress(gz).decode())) != expected_core:
+    if fen_full(chess.Board(gzip.decompress(gz).decode())) != expected_full:
         return "gzip_fen"
 
     # lookup (hit or miss — discriminator must make both unambiguous)
@@ -666,7 +679,7 @@ def roundtrip_encoded(
         if got is None or moves_to_uci_ascii(got) != expected_uci:
             return "hybrid_min:packed"
     elif mode == 1:
-        if decode_occupancy(r) != expected_core:
+        if decode_occupancy(r) != expected_full:
             return "hybrid_min:occupancy"
     elif mode == 2:
         got = decode_lookup(r, books)
@@ -1136,9 +1149,9 @@ def run_validate_suite(books: dict[int, dict[str, int]]) -> None:
         # Re-check via roundtrip helper pieces
         pass
     fail = None
-    expected = fen_core(promo_board)
+    expected = fen_full(promo_board)
     fen = base64.urlsafe_b64decode(encs["native_fen"].code[2:] + "==").decode()
-    if fen_core(chess.Board(fen)) != expected:
+    if fen_full(chess.Board(fen)) != expected:
         fail = "native_fen"
     r = BitReader.from_bytes(base64.urlsafe_b64decode(encs["occupancy"].code[2:] + "=="))
     if decode_occupancy(r) != expected:
@@ -1154,7 +1167,7 @@ def run_validate_suite(books: dict[int, dict[str, int]]) -> None:
     under.push(chess.Move.from_uci("a7a8n"))
     encs = encode_all(under, [], books)
     r = BitReader.from_bytes(base64.urlsafe_b64decode(encs["occupancy"].code[2:] + "=="))
-    if decode_occupancy(r) != fen_core(under):
+    if decode_occupancy(r) != fen_full(under):
         raise SystemExit("validate suite failed on underpromotion occupancy")
 
     print("[validate-suite] ok", flush=True)

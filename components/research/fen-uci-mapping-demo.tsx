@@ -173,7 +173,7 @@ const MiniBoard = ({
     <div
       className="relative border border-border overflow-hidden rounded-none w-full aspect-square"
       role="img"
-      aria-label="Opera Game board position for the current FEN and UCI"
+      aria-label="Opera Game board position for the current ply"
     >
       <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
         {RANKS.map((rank) =>
@@ -226,12 +226,14 @@ const MiniBoard = ({
 
 const EncodingRow = ({
   label,
+  notation,
   value,
   accent,
   emptyLabel,
   scrollable,
 }: {
   label: string;
+  notation?: { abbr: string; fullName: string };
   value: string;
   accent?: string;
   emptyLabel: string;
@@ -250,7 +252,15 @@ const EncodingRow = ({
   return (
     <div className="space-y-1 min-w-0">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-xs text-foreground">{label}</span>
+        <span className="text-xs text-foreground">
+          {label}
+          {notation ? (
+            <span className="text-muted-foreground font-normal">
+              {" "}
+              ({notation.abbr}, {notation.fullName})
+            </span>
+          ) : null}
+        </span>
         <span
           className="font-mono text-[11px] tabular-nums text-muted-foreground shrink-0"
           aria-label={
@@ -322,10 +332,12 @@ export const FenUciMappingDemo = () => {
   return (
     <div
       className="space-y-3"
-      aria-label="Opera Game mapped to FEN state and UCI path length"
+      aria-label="Opera Game mapped to board text and move list length"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-sm font-medium text-foreground">Board → FEN / UCI</p>
+        <p className="text-sm font-medium text-foreground">
+          Board → text snapshot / move list
+        </p>
         <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
           <span>{plyLabel}</span>
           <span className="mx-1.5 text-border" aria-hidden="true">
@@ -358,9 +370,21 @@ export const FenUciMappingDemo = () => {
         </div>
 
         <div className="min-w-0 space-y-2">
-          <EncodingRow label="FEN" value={frame.fen} emptyLabel="empty" />
           <EncodingRow
-            label="UCI path"
+            label="Board text"
+            notation={{
+              abbr: "FEN",
+              fullName: "Forsyth–Edwards Notation",
+            }}
+            value={frame.fen}
+            emptyLabel="empty"
+          />
+          <EncodingRow
+            label="Move list"
+            notation={{
+              abbr: "UCI",
+              fullName: "Universal Chess Interface",
+            }}
             value={frame.uci}
             accent={accent || undefined}
             emptyLabel="(start · empty path)"

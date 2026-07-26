@@ -14,10 +14,13 @@ import { Chess, type Square } from "chess.js";
 import { gunzipSync } from "fflate";
 import { base64urlDecode, base64urlDecodeBytes } from "@/lib/base64url";
 import {
+  FULLMOVE_BITS,
+  HALFMOVE_BITS,
   LOOKUP_DEPTHS,
   LOOKUP_HIT,
   LOOKUP_K,
   LOOKUP_MISS,
+  META_BITS,
   depthIdBits,
   indexBits,
 } from "@/lib/research-url-codecs";
@@ -108,11 +111,21 @@ const epFromNibble = (n: number, turn: "w" | "b"): string => {
   return `${String.fromCharCode(97 + file)}${rank}`;
 };
 
-const readMeta = (r: BitReader): { turn: "w" | "b"; castling: string; ep: string } => {
+const readMeta = (
+  r: BitReader,
+): {
+  turn: "w" | "b";
+  castling: string;
+  ep: string;
+  halfmove: number;
+  fullmove: number;
+} => {
   const turn = r.read(1) === 1 ? "w" : "b";
   const castling = castlingFromNibble(r.read(4));
   const ep = epFromNibble(r.read(4), turn);
-  return { turn, castling, ep };
+  const halfmove = r.read(HALFMOVE_BITS);
+  const fullmove = Math.max(1, r.read(FULLMOVE_BITS));
+  return { turn, castling, ep, halfmove, fullmove };
 };
 
 const boardToFen = (
@@ -120,6 +133,8 @@ const boardToFen = (
   turn: "w" | "b",
   castling: string,
   ep: string,
+  halfmove: number,
+  fullmove: number,
 ): string | null => {
   const ranks: string[] = [];
   for (let rank = 7; rank >= 0; rank -= 1) {
@@ -141,7 +156,7 @@ const boardToFen = (
     if (empty > 0) row += String(empty);
     ranks.push(row);
   }
-  const fen = `${ranks.join("/")} ${turn} ${castling} ${ep} 0 1`;
+  const fen = `${ranks.join("/")} ${turn} ${castling} ${ep} ${halfmove} ${fullmove}`;
   try {
     const chess = new Chess(fen);
     // Drop impossible ep targets so the FEN matches u-/f- for the same board.
@@ -254,7 +269,7 @@ const decodeLookupBits = (
 };
 
 const decodeOccupancyBits = (r: BitReader): ResearchDecoded | null => {
-  if (r.remaining < 64 + 9) return null;
+  if (r.remaining < 64 + META_BITS) return null;
   const low = r.read(32);
   const high = r.read(32);
   const squares: Array<{ type: string; color: "w" | "b" } | null> = Array(
@@ -266,7 +281,7 @@ const decodeOccupancyBits = (r: BitReader): ResearchDecoded | null => {
     if (!bit) continue;
     occCount += 1;
   }
-  if (r.remaining < occCount * 4 + 9) return null;
+  if (r.remaining < occCount * 4 + META_BITS) return null;
   for (let sq = 0; sq < 64; sq += 1) {
     const bit = sq < 32 ? (low >>> sq) & 1 : (high >>> (sq - 32)) & 1;
     if (!bit) continue;
@@ -276,13 +291,20 @@ const decodeOccupancyBits = (r: BitReader): ResearchDecoded | null => {
     squares[sq] = piece;
   }
   const meta = readMeta(r);
-  const fen = boardToFen(squares, meta.turn, meta.castling, meta.ep);
+  const fen = boardToFen(
+    squares,
+    meta.turn,
+    meta.castling,
+    meta.ep,
+    meta.halfmove,
+    meta.fullmove,
+  );
   if (!fen) return null;
   return { fen, sideToMove: meta.turn };
 };
 
 const decodeNaiveBits = (r: BitReader): ResearchDecoded | null => {
-  if (r.remaining < 256 + 9) return null;
+  if (r.remaining < 256 + META_BITS) return null;
   const squares: Array<{ type: string; color: "w" | "b" } | null> = Array(
     64,
   ).fill(null);
@@ -294,7 +316,14 @@ const decodeNaiveBits = (r: BitReader): ResearchDecoded | null => {
     squares[sq] = piece;
   }
   const meta = readMeta(r);
-  const fen = boardToFen(squares, meta.turn, meta.castling, meta.ep);
+  const fen = boardToFen(
+    squares,
+    meta.turn,
+    meta.castling,
+    meta.ep,
+    meta.halfmove,
+    meta.fullmove,
+  );
   if (!fen) return null;
   return { fen, sideToMove: meta.turn };
 };
