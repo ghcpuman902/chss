@@ -155,12 +155,12 @@ export const LinkUnfurl = () => {
 
   return (
     <div
-      className="w-full max-w-md mx-auto"
+      className="mx-auto w-full max-w-[17.5rem] sm:max-w-sm lg:max-w-md"
       aria-label="Deep Blue messages Garry Kasparov a chess link after Be4"
     >
-      <div className="overflow-hidden rounded-2xl border border-border bg-muted shadow-sm">
+      <div className="flex h-[28rem] flex-col overflow-hidden rounded-4xl border border-border bg-muted sm:h-[32rem] lg:h-[38rem]">
         {/* Mid-chat header (not compose / New Message) */}
-        <header className="flex items-center gap-1.5 border-b border-border/70 bg-card/90 px-2 py-1.5 backdrop-blur-sm">
+        <header className="flex shrink-0 items-center gap-1.5 border-b border-border/70 bg-card/90 px-2 py-1.5 backdrop-blur-sm">
           <span
             className="flex items-center gap-0.5 text-primary"
             aria-hidden="true"
@@ -198,54 +198,58 @@ export const LinkUnfurl = () => {
           </span>
         </header>
 
-        {/* Bottom-pinned thread: prior plies fill the top so empty history isn't obvious */}
-        <div className="flex h-[32rem] flex-col justify-end gap-1.5 overflow-hidden px-3 py-2.5">
-          {PRIOR_MOVES.map((move) => (
-            <div
-              key={move.text}
-              className={cn(
-                "flex",
-                move.align === "end" ? "justify-end" : "justify-start",
-              )}
-            >
-              <TextBubble align={move.align}>{move.text}</TextBubble>
-            </div>
-          ))}
-
-          <Enter>
-            <div className={cn("flex flex-col gap-1.5 self-start", CARD_WIDTH)}>
-              <LinkPreviewCard
-                ogSrc={KASPAROV_OG}
-                alt={`Position after Kasparov played axb5 (chss.chat${KASPAROV_PATH}), White to move`}
-                title="White's turn"
-              />
-              <TextBubble align="start">{KASPAROV_TEXT}</TextBubble>
-            </div>
-          </Enter>
-
-          {showTyping ? (
-            <Enter className="flex justify-end">
-              <div className="rounded-[16px] rounded-br-[4px] bg-primary px-3.5 py-2.5">
-                <TypingDots />
+        {/* Absolute thread: message steps cannot change outer height */}
+        <div className="relative min-h-0 flex-1 overflow-hidden">
+          <div className="absolute inset-0 flex flex-col justify-end gap-1.5 overflow-hidden px-3 py-2.5">
+            {PRIOR_MOVES.map((move) => (
+              <div
+                key={move.text}
+                className={cn(
+                  "flex",
+                  move.align === "end" ? "justify-end" : "justify-start",
+                )}
+              >
+                <TextBubble align={move.align}>{move.text}</TextBubble>
               </div>
-            </Enter>
-          ) : null}
+            ))}
 
-          {showSent ? (
-            <Enter className="flex flex-col items-end gap-1.5">
-              <div className={CARD_WIDTH}>
+            <Enter>
+              <div
+                className={cn("flex flex-col gap-1.5 self-start", CARD_WIDTH)}
+              >
                 <LinkPreviewCard
-                  ogSrc={DEEP_BLUE_OG}
-                  alt={`Position after Deep Blue played Be4 (chss.chat${DEEP_BLUE_PATH}), Black to move`}
-                  title="Black's turn"
+                  ogSrc={KASPAROV_OG}
+                  alt={`Position after Kasparov played axb5 (chss.chat${KASPAROV_PATH}), White to move`}
+                  title="White's turn"
                 />
+                <TextBubble align="start">{KASPAROV_TEXT}</TextBubble>
               </div>
-              <TextBubble align="end">{DEEP_BLUE_TEXT}</TextBubble>
             </Enter>
-          ) : null}
+
+            {showTyping ? (
+              <Enter className="flex justify-end">
+                <div className="rounded-[16px] rounded-br-[4px] bg-primary px-3.5 py-2.5">
+                  <TypingDots />
+                </div>
+              </Enter>
+            ) : null}
+
+            {showSent ? (
+              <Enter className="flex flex-col items-end gap-1.5">
+                <div className={CARD_WIDTH}>
+                  <LinkPreviewCard
+                    ogSrc={DEEP_BLUE_OG}
+                    alt={`Position after Deep Blue played Be4 (chss.chat${DEEP_BLUE_PATH}), Black to move`}
+                    title="Black's turn"
+                  />
+                </div>
+                <TextBubble align="end">{DEEP_BLUE_TEXT}</TextBubble>
+              </Enter>
+            ) : null}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 border-t border-border/70 bg-card/80 px-3 py-2">
+        <div className="flex shrink-0 items-center gap-2 border-t border-border/70 bg-card/80 px-3 py-2">
           <span
             className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
             aria-hidden="true"

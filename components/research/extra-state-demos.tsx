@@ -278,7 +278,7 @@ const StateComparison = ({
   rightPanel: ReactNode;
   children: ReactNode;
 }) => (
-  <li className="list-none border-b border-border/60 py-5 first:pt-0 last:border-0 last:pb-0">
+  <li className="list-none  border-border/60 py-5 first:pt-0 last:border-0 last:pb-0">
     <p className="font-medium text-foreground">{title}</p>
     <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-5">
       {leftPanel}
@@ -297,7 +297,7 @@ const CompactStateNote = ({
   title: string;
   children: ReactNode;
 }) => (
-  <li className="list-none border-b border-border/60 py-3.5 last:border-0 last:pb-0">
+  <li className="list-none py-3.5 last:border-0 last:pb-0">
     <p className="font-medium text-foreground leading-none">{title}</p>
     <p className="mt-1.5 text-muted-foreground text-[0.95rem] leading-relaxed">
       {children}
@@ -350,9 +350,10 @@ const CastlingComparison = ({
         />
       }
     >
-      Both sides begin with the same arrangement. The left board replays the
-      hidden history that removed White&apos;s right to castle; the right board
-      shows the move that remains legal when that history never happened.
+      Both histories reach the same arrangement, with the king and rook on their
+      original squares. The difference is the invisible journey that came
+      before: one history moved the king and permanently removed castling rights;
+      the other never did.
     </StateComparison>
   );
 };
@@ -365,7 +366,7 @@ const EnPassantComparison = ({
   const leftFrames: BoardFrame[] = [
     {
       fen: `${BEFORE_EN_PASSANT_SINGLE} b KQ - 0 8`,
-      label: "Black pawn on e6",
+      label: "White pawn on d5; black pawn on e6",
     },
     {
       fen: `${EN_PASSANT_PLACEMENT} w KQ - 0 8`,
@@ -375,7 +376,7 @@ const EnPassantComparison = ({
   const rightFrames: BoardFrame[] = [
     {
       fen: `${BEFORE_EN_PASSANT_DOUBLE} b KQ - 0 7`,
-      label: "Black pawn on e7",
+      label: "White pawn on d5; black pawn on e7",
     },
     {
       fen: `${EN_PASSANT_PLACEMENT} w KQ e6 0 8`,
@@ -405,9 +406,9 @@ const EnPassantComparison = ({
         />
       }
     >
-      Both sides end on the same pawn arrangement. The left pawn advanced one
-      square from e6; the right pawn jumped two squares from e7. Only the second
-      case leaves a one-move capture on e6.
+      Both boards end with a white pawn on d5 and a black pawn on e5. On the
+      left, Black just played the normal one-square move e6–e5. On the right,
+      Black jumped from e7 to e5, so White may capture on e6 for this move only.
     </StateComparison>
   );
 };
@@ -416,7 +417,7 @@ export const ExtraStateDemos = () => {
   const reducedMotion = usePrefersReducedMotion();
 
   return (
-    <ul className="mt-6 space-y-0 border-y border-border/60">
+    <ul className="mt-6 space-y-0">
       <CastlingComparison reducedMotion={reducedMotion} />
       <EnPassantComparison reducedMotion={reducedMotion} />
 

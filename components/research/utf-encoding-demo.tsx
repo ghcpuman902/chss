@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { cn } from "@/lib/utils";
 
-type Encoding = "utf8" | "utf16";
+type Encoding = "utf8" | "utf16" | "ascii";
 
 type DecodeOk = {
   ok: true;
@@ -32,7 +32,18 @@ const PRESETS: Preset[] = [
   { label: "😀", char: "😀", note: "Emoji · 4 UTF-8 bytes / UTF-16 surrogate pair" },
 ];
 
-const widthOf = (encoding: Encoding) => (encoding === "utf8" ? 8 : 16);
+const widthOf = (encoding: Encoding) => {
+  if (encoding === "utf8") return 8;
+  if (encoding === "ascii") return 7;
+  return 16;
+};
+
+const isAsciiText = (text: string) => {
+  for (const ch of text) {
+    if ((ch.codePointAt(0) ?? 0) > 0x7f) return false;
+  }
+  return true;
+};
 
 const toBits = (value: number, width: number): string => {
   let out = "";
@@ -92,8 +103,23 @@ const encodeUtf16 = (text: string): number[] => {
   return units;
 };
 
-const encodeText = (text: string, encoding: Encoding): number[] =>
-  encoding === "utf8" ? encodeUtf8(text) : encodeUtf16(text);
+const encodeAscii = (text: string): number[] => {
+  const units: number[] = [];
+  for (const ch of text) {
+    const cp = ch.codePointAt(0) ?? 0;
+    if (cp > 0x7f) {
+      throw new Error("Not ASCII");
+    }
+    units.push(cp);
+  }
+  return units;
+};
+
+const encodeText = (text: string, encoding: Encoding): number[] => {
+  if (encoding === "utf8") return encodeUtf8(text);
+  if (encoding === "ascii") return encodeAscii(text);
+  return encodeUtf16(text);
+};
 
 const unitsToBitText = (units: number[], width: number) =>
   units.map((unit) => toBits(unit, width)).join("\n");
@@ -119,6 +145,24 @@ const decodeUtf8 = (bytes: number[]): DecodeResult => {
   } catch {
     return { ok: false, reason: "Invalid UTF-8" };
   }
+};
+
+const decodeAscii = (units: number[]): DecodeResult => {
+  if (units.length === 0) {
+    return { ok: false, reason: "No bits yet" };
+  }
+
+  for (const unit of units) {
+    if (unit > 0x7f) {
+      return { ok: false, reason: "Not ASCII (value > 127)" };
+    }
+  }
+
+  return {
+    ok: true,
+    text: String.fromCodePoint(...units),
+    codePoints: [...units],
+  };
 };
 
 const decodeUtf16 = (units: number[]): DecodeResult => {
@@ -162,14 +206,37 @@ const decodeUtf16 = (units: number[]): DecodeResult => {
   };
 };
 
-const decodeUnits = (units: number[], encoding: Encoding): DecodeResult =>
-  encoding === "utf8" ? decodeUtf8(units) : decodeUtf16(units);
+const decodeUnits = (units: number[], encoding: Encoding): DecodeResult => {
+  if (encoding === "utf8") return decodeUtf8(units);
+  if (encoding === "ascii") return decodeAscii(units);
+  return decodeUtf16(units);
+};
 
 const formatCodePoints = (points: number[]): string =>
   points.map((p) => `U+${p.toString(16).toUpperCase().padStart(4, "0")}`).join(" ");
 
 const unitHex = (value: number, width: number) =>
-  `0x${value.toString(16).toUpperCase().padStart(width === 8 ? 2 : 4, "0")}`;
+  `0x${value.toString(16).toUpperCase().padStart(width === 16 ? 4 : 2, "0")}`;
+
+const ENCODING_OPTIONS: {
+  value: Encoding;
+  label: string;
+  title: string;
+}[] = [
+  { value: "ascii", label: "ASCII", title: "Encode as 7-bit ASCII (U+007F max)" },
+  { value: "utf8", label: "UTF-8", title: "Encode as UTF-8 (8-bit bytes)" },
+  { value: "utf16", label: "UTF-16", title: "Encode as UTF-16 (16-bit code units)" },
+];
+
+const unitLabel = (encoding: Encoding, count: number) => {
+  if (encoding === "ascii") {
+    return count === 1 ? "ASCII character" : "ASCII characters";
+  }
+  if (encoding === "utf8") {
+    return count === 1 ? "UTF-8 byte" : "UTF-8 bytes";
+  }
+  return count === 1 ? "UTF-16 code unit" : "UTF-16 code units";
+};
 
 export const UtfEncodingDemo = () => {
   const charsId = useId();
@@ -189,7 +256,17 @@ export const UtfEncodingDemo = () => {
   const syncFromChars = (text: string, nextEncoding: Encoding = encoding) => {
     const nextWidth = widthOf(nextEncoding);
     setChars(text);
-    setBitText(unitsToBitText(encodeText(text, nextEncoding), nextWidth));
+
+    if (nextEncoding === "ascii" && text.length > 0 && !isAsciiText(text)) {
+      setBitText("");
+      return;
+    }
+
+    try {
+      setBitText(unitsToBitText(encodeText(text, nextEncoding), nextWidth));
+    } catch {
+      setBitText("");
+    }
   };
 
   const applyBits = (
@@ -239,6 +316,17 @@ export const UtfEncodingDemo = () => {
     syncFromChars(char);
   };
 
+  const asciiRejected =
+    encoding === "ascii" && chars.length > 0 && !isAsciiText(chars);
+
+  const statusMessage = asciiRejected
+    ? "Not ASCII (U+007F max)"
+    : decoded.ok
+      ? null
+      : bitCount > 0
+        ? decoded.reason
+        : null;
+
   return (
     <figure className="my-6 border border-border rounded-sm overflow-hidden">
       <div className="grid sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
@@ -250,13 +338,13 @@ export const UtfEncodingDemo = () => {
             >
               Displayed glyphs
             </label>
-            {decoded.ok ? (
+            {decoded.ok && !asciiRejected ? (
               <span className="font-mono text-xs text-muted-foreground truncate">
                 Code points · {formatCodePoints(decoded.codePoints)}
               </span>
-            ) : bitCount > 0 ? (
+            ) : statusMessage ? (
               <span className="text-xs text-amber-800 dark:text-amber-200 truncate">
-                {decoded.reason}
+                {statusMessage}
               </span>
             ) : null}
           </div>
@@ -314,25 +402,21 @@ export const UtfEncodingDemo = () => {
               role="group"
               aria-label="Bit group width"
             >
-              {(["utf8", "utf16"] as const).map((mode) => (
+              {ENCODING_OPTIONS.map((option) => (
                 <button
-                  key={mode}
+                  key={option.value}
                   type="button"
-                  onClick={() => handleEncodingChange(mode)}
-                  aria-pressed={encoding === mode}
-                  title={
-                    mode === "utf8"
-                      ? "Encode as UTF-8 (8-bit bytes)"
-                      : "Encode as UTF-16 (16-bit code units)"
-                  }
+                  onClick={() => handleEncodingChange(option.value)}
+                  aria-pressed={encoding === option.value}
+                  title={option.title}
                   className={cn(
                     "px-2.5 py-1 text-xs transition-colors duration-150 ease-out",
-                    encoding === mode
+                    encoding === option.value
                       ? "bg-foreground text-background"
                       : "bg-background text-muted-foreground hover:bg-muted/50",
                   )}
                 >
-                  {mode === "utf8" ? "UTF-8" : "UTF-16"}
+                  {option.label}
                 </button>
               ))}
             </div>
@@ -360,14 +444,7 @@ export const UtfEncodingDemo = () => {
               <span className="mx-1.5 text-border" aria-hidden="true">
                 ·
               </span>
-              {lineCount}{" "}
-              {encoding === "utf8"
-                ? lineCount === 1
-                  ? "UTF-8 byte"
-                  : "UTF-8 bytes"
-                : lineCount === 1
-                  ? "UTF-16 code unit"
-                  : "UTF-16 code units"}
+              {lineCount} {unitLabel(encoding, lineCount)}
             </span>
             {units.length > 0 ? (
               <span
@@ -381,7 +458,7 @@ export const UtfEncodingDemo = () => {
         </div>
       </div>
       <figcaption className="border-t border-border px-4 sm:px-5 py-3 text-sm text-muted-foreground leading-relaxed">
-        {decoded.ok && chars.length > 0 ? (
+        {decoded.ok && chars.length > 0 && !asciiRejected ? (
           <>
             Serialised URL characters for this input in a path context:{" "}
             <code className="text-xs text-foreground break-all">
@@ -392,8 +469,8 @@ export const UtfEncodingDemo = () => {
           </>
         ) : (
           <>
-            Pick a glyph to compare displayed characters, code points, UTF-8
-            bytes, UTF-16 units, and serialised URL characters.
+            Pick a glyph to compare displayed characters, code points, ASCII
+            (7-bit), UTF-8 bytes, UTF-16 units, and serialised URL characters.
           </>
         )}
       </figcaption>

@@ -371,8 +371,10 @@
           <div className="overflow-x-auto -mx-4 px-4">
             <table className="w-full min-w-[28rem] text-sm border-collapse">
               <caption className="caption-top text-left text-muted-foreground mb-3">
-                Mean across sampled checkpoint positions, not an average full
-                game. URL includes{" "}
+                Checkpoint means from a random Lichess hash sample—not
+                full-game averages (chss.chat is DB-less; a complete Lichess
+                month is too large; a smaller draw checked stability before
+                scaling N). URL includes{" "}
                 <code className="text-xs">{meta.url_origin}</code>. Overlay
                 reads mean ± σ [min–max]. Tall band = min–max; mid = ±σ;
                 coloured bar = mean.{" "}

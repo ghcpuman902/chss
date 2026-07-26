@@ -155,11 +155,11 @@ Sampled at plies 2 / 8 / 16 / 32 / 64 (checkpoint means, not full phase ranges).
 |---|---:|---:|---:|---:|---:|
 | Full FEN | 491 ±43 | 497 | 519 | 493 | 406 |
 | Trimmed FEN | 456 ±44 | 465 | 487 | 453 | 366 |
-| Naïve 4-bit | **265** | 265 | 265 | 265 | 265 |
+| Naïve 4-bit (playable meta only) | **265** | 265 | 265 | 265 | 265 |
 | Occupancy | **186 ±21** | 200 | 192 | 174 | **138** |
 | Packed UCI | 236 ±227 | **60** | 192 | 384 | 768 |
 
-\*Early Phase A also reported bucket means by ply band for exploration; the published URL scoreboard uses only the five checkpoints above.
+\*Early Phase A used a 9-bit playable-state meta block, so its fixed grid was 256 + 9 = 265 bits. The published URL scoreboard tests the FEN-complete version with an additional 8-bit halfmove clock and 10-bit fullmove number: 256 + 27 = 283 bits. Phase A also reported bucket means by ply band for exploration; the published URL scoreboard uses only the five checkpoints above.
 
 **Crossover:** packed UCI wins until ~ply 15–16; occupancy wins afterward. Hybrid encoder is the product direction.
 

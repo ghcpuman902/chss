@@ -339,35 +339,16 @@ export const FenUciMappingDemo = () => {
           Board → text snapshot / move list
         </p>
         <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
-          <span>{plyLabel}</span>
-          <span className="mx-1.5 text-border" aria-hidden="true">
-            ·
-          </span>
-          <span>{frame.pieceCount} pieces</span>
+          {frame.pieceCount} pieces
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[minmax(10rem,13rem)_minmax(0,1fr)] sm:items-start">
-        <div className="space-y-2">
-          <MiniBoard
-            fen={frame.fen}
-            lastMove={frame.lastMove}
-            reduceMotion={reduced}
-          />
-          <button
-            type="button"
-            onClick={handleTogglePlay}
-            aria-label={playing ? "Pause animation" : "Play animation"}
-            aria-pressed={playing}
-            className="inline-flex size-7 items-center justify-center border border-border bg-background text-foreground hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {playing ? (
-              <Pause className="size-3.5" aria-hidden />
-            ) : (
-              <Play className="size-3.5" aria-hidden />
-            )}
-          </button>
-        </div>
+        <MiniBoard
+          fen={frame.fen}
+          lastMove={frame.lastMove}
+          reduceMotion={reduced}
+        />
 
         <div className="min-w-0 space-y-2">
           <EncodingRow
@@ -383,7 +364,7 @@ export const FenUciMappingDemo = () => {
             label="Move list"
             notation={{
               abbr: "UCI",
-              fullName: "Universal Chess Interface",
+              fullName: "Universal Chess Interface protocol",
             }}
             value={frame.uci}
             accent={accent || undefined}
@@ -393,21 +374,39 @@ export const FenUciMappingDemo = () => {
         </div>
       </div>
 
-      <input
-        type="range"
-        min={0}
-        max={FINAL_PLY}
-        step={1}
-        value={step}
-        onChange={handleSliderChange}
-        aria-label="Scrub through Opera Game plies"
-        aria-valuetext={
-          frame.ply === 0
-            ? "Starting position"
-            : `Ply ${frame.ply} of ${FINAL_PLY}${frame.lastMove ? `, ${frame.lastMove}` : ""}`
-        }
-        className="fen-uci-scrubber w-full h-1.5 appearance-none cursor-pointer bg-muted accent-primary rounded-none"
-      />
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={handleTogglePlay}
+          aria-label={playing ? "Pause animation" : "Play animation"}
+          aria-pressed={playing}
+          className="inline-flex size-7 shrink-0 items-center justify-center border border-border bg-background text-foreground hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {playing ? (
+            <Pause className="size-3.5" aria-hidden />
+          ) : (
+            <Play className="size-3.5" aria-hidden />
+          )}
+        </button>
+        <input
+          type="range"
+          min={0}
+          max={FINAL_PLY}
+          step={1}
+          value={step}
+          onChange={handleSliderChange}
+          aria-label="Scrub through Opera Game plies"
+          aria-valuetext={
+            frame.ply === 0
+              ? "Starting position"
+              : `Ply ${frame.ply} of ${FINAL_PLY}${frame.lastMove ? `, ${frame.lastMove}` : ""}`
+          }
+          className="fen-uci-scrubber min-w-0 flex-1 h-2 appearance-none cursor-pointer bg-muted accent-primary rounded-none"
+        />
+        <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
+          {plyLabel}
+        </span>
+      </div>
     </div>
   );
 };

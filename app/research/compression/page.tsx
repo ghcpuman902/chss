@@ -236,7 +236,7 @@ const METHOD_DETAILS: MethodDetail[] = [
   {
     id: "method-naive-4bit",
     method: "naive_4bit",
-    how: "Every square gets a fixed 4-bit cell (empty or coloured piece), plus 27 bits of FEN-complete meta. Always 283 bits before Base64URL.",
+    how: "Every square gets a fixed 4-bit cell (empty or coloured piece), plus the same 27-bit FEN-complete meta used by the benchmark. The total is always 283 logical bits before Base64URL.",
     when: "A useful baseline for “store the grid literally.” Occupancy beats it because empty squares cost one bit in the mask instead of four in the grid.",
     examples: [
       {
@@ -1063,10 +1063,11 @@ export default function CompressionResearchPage() {
           </h2>
           <p>
             The most literal binary approach gives every square a four-bit cell
-            for empty or a coloured piece type, then adds bits for side to move,
-            castling, en passant, halfmove clock, and fullmove number. The
-            payload is always 283 bits before the URL alphabet. It never adapts
-            to how empty the board becomes.
+            for empty or a coloured piece type. That fixed grid costs 256 bits.
+            The tested codec adds the same 27-bit meta block used by occupancy:
+            side to move, castling, en passant, halfmove clock, and fullmove
+            number. Its logical payload is therefore always 283 bits before the
+            URL alphabet. It never adapts to how empty the board becomes.
           </p>
           <p>
             Most of the board is air, though, and that is where Occupancy +
@@ -1203,7 +1204,9 @@ export default function CompressionResearchPage() {
             value, and encode the ambiguity when it does not. Simply deleting a
             field produces a different state rather than a better compression
             of the same one. The first scoreboard therefore compares codecs that
-            still tell the whole truth, including occupancy with its full meta.
+            preserve the chosen target: a restorable FEN snapshot, including
+            legal-move state and both counters. Occupancy carries its full meta
+            block in that comparison.
           </p>
         </section>
 
@@ -1226,9 +1229,14 @@ export default function CompressionResearchPage() {
           <div className="overflow-x-auto -mx-4 px-4">
             <table className="w-full min-w-[28rem] text-sm border-collapse">
               <caption className="caption-top text-left text-muted-foreground mb-3">
-                Mean across sampled checkpoint positions. Full URL includes{" "}
-                <code className="text-xs">{meta.url_origin}</code>; these are
-                not averages over complete games.
+                Checkpoint means from a random Lichess hash sample (
+                {meta.games.toLocaleString()} games,{" "}
+                {meta.positions.toLocaleString()} observations at plies{" "}
+                {meta.ply_points.join(", ")}). Not full-game averages—chss.chat
+                is DB-less, and a complete Lichess month is too large to score;
+                a smaller draw reran to check stability before scaling N. Full
+                URL includes{" "}
+                <code className="text-xs">{meta.url_origin}</code>.
               </caption>
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
