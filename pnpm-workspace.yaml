@@ -1,0 +1,6 @@
+packages:
+  - "."
+
+# Harden installs against brand-new / downgraded package publishes.
+minimumReleaseAge: 10080
+trustPolicy: no-downgrade

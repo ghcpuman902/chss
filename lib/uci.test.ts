@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MEASURE_DEMO_SAMPLES } from "@/lib/research-url-codecs";
 import { isRawUciString, readUciMoveAt } from "@/lib/uci";
 import { parseCode, START_FEN } from "@/lib/state-core";
 
@@ -62,17 +63,17 @@ describe("isRawUciString", () => {
   });
 });
 
-// samples smoke — kept near UCI tests
-import { MEASURE_DEMO_SAMPLES } from '@/lib/research-url-codecs';
-
-describe('MEASURE_DEMO_SAMPLES', () => {
-  it('is a non-empty fixed Italian progression', () => {
+describe("MEASURE_DEMO_SAMPLES", () => {
+  it("is a non-empty fixed Italian progression", () => {
     expect(MEASURE_DEMO_SAMPLES.length).toBeGreaterThan(20);
     expect(MEASURE_DEMO_SAMPLES[0]!.ply).toBe(1);
-    expect(MEASURE_DEMO_SAMPLES.at(-1)!.ply).toBe(MEASURE_DEMO_SAMPLES.length);
-    // ply increases monotonically
+    expect(MEASURE_DEMO_SAMPLES.at(-1)!.ply).toBe(
+      MEASURE_DEMO_SAMPLES.length,
+    );
     for (let i = 1; i < MEASURE_DEMO_SAMPLES.length; i += 1) {
-      expect(MEASURE_DEMO_SAMPLES[i]!.ply).toBe(MEASURE_DEMO_SAMPLES[i - 1]!.ply + 1);
+      expect(MEASURE_DEMO_SAMPLES[i]!.ply).toBe(
+        MEASURE_DEMO_SAMPLES[i - 1]!.ply + 1,
+      );
     }
   });
 });

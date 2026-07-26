@@ -133,6 +133,7 @@ const MiniBoard = ({
 }) => {
   const prevPiecesRef = useRef<BoardPiece[] | null>(null);
   const animate = Boolean(lastMove) && !reduceMotion;
+  const highlightSet = useMemo(() => new Set(highlights), [highlights]);
 
   const pieces = useMemo(() => {
     const move =
@@ -141,14 +142,12 @@ const MiniBoard = ({
         : null;
 
     // Loop reset / start: new identities so pieces don't tween home.
-    const matched = matchPieceIds(
-      move ? prevPiecesRef.current : null,
-      fen,
-      move,
-    );
-    prevPiecesRef.current = matched;
-    return matched;
+    return matchPieceIds(move ? prevPiecesRef.current : null, fen, move);
   }, [fen, lastMove]);
+
+  useEffect(() => {
+    prevPiecesRef.current = pieces;
+  }, [pieces]);
 
   return (
     <div
@@ -167,7 +166,7 @@ const MiniBoard = ({
                 className={cn(
                   "chess-square cursor-default",
                   isLight ? "light" : "dark",
-                  highlights.includes(square) && "last-move",
+                  highlightSet.has(square) && "last-move",
                 )}
               />
             );

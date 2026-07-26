@@ -1,5 +1,5 @@
 // lib/state-core.ts — chess URL state without the short-key map (client-safe).
-import { Chess, Move, Square } from 'chess.js';
+import { Chess } from 'chess.js';
 import { base64urlDecode, base64urlEncode } from '@/lib/base64url';
 import { encodeHybridCode } from '@/lib/hybrid-url';
 import { parseResearchCode } from '@/lib/research-url-decode';
@@ -184,29 +184,3 @@ export function makeMove(
   }
 }
 
-export function getLegalMoves(fen: string, from?: string): string[] {
-  try {
-    const chess = new Chess(fen);
-    const moves = chess.moves({ square: from as Square, verbose: true });
-    return moves.map((move: Move) => move.to);
-  } catch {
-    return [];
-  }
-}
-
-export function isGameOver(fen: string): {
-  isCheckmate: boolean;
-  isDraw: boolean;
-  isStalemate: boolean;
-} {
-  try {
-    const chess = new Chess(fen);
-    return {
-      isCheckmate: chess.isCheckmate(),
-      isDraw: chess.isDraw(),
-      isStalemate: chess.isStalemate(),
-    };
-  } catch {
-    return { isCheckmate: false, isDraw: false, isStalemate: false };
-  }
-}

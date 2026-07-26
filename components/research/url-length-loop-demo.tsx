@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Pause, Play } from "lucide-react";
 import { buildOgPath, type OgPerspective } from "@/lib/og-encoding";
 import {
@@ -33,13 +34,13 @@ const OgMiniBoard = ({ fen }: { fen: string }) => {
   const src = buildOgPath(fen, stm);
 
   return (
-    <img
+    <Image
       src={src}
       alt="Fixed progression board position"
       width={208}
       height={208}
+      unoptimized
       className="block w-full aspect-square border border-border rounded-none bg-muted/30"
-      decoding="async"
     />
   );
 };

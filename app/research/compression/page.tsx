@@ -712,34 +712,49 @@ const MethodExplainBlock = ({
   </article>
 );
 
+type BoardStatePieceIcon = typeof PawnIcon;
+type BoardStateCell =
+  | { kind: "empty" }
+  | { kind: "piece"; color: "w" | "b"; Icon: BoardStatePieceIcon };
+
+const BOARD_STATE_BLACK_PIECES: BoardStatePieceIcon[] = [
+  KingIcon,
+  QueenIcon,
+  RookIcon,
+  BishopIcon,
+  KnightIcon,
+  PawnIcon,
+];
+const BOARD_STATE_WHITE_PIECES: BoardStatePieceIcon[] = [
+  KingIcon,
+  QueenIcon,
+  RookIcon,
+  BishopIcon,
+  KnightIcon,
+  PawnIcon,
+];
+const BOARD_STATE_GRID: BoardStateCell[][] = [
+  [
+    { kind: "empty" },
+    ...BOARD_STATE_BLACK_PIECES.map((Icon) => ({
+      kind: "piece" as const,
+      color: "b" as const,
+      Icon,
+    })),
+  ],
+  [
+    { kind: "empty" },
+    ...BOARD_STATE_WHITE_PIECES.map((Icon) => ({
+      kind: "piece" as const,
+      color: "w" as const,
+      Icon,
+    })),
+  ],
+];
+
 /** Legend board: every piece type once per colour, plus empty squares. */
 const BoardStateDiagram = () => {
-  type PieceIcon = typeof PawnIcon;
-  type Cell =
-    | { kind: "empty" }
-    | { kind: "piece"; color: "w" | "b"; Icon: PieceIcon };
-
-  const blackPieces: PieceIcon[] = [
-    KingIcon,
-    QueenIcon,
-    RookIcon,
-    BishopIcon,
-    KnightIcon,
-    PawnIcon,
-  ];
-  const whitePieces: PieceIcon[] = [
-    KingIcon,
-    QueenIcon,
-    RookIcon,
-    BishopIcon,
-    KnightIcon,
-    PawnIcon,
-  ];
-
-  const grid: Cell[][] = [
-    [{ kind: "empty" }, ...blackPieces.map((Icon) => ({ kind: "piece" as const, color: "b" as const, Icon }))],
-    [{ kind: "empty" }, ...whitePieces.map((Icon) => ({ kind: "piece" as const, color: "w" as const, Icon }))],
-  ];
+  const grid = BOARD_STATE_GRID;
 
   return (
     <figure className="my-6">
