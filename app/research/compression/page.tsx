@@ -393,12 +393,12 @@ const CROSSOVER_METHODS = [
   "hybrid_min",
 ] as const;
 
+/** First scoreboard: story codecs only. trim_fen / naive_4bit live in the compact map. */
 const BASELINE_METHODS = [
   "native_fen",
   "native_uci",
   "packed_uci",
   "occupancy",
-  "naive_4bit",
   "gzip_uci",
   "gzip_fen",
 ] as const;
@@ -893,6 +893,13 @@ export default function CompressionResearchPage() {
   };
 
   const bestUrl = Math.min(...table.map((r) => r.url));
+  const bestBaselineUrl = Math.min(
+    ...table
+      .filter((r) =>
+        (BASELINE_METHODS as readonly string[]).includes(r.method),
+      )
+      .map((r) => r.url),
+  );
   const maxUrl = Math.max(
     ...table.map((r) =>
       Math.max(r.url, enrichSpread(r.method, "url", r.url, r.url_min, r.url_max, r.url_std).max ?? r.url),
@@ -1143,17 +1150,78 @@ export default function CompressionResearchPage() {
 
         <section className="space-y-5">
           <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            The first comparison
+            What can the decoder infer?
           </h2>
           <p>
+            Occupancy still writes a full FEN-complete meta block. Before seeing
+            how that compares on the scoreboard, ask how much of that meta the
+            decoder could recover from the pieces alone. A shorter state
+            encoding can exploit what the current arrangement makes impossible.
+            It cannot treat hidden state as if the pieces uniquely determine it.
+            The paired boards near the beginning show exactly where that
+            assumption fails.
+          </p>
+          <ul className="list-disc pl-5 space-y-3 text-muted-foreground">
+            <li>
+              <strong className="font-medium text-foreground">
+                Castling rights are partly constrained.
+              </strong>{" "}
+              If a king or rook is absent from its home square, that castling
+              right is certainly gone. If both have returned home, the board
+              still cannot reveal whether they moved earlier. The encoder can
+              omit impossible rights, but must distinguish the remaining cases.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">
+                En passant is usually impossible, but not always inferable.
+              </strong>{" "}
+              Pawn geometry and side to move sharply limit when a target square
+              could exist. When the geometry permits one, identical pieces can
+              still result from a one-square or two-square pawn move. The
+              relevant detail of the previous move remains genuinely hidden.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">
+                Side to move is generally independent.
+              </strong>{" "}
+              Some arrangements constrain which side could legally move, but
+              many are valid with either player to move. A general snapshot
+              therefore needs to preserve the distinction.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">
+                Neither move counter has an exact answer on the board.
+              </strong>{" "}
+              The same pieces can appear after different numbers of quiet plies
+              and at different fullmove numbers. Common values can receive
+              shorter codes, but recovering the original values requires
+              carrying equivalent information somewhere in the state payload.
+            </li>
+          </ul>
+          <p>
+            The useful saving is conditional: avoid bits when the board proves a
+            value, and encode the ambiguity when it does not. Simply deleting a
+            field produces a different state rather than a better compression
+            of the same one. The first scoreboard therefore compares codecs that
+            still tell the whole truth, including occupancy with its full meta.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            At ply 2, who should win?
+          </h2>
+          <p>
+            Before the numbers: at two plies, should replaying{" "}
+            <code className="text-sm">e2e4e7e5</code> beat carrying an entire
+            board? Should occupancy already beat native FEN once empty squares
+            cost one bit instead of four? And can gzip repay its header on a
+            string this short?
+          </p>
+          <p>
             The benchmark samples positions from real Lichess games and measures
-            the complete URL, not just the payload. Occupancy lands around{" "}
-            <span className="font-mono text-foreground">
-              {format(occupancyUrl, 0)}
-            </span>{" "}
-            URL characters as a standalone mean, against roughly{" "}
-            {format(nativeUrl, 0)} for native FEN. Packed paths win early and
-            lose later. gzip loses throughout.
+            the complete URL, not just the payload. Make a prediction, then read
+            the means.
           </p>
           <div className="overflow-x-auto -mx-4 px-4">
             <table className="w-full min-w-[28rem] text-sm border-collapse">
@@ -1267,7 +1335,7 @@ export default function CompressionResearchPage() {
                                 )}
                                 max={maxUrl}
                                 barClass={METRIC_BAR.url}
-                                highlight={row.url === bestUrl}
+                                highlight={row.url === bestBaselineUrl}
                               />
                             </div>
                           </td>
@@ -1284,65 +1352,20 @@ export default function CompressionResearchPage() {
             </p>
           </div>
           <p>
-            Among the standalone codecs, occupancy has the shortest overall
-            mean. It stores the current state without growing with the move
-            count. The remaining question is whether the decoder can sometimes
-            avoid storing even that much.
+            Occupancy lands around{" "}
+            <span className="font-mono text-foreground">
+              {format(occupancyUrl, 0)}
+            </span>{" "}
+            URL characters as a standalone mean, against roughly{" "}
+            {format(nativeUrl, 0)} for native FEN. Packed paths win early and
+            lose later. gzip loses throughout. Among the standalone codecs,
+            occupancy has the shortest overall mean because it stores the
+            current state without growing with the move count.
           </p>
-        </section>
-
-        <section className="space-y-5">
-          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            What can the decoder infer?
-          </h2>
           <p>
-            A shorter state encoding can exploit what the current arrangement
-            makes impossible. It cannot treat hidden state as if the pieces
-            uniquely determine it. The paired boards near the beginning show
-            exactly where that assumption fails.
-          </p>
-          <ul className="list-disc pl-5 space-y-3 text-muted-foreground">
-            <li>
-              <strong className="font-medium text-foreground">
-                Castling rights are partly constrained.
-              </strong>{" "}
-              If a king or rook is absent from its home square, that castling
-              right is certainly gone. If both have returned home, the board
-              still cannot reveal whether they moved earlier. The encoder can
-              omit impossible rights, but must distinguish the remaining cases.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">
-                En passant is usually impossible, but not always inferable.
-              </strong>{" "}
-              Pawn geometry and side to move sharply limit when a target square
-              could exist. When the geometry permits one, identical pieces can
-              still result from a one-square or two-square pawn move. The
-              relevant detail of the previous move remains genuinely hidden.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">
-                Side to move is generally independent.
-              </strong>{" "}
-              Some arrangements constrain which side could legally move, but
-              many are valid with either player to move. A general snapshot
-              therefore needs to preserve the distinction.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">
-                Neither move counter has an exact answer on the board.
-              </strong>{" "}
-              The same pieces can appear after different numbers of quiet plies
-              and at different fullmove numbers. Common values can receive
-              shorter codes, but recovering the original values requires
-              carrying equivalent information somewhere in the state payload.
-            </li>
-          </ul>
-          <p>
-            The useful saving is conditional: avoid bits when the board proves a
-            value, and encode the ambiguity when it does not. Simply deleting a
-            field produces a different state rather than a better compression
-            of the same one.
+            Inference can trim some meta later. The next leap is different:
+            move shared opening knowledge into the decoder so familiar prefixes
+            need not be spelled out at all.
           </p>
         </section>
 
@@ -1400,6 +1423,46 @@ export default function CompressionResearchPage() {
 
         <section className="space-y-5">
           <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            How far could a dictionary go?
+          </h2>
+          <p>
+            The opening book suggests an extreme version of the same idea. If
+            the decoder contained every possible position, the URL could be
+            little more than an index. Common positions could receive the
+            shortest indices, while rare positions would receive longer ones.
+            That is the theoretical direction in which a frequency-aware codec
+            points.
+          </p>
+          <p>
+            The decoder would be doing most of the work. Tromp and Österlund
+            estimate about{" "}
+            <a
+              href="https://github.com/tromp/ChessPositionRanking"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              4.8 × 10<sup>44</sup> legal chess positions
+            </a>
+            . Even if real games visit only a tiny fraction of them, a complete
+            catalogue is far beyond anything a web client could sensibly ship.
+          </p>
+          <p>
+            Our corpus shows where the smaller version stops paying. At depth 2,
+            a 1,024-entry book covers essentially every observed opening prefix.
+            By depth 8, more than 600,000 prefixes appear and the same book covers
+            about a quarter of them by frequency. At depth 12, over 1.5 million
+            appear and coverage falls below 5%. The first few moves repeat;
+            middlegames quickly fan out.
+          </p>
+          <p>
+            A full position database is therefore a useful limit, not a useful
+            product. The practical design keeps the small, high-value opening
+            book and falls back to packed moves or occupancy when a game leaves
+            it. That combination is the hybrid in the next section.
+          </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
             Where does history stop winning?
           </h2>
           <p>
@@ -1407,8 +1470,12 @@ export default function CompressionResearchPage() {
             stay relatively stable and may shrink after captures. Dictionaries
             help when openings are predictable. A hybrid that tries packed path,
             occupancy, and lookup, then keeps the smallest, rides the cheap side
-            of that curve. The path option is there for the opening edge, not as
-            the late-game default.
+            of that curve.
+          </p>
+          <p>
+            Before the loop and the table: at ply 2, should lookup beat
+            occupancy by a wide margin? By ply 32, should that answer reverse?
+            Where do you expect the hybrid to sit relative to both?
           </p>
           <p className="text-sm text-muted-foreground">
             Morphy&apos;s Opera Game from the starting position through mate,
@@ -1480,6 +1547,12 @@ export default function CompressionResearchPage() {
             wins because the board no longer cares how many moves it took to get
             there.
           </p>
+        </section>
+
+        <section className="space-y-5">
+          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
+            The hybrid keeps the cheapest explanation
+          </h2>
           <p>
             Across sampled checkpoint positions, hybrid lands around{" "}
             <span className="font-mono text-foreground">
@@ -1488,55 +1561,60 @@ export default function CompressionResearchPage() {
             URL characters versus roughly {format(nativeUrl, 0)} for native FEN.
             Equal-weighting games instead of checkpoint observations changes the
             hybrid mean only slightly, from about {format(bestUrl, 0)} to{" "}
-            {format(bestPerGameUrl, 1)} characters. The hybrid is not a proof of
-            the shortest chess encoding possible. It is the practical result of
-            choosing the cheapest truthful explanation for each position.
+            {format(bestPerGameUrl, 1)} characters.
+          </p>
+          <p>
+            That is not proof of the shortest chess encoding possible. It is the
+            best result among the practical methods tested here. The durable
+            lesson is not one winning representation. The winning system chooses
+            the cheapest truthful description for each case: a short path while
+            history is cheap, a known opening when the codebook hits, and a
+            board snapshot once the journey costs more than the destination.
           </p>
         </section>
 
         <section className="space-y-5">
           <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            How far could a dictionary go?
+            What to try next
           </h2>
+          <ul className="list-disc pl-5 space-y-3 text-muted-foreground">
+            <li>
+              <strong className="font-medium text-foreground">Smarter paths.</strong>{" "}
+              Rank each move among legal moves rather than storing source and
+              destination squares.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">
+                Compressed move sequences.
+              </strong>{" "}
+              Measure whether UCI or PGN becomes more competitive once wrapped in
+              Zstandard or Brotli as well as gzip. Raw gzip already loses on
+              short share strings; a fuller bake-off would still keep the
+              comparison honest.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">Smarter snapshots.</strong>{" "}
+              Use variable-length piece coding or rank legal board
+              configurations. Flat position ranking may improve bounded or
+              worst-case size; it does not automatically minimise
+              frequency-weighted average length on real shares.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">Smarter alphabets.</strong>{" "}
+              Write directly into URL-safe six-bit symbols instead of padding
+              through bytes.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">Prior art and variants.</strong>{" "}
+              Compare specialised position encodings from the literature, plus
+              Chess960 and crazyhouse. The numbers would move. The same
+              URL-safety and character-count constraints would still apply.
+            </li>
+          </ul>
           <p>
-            The opening book suggests an extreme version of the same idea. If
-            the decoder contained every possible position, the URL could be
-            little more than an index. Common positions could receive the
-            shortest indices, while rare positions would receive longer ones.
-            That is the theoretical direction in which a frequency-aware codec
-            points.
-          </p>
-          <p>
-            The decoder would be doing most of the work. Tromp and Österlund
-            estimate about{" "}
-            <a
-              href="https://github.com/tromp/ChessPositionRanking"
-              className="underline underline-offset-2 hover:text-foreground"
-            >
-              4.8 × 10<sup>44</sup> legal chess positions
-            </a>
-            . Even if real games visit only a tiny fraction of them, a complete
-            catalogue is far beyond anything a web client could sensibly ship.
-          </p>
-          <p>
-            Our corpus shows where the smaller version stops paying. At depth 2,
-            a 1,024-entry book covers essentially every observed opening prefix.
-            By depth 8, more than 600,000 prefixes appear and the same book covers
-            about a quarter of them by frequency. At depth 12, over 1.5 million
-            appear and coverage falls below 5%. The first few moves repeat;
-            middlegames quickly fan out.
-          </p>
-          <p>
-            That makes a full position database a useful limit, but not a useful
-            product. The practical hybrid keeps the small, high-value opening
-            book and falls back to packed moves or occupancy when a game leaves
-            it. Its mean link is about{" "}
-            <span className="font-mono text-foreground">
-              {format(bestUrl, 0)}
-            </span>{" "}
-            characters in this benchmark. It does not reach the theoretical
-            minimum, but it captures the useful part of the idea without making
-            every link depend on an encyclopaedia.
+            The open question is not whether a shorter link exists in principle.
+            It is which of these mechanisms still pays once every share must
+            remain pasteable, self-contained, and truthful.
           </p>
         </section>
 
@@ -1604,46 +1682,6 @@ export default function CompressionResearchPage() {
               />
             ))}
           </div>
-        </section>
-
-        <section className="space-y-5">
-          <h2 className="font-serif text-3xl md:text-4xl leading-[1.15] tracking-tighter text-balance">
-            What to try next
-          </h2>
-          <ul className="list-disc pl-5 space-y-3 text-muted-foreground">
-            <li>
-              <strong className="font-medium text-foreground">Smarter paths.</strong>{" "}
-              Rank each move among legal moves rather than storing source and
-              destination squares.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">
-                Compressed move sequences.
-              </strong>{" "}
-              Measure whether UCI or PGN becomes more competitive once wrapped in
-              Zstandard or Brotli as well as gzip. Raw gzip already loses on
-              short share strings; a fuller bake-off would still keep the
-              comparison honest.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">Smarter snapshots.</strong>{" "}
-              Use variable-length piece coding or rank legal board
-              configurations. Flat position ranking may improve bounded or
-              worst-case size; it does not automatically minimise
-              frequency-weighted average length on real shares.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">Smarter alphabets.</strong>{" "}
-              Write directly into URL-safe six-bit symbols instead of padding
-              through bytes.
-            </li>
-            <li>
-              <strong className="font-medium text-foreground">Prior art and variants.</strong>{" "}
-              Compare specialised position encodings from the literature, plus
-              Chess960 and crazyhouse. The numbers would move. The same
-              URL-safety and character-count constraints would still apply.
-            </li>
-          </ul>
         </section>
 
         <section className="space-y-5">
@@ -1786,11 +1824,12 @@ curl -L --continue-at - \\
   --slim-out lib/compression-url-scoreboard.json`}
           </pre>
           <p>
-            You should land near the same ranking: hybrid around{" "}
-            <span className="font-mono">{format(bestUrl, 0)}</span> URL
-            characters as a checkpoint mean, occupancy around{" "}
-            <span className="font-mono">{format(occupancyUrl, 0)}</span>,
-            native FEN around{" "}
+            You should land near the same ranking: hybrid shortest among the
+            tested methods, occupancy next among standalone state codecs, native
+            FEN much longer. Approximate checkpoint means on this page are hybrid{" "}
+            <span className="font-mono">{format(bestUrl, 0)}</span>, occupancy{" "}
+            <span className="font-mono">{format(occupancyUrl, 0)}</span>, and
+            native FEN{" "}
             <span className="font-mono">{format(nativeUrl, 0)}</span>. Exact
             floats can shift a little with toolchain versions; the order should
             not.
