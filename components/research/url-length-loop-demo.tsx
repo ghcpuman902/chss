@@ -1,73 +1,18 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-  type FC,
-  type SVGProps,
-} from "react";
+import { useEffect, useState } from "react";
 import { Pause, Play } from "lucide-react";
+import { buildOgPath, type OgPerspective } from "@/lib/og-encoding";
 import {
-  BishopIcon,
-  KingIcon,
-  KnightIcon,
-  PawnIcon,
-  QueenIcon,
-  RookIcon,
-} from "@/components/pieces";
-import {
-  generateRandomSamples,
+  MEASURE_DEMO_SAMPLES,
   type CodecMethod,
   type EncodedUrl,
   type PositionSample,
 } from "@/lib/research-url-codecs";
 import { cn } from "@/lib/utils";
 
-type PieceColor = "w" | "b";
-type PieceType = "p" | "n" | "b" | "r" | "q" | "k";
-type PieceKey =
-  | "wP"
-  | "wN"
-  | "wB"
-  | "wR"
-  | "wQ"
-  | "wK"
-  | "bP"
-  | "bN"
-  | "bB"
-  | "bR"
-  | "bQ"
-  | "bK";
-
-type BoardPiece = {
-  id: string;
-  type: PieceType;
-  color: PieceColor;
-  square: string;
-};
-
-type PieceIcon = FC<SVGProps<SVGSVGElement>>;
-
-const PIECE_COMPONENT: Record<PieceKey, PieceIcon> = {
-  wP: PawnIcon,
-  wN: KnightIcon,
-  wB: BishopIcon,
-  wR: RookIcon,
-  wQ: QueenIcon,
-  wK: KingIcon,
-  bP: PawnIcon,
-  bN: KnightIcon,
-  bB: BishopIcon,
-  bR: RookIcon,
-  bQ: QueenIcon,
-  bK: KingIcon,
-};
-
-const FILES = "abcdefgh";
-const RANKS = [8, 7, 6, 5, 4, 3, 2, 1];
-const SAMPLE_N = 36;
-const FRAME_MS = 100; // 10 fps
+const FRAME_MS = 700;
+const SAMPLES: PositionSample[] = MEASURE_DEMO_SAMPLES;
 
 const usePrefersReducedMotion = () => {
   const [reduced, setReduced] = useState(false);
@@ -83,94 +28,19 @@ const usePrefersReducedMotion = () => {
   return reduced;
 };
 
-const fileIndex = (square: string) => square.charCodeAt(0) - 97;
-
-const fenBoardToPieces = (fen: string): Omit<BoardPiece, "id">[] => {
-  const rows = fen.split(" ")[0].split("/");
-  const out: Omit<BoardPiece, "id">[] = [];
-  rows.forEach((row, ri) => {
-    let file = 0;
-    for (const ch of row) {
-      if (ch >= "1" && ch <= "8") {
-        file += Number(ch);
-        continue;
-      }
-      const color: PieceColor = ch === ch.toUpperCase() ? "w" : "b";
-      const type = ch.toLowerCase() as PieceType;
-      const square = `${FILES[file]}${8 - ri}`;
-      out.push({ type, color, square });
-      file += 1;
-    }
-  });
-  return out;
-};
-
-const piecesFromFen = (fen: string): BoardPiece[] =>
-  fenBoardToPieces(fen).map((p, i) => ({
-    ...p,
-    id: `${p.color}${p.type}-${p.square}-${i}`,
-  }));
-
-const MiniBoard = ({
-  fen,
-  reduceMotion,
-}: {
-  fen: string;
-  reduceMotion: boolean;
-}) => {
-  const pieces = useMemo(() => piecesFromFen(fen), [fen]);
+const OgMiniBoard = ({ fen }: { fen: string }) => {
+  const stm = (fen.split(" ")[1] === "b" ? "b" : "w") as OgPerspective;
+  const src = buildOgPath(fen, stm);
 
   return (
-    <div
-      className="relative border border-border overflow-hidden rounded-none w-full aspect-square"
-      role="img"
-      aria-label="Random sample board position"
-    >
-      <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
-        {RANKS.map((rank) =>
-          FILES.split("").map((file, fi) => {
-            const square = `${file}${rank}`;
-            const isLight = (8 - rank + fi) % 2 === 0;
-            return (
-              <div
-                key={square}
-                className={cn(
-                  "chess-square cursor-default",
-                  isLight ? "light" : "dark",
-                )}
-              />
-            );
-          }),
-        )}
-      </div>
-
-      {pieces.map((piece) => {
-        const key = (piece.color + piece.type.toUpperCase()) as PieceKey;
-        const Icon = PIECE_COMPONENT[key];
-        const col = fileIndex(piece.square);
-        const row = 8 - Number(piece.square[1]);
-
-        return (
-          <span
-            key={piece.id}
-            className={cn(
-              "chess-piece absolute inline-flex items-center justify-center pointer-events-none top-0 left-0",
-              piece.color === "w" ? "white" : "black",
-            )}
-            style={{
-              width: "12.5%",
-              height: "12.5%",
-              transform: `translate(${col * 100}%, ${row * 100}%)`,
-              transition: reduceMotion
-                ? "none"
-                : "transform 90ms cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-            }}
-          >
-            <Icon className="block w-[72%] h-[72%]" aria-hidden />
-          </span>
-        );
-      })}
-    </div>
+    <img
+      src={src}
+      alt="Fixed progression board position"
+      width={208}
+      height={208}
+      className="block w-full aspect-square border border-border rounded-none bg-muted/30"
+      decoding="async"
+    />
   );
 };
 
@@ -189,11 +59,7 @@ const MonoPayload = ({
       )}
       aria-label={text}
     >
-      {text.split("").map((ch, i) => (
-        <span key={`${i}-${ch}`} className="inline-block">
-          {ch}
-        </span>
-      ))}
+      {text}
     </p>
   </div>
 );
@@ -241,7 +107,7 @@ const EncodingRow = ({
     >
       <div
         className={cn(
-          "h-full rounded-full transition-[width] duration-100 ease-out",
+          "h-full rounded-full transition-[width] duration-300 ease-out",
           highlighted ? "bg-primary" : "bg-foreground/25",
         )}
         style={{ width: `${barWidthPct(enc.chars)}%` }}
@@ -278,7 +144,7 @@ const HybridMinRow = ({
       aria-hidden="true"
     >
       <div
-        className="h-full rounded-full bg-primary transition-[width] duration-100 ease-out"
+        className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
         style={{ width: `${barWidthPct(chars)}%` }}
       />
     </div>
@@ -297,27 +163,22 @@ const HybridMinRow = ({
 
 export const UrlLengthLoopDemo = () => {
   const reduced = usePrefersReducedMotion();
-  const [samples, setSamples] = useState<PositionSample[]>([]);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(true);
-
-  useEffect(() => {
-    setSamples(generateRandomSamples(SAMPLE_N));
-  }, []);
 
   useEffect(() => {
     if (reduced) setPlaying(false);
   }, [reduced]);
 
   useEffect(() => {
-    if (!playing || reduced || samples.length <= 1) return;
+    if (!playing || reduced || SAMPLES.length <= 1) return;
     const id = window.setInterval(() => {
-      setStep((s) => (s + 1) % samples.length);
+      setStep((s) => (s + 1) % SAMPLES.length);
     }, FRAME_MS);
     return () => window.clearInterval(id);
-  }, [playing, reduced, samples.length]);
+  }, [playing, reduced]);
 
-  const sample = samples[step] ?? samples[0];
+  const sample = SAMPLES[step] ?? SAMPLES[0];
 
   const handleTogglePlay = () => {
     setPlaying((prev) => !prev);
@@ -329,7 +190,7 @@ export const UrlLengthLoopDemo = () => {
         className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground"
         aria-busy="true"
       >
-        Sampling random positions…
+        Loading progression…
       </div>
     );
   }
@@ -352,7 +213,7 @@ export const UrlLengthLoopDemo = () => {
 
       <div className="grid gap-3 sm:grid-cols-[minmax(10rem,13rem)_minmax(0,1fr)] sm:items-start">
         <div className="space-y-2">
-          <MiniBoard fen={sample.fen} reduceMotion={reduced} />
+          <OgMiniBoard fen={sample.fen} />
           <button
             type="button"
             onClick={handleTogglePlay}

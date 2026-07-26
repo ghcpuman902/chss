@@ -3,6 +3,7 @@ import { Chess, Move, Square } from 'chess.js';
 import { base64urlDecode, base64urlEncode } from '@/lib/base64url';
 import { encodeHybridCode } from '@/lib/hybrid-url';
 import { parseResearchCode } from '@/lib/research-url-decode';
+import { readUciMoveAt } from '@/lib/uci';
 
 type ChessMovePromotion = 'n' | 'b' | 'r' | 'q';
 
@@ -47,17 +48,17 @@ function applyUciMoves(uci: string): ParsedState {
   const chess = new Chess();
 
   for (let i = 0; i < uci.length; ) {
-    const from = uci.slice(i, i + 2);
-    const to = uci.slice(i + 2, i + 4);
-    const next = uci[i + 4];
-    const promo = next && /[nbrq]/i.test(next) ? next.toLowerCase() : undefined;
-    const step = promo ? 5 : 4;
-    if (from.length < 2 || to.length < 2) break;
+    const chunk = readUciMoveAt(uci, i);
+    if (!chunk) break;
 
-    const res = chess.move({ from, to, promotion: promo as ChessMovePromotion });
+    const res = chess.move({
+      from: chunk.from,
+      to: chunk.to,
+      promotion: chunk.promotion as ChessMovePromotion | undefined,
+    });
     if (!res) throw new Error('Illegal UCI sequence');
 
-    i += step;
+    i += chunk.step;
   }
 
   return {

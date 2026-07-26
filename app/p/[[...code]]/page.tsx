@@ -6,6 +6,7 @@ import { buildOgCode } from '@/lib/og-encoding';
 import { ChessBoard } from '@/components/chess-board';
 import { redirect } from 'next/navigation';
 import { Move } from 'chess.js';
+import { isRawUciString, readUciMoveAt } from '@/lib/uci';
 
 export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
   // Decode to get side-to-move → title + OG image path
@@ -30,21 +31,21 @@ export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
       if (/^[tponzgdh]-/.test(codeString)) return parsed.uci || '';
       return codeString;
     })();
-    const uciPattern = /^([a-h][1-8][a-h][1-8][nbrq]?)+$/i;
-    const useUci = uciCandidate && uciPattern.test(uciCandidate);
+    const useUci = !!uciCandidate && isRawUciString(uciCandidate);
     const uciToSimulate = useUci ? uciCandidate : (parsed.uci || '');
     if (uciToSimulate && uciToSimulate.length >= 4) {
       const { Chess } = await import('chess.js');
       const chess = new Chess();
       for (let i = 0; i < uciToSimulate.length;) {
-        const from = uciToSimulate.slice(i, i + 2);
-        const to = uciToSimulate.slice(i + 2, i + 4);
-        const next = uciToSimulate[i + 4];
-        const promo = next && /[nbrq]/i.test(next) ? next.toLowerCase() : undefined;
-        const step = promo ? 5 : 4;
-        const res = chess.move({ from, to, promotion: promo as Move['promotion'] });
+        const chunk = readUciMoveAt(uciToSimulate, i);
+        if (!chunk) break;
+        const res = chess.move({
+          from: chunk.from,
+          to: chunk.to,
+          promotion: chunk.promotion as Move['promotion'] | undefined,
+        });
         if (!res) break;
-        i += step;
+        i += chunk.step;
         if (i >= uciToSimulate.length) {
           lastToSquare = String(res.to).toLowerCase();
           const pieceMap: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
@@ -90,19 +91,23 @@ export default async function Page(props: PageProps<'/p/[[...code]]'>) {
   }
 
   // Canonicalize URL:
-  // - Raw UCI: keep as-is for detailed titles
+  // - Bare UCI and native u-<UCI> history: keep as-is for detailed titles / demos
   // - Research codecs (compression scoreboard): keep prefix so demos stay honest
   // - Otherwise prefer short u- codes when available
   const preferred = generateCode(gameState);
-  const uciPattern = /^([a-h][1-8][a-h][1-8][nbrq]?)+$/i;
-  const isRawUci =
+  const isBareUci =
     !!codeString &&
     !codeString.startsWith("u-") &&
     !codeString.startsWith("f-") &&
-    uciPattern.test(codeString);
+    isRawUciString(codeString);
+  const isNativeUciHistory =
+    !!codeString &&
+    codeString.startsWith("u-") &&
+    isRawUciString(codeString.slice(2));
   const isResearchCode = /^[tponzgdh]-/.test(codeString);
   if (
-    !isRawUci &&
+    !isBareUci &&
+    !isNativeUciHistory &&
     !isResearchCode &&
     codeString &&
     preferred &&

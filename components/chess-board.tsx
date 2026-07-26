@@ -12,6 +12,7 @@ import { TurnIndicator, type GameInfo, type Outcome, type DrawReason } from './t
 import { Chess, type Move, type Square } from 'chess.js';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { readUciMoveAt } from '@/lib/uci';
 import { Undo2 } from 'lucide-react';
 
 interface ChessBoardProps {
@@ -156,14 +157,15 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         if (!uci || uci.length < 4) return {};
         const chess = new Chess();
         for (let i = 0; i < uci.length;) {
-          const from = uci.slice(i, i + 2);
-          const to = uci.slice(i + 2, i + 4);
-          const next = uci[i + 4];
-          const promo = next && /[nbrq]/i.test(next) ? next.toLowerCase() : undefined;
-          const step = promo ? 5 : 4;
-          const res = chess.move({ from, to, promotion: promo as Move['promotion'] });
+          const chunk = readUciMoveAt(uci, i);
+          if (!chunk) break;
+          const res = chess.move({
+            from: chunk.from,
+            to: chunk.to,
+            promotion: chunk.promotion as Move['promotion'] | undefined,
+          });
           if (!res) break;
-          i += step;
+          i += chunk.step;
           if (i >= uci.length) {
             const pieceMap: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
             return { to: String(res.to).toLowerCase(), pieceName: pieceMap[String(res.piece).toLowerCase()] };

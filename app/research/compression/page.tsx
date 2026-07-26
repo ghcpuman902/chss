@@ -689,6 +689,7 @@ const MethodExplainBlock = ({
             >
               <ResearchExampleBoard
                 fen={parsed.fen}
+                perspective={parsed.sideToMove}
                 label={`Board for ${ex.label}`}
               />
             </Link>

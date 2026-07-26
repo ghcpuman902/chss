@@ -9,6 +9,7 @@
 import { Chess, type Square } from "chess.js";
 import { gunzipSync } from "fflate";
 import { base64urlDecode, base64urlDecodeBytes } from "@/lib/base64url";
+import { readUciMoveAt } from "@/lib/uci";
 
 export type ResearchDecoded = {
   fen: string;
@@ -225,17 +226,18 @@ const applyUciAscii = (uci: string): ResearchDecoded | null => {
   const chess = new Chess();
   let i = 0;
   while (i < uci.length) {
-    const from = uci.slice(i, i + 2);
-    const to = uci.slice(i + 2, i + 4);
-    if (from.length < 2 || to.length < 2) return null;
-    const next = uci[i + 4];
-    const promo =
-      next && /[nbrq]/i.test(next)
-        ? (next.toLowerCase() as "n" | "b" | "r" | "q")
-        : undefined;
-    const step = promo ? 5 : 4;
-    if (!chess.move({ from, to, promotion: promo })) return null;
-    i += step;
+    const chunk = readUciMoveAt(uci, i);
+    if (!chunk) return null;
+    if (
+      !chess.move({
+        from: chunk.from,
+        to: chunk.to,
+        promotion: chunk.promotion,
+      })
+    ) {
+      return null;
+    }
+    i += chunk.step;
   }
   return {
     fen: chess.fen({ forceEnpassantSquare: true }),

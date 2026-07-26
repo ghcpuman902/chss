@@ -6,6 +6,7 @@
 
 import { Chess, type Move, type Square } from "chess.js";
 import { base64urlEncode } from "@/lib/base64url";
+import { readUciMoveAt } from "@/lib/uci";
 
 const PIECE_NIBBLE: Record<string, number> = {
   p: 1,
@@ -133,18 +134,16 @@ const movesMatchingFen = (uci: string, fen: string): Move[] | null => {
     const chess = new Chess();
     const moves: Move[] = [];
     for (let i = 0; i < uci.length; ) {
-      const from = uci.slice(i, i + 2) as Square;
-      const to = uci.slice(i + 2, i + 4) as Square;
-      const next = uci[i + 4];
-      const promo =
-        next && /[nbrq]/i.test(next)
-          ? (next.toLowerCase() as "n" | "b" | "r" | "q")
-          : undefined;
-      const step = promo ? 5 : 4;
-      const move = chess.move({ from, to, promotion: promo });
+      const chunk = readUciMoveAt(uci, i);
+      if (!chunk) return null;
+      const move = chess.move({
+        from: chunk.from,
+        to: chunk.to,
+        promotion: chunk.promotion,
+      });
       if (!move) return null;
       moves.push(move);
-      i += step;
+      i += chunk.step;
     }
     if (fenCore(chess.fen()) !== fenCore(fen)) return null;
     return moves;
