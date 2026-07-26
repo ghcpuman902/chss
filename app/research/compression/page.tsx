@@ -1358,14 +1358,37 @@ export default function CompressionResearchPage() {
             come from moving shared knowledge into the software.
           </p>
           <p>
-            The benchmark builds a separate list of up to{" "}
-            <span className="font-mono text-foreground">K = {meta.lookup_k}</span>{" "}
-            opening prefixes at each of depths {meta.lookup_depths.join(", ")}.
-            A dictionary hit stores the depth, index, and packed suffix. A miss
-            stores the complete packed path. One discriminator bit tells the
-            decoder which form it received. No network fetch is required, but
-            the codebook must ship with the decoder and remain frozen or
-            versioned, or old links break.
+            Think of the codebook as a row of small lookup tables, one for each
+            opening depth. Here, depth counts plies, or individual turns by one
+            player. Depth 2 means White and Black have each moved once; depth 12
+            means six full moves have been played. A depth-2 table might contain{" "}
+            <code className="text-sm">e2e4e7e5</code>, while a depth-8 table can
+            name a much longer branch of the same opening.
+          </p>
+          <p>
+            The letter <span className="font-mono text-foreground">K</span> sets
+            how many of the most frequent prefixes each table may keep. The
+            benchmark uses up to{" "}
+            <a
+              href="#method-lookup"
+              className="font-mono text-foreground underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={`K = ${meta.lookup_k}, jump to the lookup method details`}
+            >
+              K = {meta.lookup_k}
+            </a>{" "}
+            entries at each of depths {meta.lookup_depths.join(", ")}. Since{" "}
+            <span className="font-mono text-foreground">2¹⁰ = 1024</span>, a
+            10-bit index can select any entry in one table. The depth ID selects
+            the table. Together, those two numbers tell the decoder which known
+            sequence to replay.
+          </p>
+          <p>
+            The encoder uses the longest prefix it finds, then packs any moves
+            that came after it as a suffix. A dictionary miss stores the complete
+            packed path instead. One discriminator bit tells the decoder which
+            form it received. No network fetch is required, but the codebook must
+            ship with the decoder and remain frozen or versioned, or old links
+            break.
           </p>
           <p>
             Familiar lines such as <code className="text-sm">e2e4e7e5</code>, the
