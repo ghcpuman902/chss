@@ -27,6 +27,7 @@ export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
       if (!codeString) return '';
       if (codeString.startsWith('u-')) return codeString.slice(2);
       if (codeString.startsWith('f-')) return '';
+      if (/^[tponzgdh]-/.test(codeString)) return parsed.uci || '';
       return codeString;
     })();
     const uciPattern = /^([a-h][1-8][a-h][1-8][nbrq]?)+$/i;
@@ -89,13 +90,25 @@ export default async function Page(props: PageProps<'/p/[[...code]]'>) {
   }
 
   // Canonicalize URL:
-  // - If incoming looks like raw UCI (keep as-is for detailed titles), do NOT redirect
-  // - Otherwise, prefer short u- codes when available
+  // - Raw UCI: keep as-is for detailed titles
+  // - Research codecs (compression scoreboard): keep prefix so demos stay honest
+  // - Otherwise prefer short u- codes when available
   const preferred = generateCode(gameState);
   const uciPattern = /^([a-h][1-8][a-h][1-8][nbrq]?)+$/i;
-  const isRawUci = !!codeString && !codeString.startsWith('u-') && !codeString.startsWith('f-') && uciPattern.test(codeString);
-  if (!isRawUci && codeString && preferred && codeString !== preferred) {
-    const search = p === 'w' || p === 'b' ? `?p=${p}` : '';
+  const isRawUci =
+    !!codeString &&
+    !codeString.startsWith("u-") &&
+    !codeString.startsWith("f-") &&
+    uciPattern.test(codeString);
+  const isResearchCode = /^[tponzgdh]-/.test(codeString);
+  if (
+    !isRawUci &&
+    !isResearchCode &&
+    codeString &&
+    preferred &&
+    codeString !== preferred
+  ) {
+    const search = p === "w" || p === "b" ? `?p=${p}` : "";
     redirect(`/p/${encodeURIComponent(preferred)}${search}`);
   }
 

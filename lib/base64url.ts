@@ -11,13 +11,32 @@ export const base64urlEncode = (s: string) => {
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 };
 
+const padBase64url = (s: string) => {
+  const rem = s.length % 4;
+  const pad = rem === 2 ? '==' : rem === 3 ? '=' : rem === 1 ? '===' : '';
+  return s.replace(/-/g, '+').replace(/_/g, '/') + pad;
+};
+
 export const base64urlDecode = (s: string) => {
   try {
-    const rem = s.length % 4;
-    const pad = rem === 2 ? '==' : rem === 3 ? '=' : rem === 1 ? '===' : '';
-    const base64 = s.replace(/-/g, '+').replace(/_/g, '/') + pad;
-    return atobSafe(base64);
+    return atobSafe(padBase64url(s));
   } catch {
     return '';
+  }
+};
+
+/** Decode Base64URL to raw bytes (for packed / gzip payloads). */
+export const base64urlDecodeBytes = (s: string): Uint8Array => {
+  try {
+    const base64 = padBase64url(s);
+    if (typeof Buffer !== 'undefined') {
+      return new Uint8Array(Buffer.from(base64, 'base64'));
+    }
+    const bin = atob(base64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i += 1) out[i] = bin.charCodeAt(i);
+    return out;
+  } catch {
+    return new Uint8Array();
   }
 };

@@ -1,0 +1,768 @@
+{
+  "meta": {
+    "url_origin": "https://chss.chat/p/",
+    "eval_source": "data/standard/corpus/hash/2026-06.val.compact.jsonl.zst",
+    "lookup_k": 1024,
+    "lookup_depths": [
+      2,
+      4,
+      6,
+      8,
+      10,
+      12
+    ],
+    "ply_points": [
+      2,
+      8,
+      16,
+      32,
+      64
+    ],
+    "games": 270021,
+    "positions": 1169301,
+    "parse_errors": 0,
+    "elapsed_sec": 493.33,
+    "games_per_sec": 547.3,
+    "note": "chars = URL-safe payload length (after Base64URL where used; native_uci is raw ASCII). url = len(origin + prefix + payload)."
+  },
+  "methods": [
+    "native_fen",
+    "native_uci",
+    "trim_fen",
+    "packed_uci",
+    "occupancy",
+    "naive_4bit",
+    "gzip_uci",
+    "gzip_fen",
+    "lookup_k1024",
+    "hybrid_min"
+  ],
+  "method_meta": {
+    "native_fen": {
+      "family": "raw",
+      "prefix": "f-",
+      "label": "Native FEN (Base64URL)"
+    },
+    "native_uci": {
+      "family": "raw",
+      "prefix": "u-",
+      "label": "Native UCI (ASCII)"
+    },
+    "trim_fen": {
+      "family": "raw",
+      "prefix": "t-",
+      "label": "Trimmed FEN (Base64URL)"
+    },
+    "packed_uci": {
+      "family": "packed",
+      "prefix": "p-",
+      "label": "Packed UCI path"
+    },
+    "occupancy": {
+      "family": "packed",
+      "prefix": "o-",
+      "label": "Occupancy + pieces"
+    },
+    "naive_4bit": {
+      "family": "packed",
+      "prefix": "n-",
+      "label": "Na\u00efve 4-bit grid"
+    },
+    "gzip_uci": {
+      "family": "gzip",
+      "prefix": "g-",
+      "label": "gzip(UCI) \u2192 Base64URL"
+    },
+    "gzip_fen": {
+      "family": "gzip",
+      "prefix": "z-",
+      "label": "gzip(FEN) \u2192 Base64URL"
+    },
+    "lookup_k1024": {
+      "family": "lookup",
+      "prefix": "d-",
+      "label": "Lookup K=1024 + suffix"
+    },
+    "hybrid_min": {
+      "family": "hybrid",
+      "prefix": "h-",
+      "label": "Hybrid (min of 3)"
+    }
+  },
+  "summary_table": [
+    {
+      "method": "native_fen",
+      "family": "raw",
+      "label": "Native FEN (Base64URL)",
+      "bits": 490.77,
+      "chars": 82.05,
+      "url": 104.05,
+      "n": 1169301
+    },
+    {
+      "method": "native_uci",
+      "family": "raw",
+      "label": "Native UCI (ASCII)",
+      "bits": 627.09,
+      "chars": 78.39,
+      "url": 100.39,
+      "n": 1169301
+    },
+    {
+      "method": "trim_fen",
+      "family": "raw",
+      "label": "Trimmed FEN (Base64URL)",
+      "bits": 456.2,
+      "chars": 76.37,
+      "url": 98.37,
+      "n": 1169301
+    },
+    {
+      "method": "packed_uci",
+      "family": "packed",
+      "label": "Packed UCI path",
+      "bits": 235.15,
+      "chars": 39.2,
+      "url": 61.2,
+      "n": 1169301
+    },
+    {
+      "method": "occupancy",
+      "family": "packed",
+      "label": "Occupancy + pieces",
+      "bits": 185.68,
+      "chars": 32.33,
+      "url": 54.33,
+      "n": 1169301
+    },
+    {
+      "method": "naive_4bit",
+      "family": "packed",
+      "label": "Na\u00efve 4-bit grid",
+      "bits": 265.0,
+      "chars": 46.0,
+      "url": 68.0,
+      "n": 1169301
+    },
+    {
+      "method": "gzip_uci",
+      "family": "gzip",
+      "label": "gzip(UCI) \u2192 Base64URL",
+      "bits": 587.83,
+      "chars": 98.42,
+      "url": 120.42,
+      "n": 1169301
+    },
+    {
+      "method": "gzip_fen",
+      "family": "gzip",
+      "label": "gzip(FEN) \u2192 Base64URL",
+      "bits": 612.85,
+      "chars": 102.47,
+      "url": 124.47,
+      "n": 1169301
+    },
+    {
+      "method": "lookup_k1024",
+      "family": "lookup",
+      "label": "Lookup K=1024 + suffix",
+      "bits": 192.35,
+      "chars": 32.89,
+      "url": 54.89,
+      "n": 1169301
+    },
+    {
+      "method": "hybrid_min",
+      "family": "hybrid",
+      "label": "Hybrid (min of 3)",
+      "bits": 97.74,
+      "chars": 16.91,
+      "url": 38.91,
+      "n": 1169301
+    }
+  ],
+  "by_phase": {
+    "native_fen": {
+      "opening": {
+        "n": 536243,
+        "bits": 497.38,
+        "chars": 83.07,
+        "url": 105.07
+      },
+      "early": {
+        "n": 262494,
+        "bits": 518.61,
+        "chars": 86.77,
+        "url": 108.77
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 491.85,
+        "chars": 82.31,
+        "url": 104.31
+      },
+      "late": {
+        "n": 130616,
+        "bits": 405.67,
+        "chars": 67.94,
+        "url": 89.94
+      }
+    },
+    "native_uci": {
+      "opening": {
+        "n": 536243,
+        "bits": 159.68,
+        "chars": 19.96,
+        "url": 41.96
+      },
+      "early": {
+        "n": 262494,
+        "bits": 512.0,
+        "chars": 64.0,
+        "url": 86.0
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 1024.01,
+        "chars": 128.0,
+        "url": 150.0
+      },
+      "late": {
+        "n": 130616,
+        "bits": 2048.15,
+        "chars": 256.02,
+        "url": 278.02
+      }
+    },
+    "trim_fen": {
+      "opening": {
+        "n": 536243,
+        "bits": 465.38,
+        "chars": 77.9,
+        "url": 99.9
+      },
+      "early": {
+        "n": 262494,
+        "bits": 486.6,
+        "chars": 81.43,
+        "url": 103.43
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 451.81,
+        "chars": 75.63,
+        "url": 97.63
+      },
+      "late": {
+        "n": 130616,
+        "bits": 365.52,
+        "chars": 61.25,
+        "url": 83.25
+      }
+    },
+    "packed_uci": {
+      "opening": {
+        "n": 536243,
+        "bits": 59.88,
+        "chars": 9.98,
+        "url": 31.98
+      },
+      "early": {
+        "n": 262494,
+        "bits": 192.0,
+        "chars": 32.0,
+        "url": 54.0
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 384.0,
+        "chars": 64.0,
+        "url": 86.0
+      },
+      "late": {
+        "n": 130616,
+        "bits": 768.04,
+        "chars": 128.04,
+        "url": 150.04
+      }
+    },
+    "occupancy": {
+      "opening": {
+        "n": 536243,
+        "bits": 199.51,
+        "chars": 34.75,
+        "url": 56.75
+      },
+      "early": {
+        "n": 262494,
+        "bits": 191.76,
+        "chars": 33.33,
+        "url": 55.33
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 174.02,
+        "chars": 30.24,
+        "url": 52.24
+      },
+      "late": {
+        "n": 130616,
+        "bits": 138.08,
+        "chars": 24.18,
+        "url": 46.18
+      }
+    },
+    "naive_4bit": {
+      "opening": {
+        "n": 536243,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      },
+      "early": {
+        "n": 262494,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      },
+      "late": {
+        "n": 130616,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      }
+    },
+    "gzip_uci": {
+      "opening": {
+        "n": 536243,
+        "bits": 316.01,
+        "chars": 53.24,
+        "url": 75.24
+      },
+      "early": {
+        "n": 262494,
+        "bits": 555.52,
+        "chars": 92.93,
+        "url": 114.93
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 823.64,
+        "chars": 137.61,
+        "url": 159.61
+      },
+      "late": {
+        "n": 130616,
+        "bits": 1335.52,
+        "chars": 222.92,
+        "url": 244.92
+      }
+    },
+    "gzip_fen": {
+      "opening": {
+        "n": 536243,
+        "bits": 609.14,
+        "chars": 101.84,
+        "url": 123.84
+      },
+      "early": {
+        "n": 262494,
+        "bits": 647.79,
+        "chars": 108.3,
+        "url": 130.3
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 621.25,
+        "chars": 103.87,
+        "url": 125.87
+      },
+      "late": {
+        "n": 130616,
+        "bits": 542.45,
+        "chars": 90.74,
+        "url": 112.74
+      }
+    },
+    "lookup_k1024": {
+      "opening": {
+        "n": 536243,
+        "bits": 29.54,
+        "chars": 5.76,
+        "url": 27.76
+      },
+      "early": {
+        "n": 262494,
+        "bits": 138.39,
+        "chars": 23.9,
+        "url": 45.9
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 330.59,
+        "chars": 55.93,
+        "url": 77.93
+      },
+      "late": {
+        "n": 130616,
+        "bits": 715.22,
+        "chars": 120.03,
+        "url": 142.03
+      }
+    },
+    "hybrid_min": {
+      "opening": {
+        "n": 536243,
+        "bits": 31.54,
+        "chars": 5.76,
+        "url": 27.76
+      },
+      "early": {
+        "n": 262494,
+        "bits": 140.37,
+        "chars": 23.9,
+        "url": 45.9
+      },
+      "middlegame": {
+        "n": 239948,
+        "bits": 176.02,
+        "chars": 30.24,
+        "url": 52.24
+      },
+      "late": {
+        "n": 130616,
+        "bits": 140.08,
+        "chars": 24.18,
+        "url": 46.18
+      }
+    }
+  },
+  "by_ply": {
+    "native_fen": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 479.92,
+        "chars": 79.99,
+        "url": 101.99
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 514.97,
+        "chars": 86.16,
+        "url": 108.16
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 518.61,
+        "chars": 86.77,
+        "url": 108.77
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 491.85,
+        "chars": 82.31,
+        "url": 104.31
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 405.67,
+        "chars": 67.94,
+        "url": 89.94
+      }
+    },
+    "native_uci": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 64.0,
+        "chars": 8.0,
+        "url": 30.0
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 256.0,
+        "chars": 32.0,
+        "url": 54.0
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 512.0,
+        "chars": 64.0,
+        "url": 86.0
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 1024.01,
+        "chars": 128.0,
+        "url": 150.0
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 2048.15,
+        "chars": 256.02,
+        "url": 278.02
+      }
+    },
+    "trim_fen": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 447.92,
+        "chars": 74.99,
+        "url": 96.99
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 482.97,
+        "chars": 80.83,
+        "url": 102.83
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 486.6,
+        "chars": 81.43,
+        "url": 103.43
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 451.81,
+        "chars": 75.63,
+        "url": 97.63
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 365.52,
+        "chars": 61.25,
+        "url": 83.25
+      }
+    },
+    "packed_uci": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 24.0,
+        "chars": 4.0,
+        "url": 26.0
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 96.0,
+        "chars": 16.0,
+        "url": 38.0
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 192.0,
+        "chars": 32.0,
+        "url": 54.0
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 384.0,
+        "chars": 64.0,
+        "url": 86.0
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 768.04,
+        "chars": 128.04,
+        "url": 150.04
+      }
+    },
+    "occupancy": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 201.0,
+        "chars": 35.0,
+        "url": 57.0
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 198.0,
+        "chars": 34.5,
+        "url": 56.5
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 191.76,
+        "chars": 33.33,
+        "url": 55.33
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 174.02,
+        "chars": 30.24,
+        "url": 52.24
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 138.08,
+        "chars": 24.18,
+        "url": 46.18
+      }
+    },
+    "naive_4bit": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 265.0,
+        "chars": 46.0,
+        "url": 68.0
+      }
+    },
+    "gzip_uci": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 224.0,
+        "chars": 38.0,
+        "url": 60.0
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 408.65,
+        "chars": 68.59,
+        "url": 90.59
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 555.52,
+        "chars": 92.93,
+        "url": 114.93
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 823.64,
+        "chars": 137.61,
+        "url": 159.61
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 1335.52,
+        "chars": 222.92,
+        "url": 244.92
+      }
+    },
+    "gzip_fen": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 580.79,
+        "chars": 97.08,
+        "url": 119.08
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 637.69,
+        "chars": 106.64,
+        "url": 128.64
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 647.79,
+        "chars": 108.3,
+        "url": 130.3
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 621.25,
+        "chars": 103.87,
+        "url": 125.87
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 542.45,
+        "chars": 90.74,
+        "url": 112.74
+      }
+    },
+    "lookup_k1024": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 13.0,
+        "chars": 3.0,
+        "url": 25.0
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 46.2,
+        "chars": 8.53,
+        "url": 30.53
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 138.39,
+        "chars": 23.9,
+        "url": 45.9
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 330.59,
+        "chars": 55.93,
+        "url": 77.93
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 715.22,
+        "chars": 120.03,
+        "url": 142.03
+      }
+    },
+    "hybrid_min": {
+      "ply_2": {
+        "n": 269027,
+        "bits": 15.0,
+        "chars": 3.0,
+        "url": 25.0
+      },
+      "ply_8": {
+        "n": 267216,
+        "bits": 48.2,
+        "chars": 8.53,
+        "url": 30.53
+      },
+      "ply_16": {
+        "n": 262494,
+        "bits": 140.37,
+        "chars": 23.9,
+        "url": 45.9
+      },
+      "ply_32": {
+        "n": 239948,
+        "bits": 176.02,
+        "chars": 30.24,
+        "url": 52.24
+      },
+      "ply_64": {
+        "n": 130616,
+        "bits": 140.08,
+        "chars": 24.18,
+        "url": 46.18
+      }
+    }
+  }
+}

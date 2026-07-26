@@ -1,6 +1,8 @@
 // lib/state-core.ts — chess URL state without the short-key map (client-safe).
 import { Chess, Move, Square } from 'chess.js';
 import { base64urlDecode, base64urlEncode } from '@/lib/base64url';
+import { encodeHybridCode } from '@/lib/hybrid-url';
+import { parseResearchCode } from '@/lib/research-url-decode';
 
 type ChessMovePromotion = 'n' | 'b' | 'r' | 'q';
 
@@ -97,6 +99,16 @@ export function parseCode(code: string, keys?: KeyLookup): ParsedState {
     return { fen: fenDecoded, sideToMove };
   }
 
+  // Research codecs from the compression scoreboard (t-/p-/o-/n-/g-/z-/d-/h-)
+  const research = parseResearchCode(code);
+  if (research) {
+    return {
+      fen: research.fen,
+      sideToMove: research.sideToMove,
+      uci: research.uci,
+    };
+  }
+
   // Fallback: treat entire string as UCI
   try {
     const parsed = applyUciMoves(code);
@@ -111,12 +123,18 @@ export function parseCode(code: string, keys?: KeyLookup): ParsedState {
 export function generateCode(state: ParsedState, keys?: KeyLookup): string {
   if (state.fen === START_FEN) return '';
 
+  // Ultra-short opening keys still win when the server map has a hit.
   if (state.uKey) return `u-${state.uKey}`;
 
   const key = keys?.fenToKey(state.fen);
   if (key) return `u-${key}`;
 
-  return `f-${base64urlEncode(state.fen)}`;
+  // Default product codec: hybrid min(packed UCI, occupancy).
+  try {
+    return encodeHybridCode(state.fen, state.uci);
+  } catch {
+    return `f-${base64urlEncode(state.fen)}`;
+  }
 }
 
 export function makeMove(

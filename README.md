@@ -64,7 +64,7 @@ chss/
 │   ├── chess-board.tsx          # Interactive chess board component
 │   ├── pieces.tsx               # SVG chess piece components
 │   ├── turn-indicator.tsx       # Game status indicator
-│   ├── animated-chat.tsx        # Landing page demo animation
+│   ├── link-unfurl.tsx          # Landing page chat link-preview demo
 │   ├── floating-title.tsx       # Floating site title
 │   ├── footer.tsx               # Site footer
 │   ├── providers.tsx            # React context providers

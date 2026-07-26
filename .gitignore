@@ -48,8 +48,20 @@ output.ai
 /data/*
 
 /scripts/*
+!scripts/build-og-top-codes.cjs
 lib/state.ts
 
 # large data files
 lib/keys_358.3MB.json
 lib/fen_counts-from-lichess.json
+
+# benchmark artifacts (checkpoints, caches, logs, local venv)
+*.pkl
+**/__pycache__/
+*.py[cod]
+*.log
+.venv-benchmark/
+.venv*/
+
+# benchmark local scratch (exploratory leftovers, checkpoints live under data/)
+/benchmark/archive/

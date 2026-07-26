@@ -1,0 +1,24 @@
+{
+  "source": "data/standard/corpus/2026-06.hashsample.compact.jsonl.zst",
+  "out_dir": "data/standard/corpus/hash",
+  "counts": {
+    "train": 2053657,
+    "val": 270021,
+    "test": 269876
+  },
+  "total_written": 2593554,
+  "json_errors": 0,
+  "elapsed_sec": 14.45,
+  "rows_per_sec": 179491.9,
+  "split_pct": {
+    "train": 79.18,
+    "val": 10.41,
+    "test": 10.41,
+    "skipped": 0.0
+  },
+  "outputs": {
+    "train": "data/standard/corpus/hash/2026-06.train.compact.jsonl.zst",
+    "val": "data/standard/corpus/hash/2026-06.val.compact.jsonl.zst",
+    "test": "data/standard/corpus/hash/2026-06.test.compact.jsonl.zst"
+  }
+}

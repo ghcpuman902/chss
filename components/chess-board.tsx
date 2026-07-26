@@ -5,7 +5,8 @@ import type React from 'react';
 import { PawnIcon, KnightIcon, BishopIcon, RookIcon, QueenIcon, KingIcon } from './pieces';
 import { useRouter } from 'next/navigation';
 import { makeMove, generateCode, parseCode, type ParsedState } from '@/lib/state-core';
-import { buildOgPath } from '@/lib/og-encoding';
+import { buildOgCode, buildOgPath } from '@/lib/og-encoding';
+import { prewarmOgImage } from '@/app/actions/prewarm-og';
 import { buildShareTitle } from '@/lib/share-title';
 import { TurnIndicator, type GameInfo, type Outcome, type DrawReason } from './turn-indicator';
 import { Chess, type Move, type Square } from 'chess.js';
@@ -120,23 +121,30 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
   const isTerminal = indicatorInfo.outcome !== 'ongoing';
 
-  // Compute OG image URL for the crawler/recipient view (side-to-move)
-  const computeOgUrl = useCallback((): string => {
-    return buildOgPath(gameState.fen, gameState.sideToMove, window.location.origin);
+  // Server Data-Cache + CDN warm so Share / messengers hit a rendered PNG.
+  const lastWarmedOgRef = useRef<string | null>(null);
+  const prewarmOg = useCallback((fen?: string, side?: 'w' | 'b') => {
+    const nextFen = fen ?? gameState.fen;
+    const nextSide = side ?? gameState.sideToMove;
+    const code = buildOgCode(nextFen, nextSide);
+    const ogUrl = buildOgPath(
+      nextFen,
+      nextSide,
+      typeof window !== 'undefined' ? window.location.origin : '',
+    );
+    if (lastWarmedOgRef.current === code) return;
+    lastWarmedOgRef.current = code;
+
+    // 1) Server: same `b-…` code as `/og/{code}.png` (log will match the GET)
+    void prewarmOgImage(code).catch(() => {});
+
+    // 2) Client: hit the route so CDN / browser cache the bytes too
+    if (typeof window !== 'undefined') {
+      fetch(ogUrl, { cache: 'force-cache', keepalive: true }).catch(() => {});
+    }
   }, [gameState.fen, gameState.sideToMove]);
 
-  // Fire-and-forget prewarm for OG route, avoids blocking share sheet
-  const lastWarmedOgRef = useRef<string | null>(null);
-  const prewarmOg = useCallback(() => {
-    try {
-      const ogUrl = computeOgUrl();
-      if (lastWarmedOgRef.current === ogUrl) return;
-      lastWarmedOgRef.current = ogUrl;
-      fetch(ogUrl, { cache: 'force-cache', keepalive: true }).catch(() => {});
-    } catch {}
-  }, [computeOgUrl]);
-
-  // Opportunistically warm on state changes
+  // Warm as soon as the position changes (after a move, before Share)
   useEffect(() => {
     prewarmOg();
   }, [prewarmOg]);
@@ -327,6 +335,8 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
         // Notify parent component
         onStateChange?.(moveResult.newState);
+        // Kick OG render immediately (don't wait for effect) so Send is warm
+        prewarmOg(moveResult.newState.fen, moveResult.newState.sideToMove);
       }
     } else {
       // Try to select a different piece
@@ -340,7 +350,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         setLegalMoves([]);
       }
     }
-  }, [selectedSquare, legalMoves, gameState, onStateChange, chessMemo, isTerminal]);
+  }, [selectedSquare, legalMoves, gameState, onStateChange, chessMemo, isTerminal, prewarmOg]);
 
   // Apply a promotion choice; supports re-choosing while popover remains open
   const handleChoosePromotion = useCallback((piece: 'q' | 'r' | 'b' | 'n') => {
@@ -397,8 +407,9 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     } catch {}
 
     onStateChange?.(moveResult.newState);
+    prewarmOg(moveResult.newState.fen, moveResult.newState.sideToMove);
     promotionAppliedRef.current = true;
-  }, [gameState, onStateChange, promotionFrom, promotionTo, isTerminal]);
+  }, [gameState, onStateChange, promotionFrom, promotionTo, isTerminal, prewarmOg]);
 
   const handleShare = useCallback(async () => {
     // Prevent sharing before any move has been made
@@ -618,7 +629,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
           <span className="hidden sm:inline">Undo</span>
         </button>
         {(() => {
-          const canSharePosition = (historyStepRef.current || 0) > 0;
+          const canSharePosition = canUndo;
 
           const isCheckmateTerminal = indicatorInfo.outcome === 'checkmate';
           const isAnyDraw = indicatorInfo.outcome === 'draw';

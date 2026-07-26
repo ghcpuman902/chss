@@ -1,0 +1,262 @@
+{
+  "source": "data/standard/2026-06.sample100k.compact.jsonl.zst",
+  "games": 100000,
+  "positions": 434411,
+  "parse_errors": 0,
+  "avg_ply": 66.49,
+  "ply_points": [
+    2,
+    8,
+    16,
+    32,
+    64
+  ],
+  "elapsed_sec": 85.3,
+  "games_per_sec": 1172.3,
+  "peak_rss_mb": 81.4,
+  "codecs": [
+    "fen_full",
+    "fen_trim",
+    "naive_4bit",
+    "occupancy",
+    "uci_packed"
+  ],
+  "summary_table": [
+    {
+      "codec": "fen_full",
+      "all": 491.01,
+      "all_std": 42.53,
+      "all_n": 434411,
+      "opening": 497.42,
+      "opening_std": 23.82,
+      "opening_n": 198597,
+      "early": 518.97,
+      "early_std": 24.83,
+      "early_n": 97420,
+      "middlegame": 492.58,
+      "middlegame_std": 32.86,
+      "middlegame_n": 89596,
+      "late": 406.21,
+      "late_std": 40.75,
+      "late_n": 48798
+    },
+    {
+      "codec": "fen_trim",
+      "all": 456.43,
+      "all_std": 44.4,
+      "all_n": 434411,
+      "opening": 465.42,
+      "opening_std": 23.82,
+      "opening_n": 198597,
+      "early": 486.96,
+      "early_std": 24.82,
+      "early_n": 97420,
+      "middlegame": 452.53,
+      "middlegame_std": 32.83,
+      "middlegame_n": 89596,
+      "late": 366.07,
+      "late_std": 40.65,
+      "late_n": 48798
+    },
+    {
+      "codec": "naive_4bit",
+      "all": 265.0,
+      "all_std": 0.0,
+      "all_n": 434411,
+      "opening": 265.0,
+      "opening_std": 0.0,
+      "opening_n": 198597,
+      "early": 265.0,
+      "early_std": 0.0,
+      "early_n": 97420,
+      "middlegame": 265.0,
+      "middlegame_std": 0.0,
+      "middlegame_n": 89596,
+      "late": 265.0,
+      "late_std": 0.0,
+      "late_n": 48798
+    },
+    {
+      "codec": "occupancy",
+      "all": 185.73,
+      "all_std": 20.77,
+      "all_n": 434411,
+      "opening": 199.53,
+      "opening_std": 3.1,
+      "opening_n": 198597,
+      "early": 191.91,
+      "early_std": 6.85,
+      "early_n": 97420,
+      "middlegame": 174.3,
+      "middlegame_std": 10.35,
+      "middlegame_n": 89596,
+      "late": 138.27,
+      "late_std": 13.01,
+      "late_n": 48798
+    },
+    {
+      "codec": "uci_packed",
+      "all": 235.91,
+      "all_std": 226.98,
+      "all_n": 434411,
+      "opening": 59.9,
+      "opening_std": 36.0,
+      "opening_n": 198597,
+      "early": 192.0,
+      "early_std": 0.03,
+      "early_n": 97420,
+      "middlegame": 384.0,
+      "middlegame_std": 0.08,
+      "middlegame_n": 89596,
+      "late": 768.04,
+      "late_std": 0.28,
+      "late_n": 48798
+    }
+  ],
+  "notes": {
+    "unit": "bits to recreate the position (lossless under stated codec)",
+    "fen_full": "UTF-8 FEN including halfmove/fullmove",
+    "fen_trim": "UTF-8 placement+side+castling+ep",
+    "naive_4bit": "256 bits piece grid + 9 meta",
+    "occupancy": "64-bit mask + 4 bits \u00d7 occupied + 9 meta",
+    "uci_packed": "12 bits/move (+2 promo) from game start \u2014 grows with ply",
+    "deferred": "Base64URL / Base85 / gzip / percent-encoding \u2014 Stage 3"
+  },
+  "by_ply": {
+    "fen_full": {
+      "ply_16": {
+        "mean": 518.97,
+        "std": 24.83,
+        "n": 97420
+      },
+      "ply_2": {
+        "mean": 479.9,
+        "std": 0.92,
+        "n": 99586
+      },
+      "ply_32": {
+        "mean": 492.58,
+        "std": 32.86,
+        "n": 89596
+      },
+      "ply_64": {
+        "mean": 406.21,
+        "std": 40.75,
+        "n": 48798
+      },
+      "ply_8": {
+        "mean": 515.04,
+        "std": 22.75,
+        "n": 99011
+      }
+    },
+    "fen_trim": {
+      "ply_16": {
+        "mean": 486.96,
+        "std": 24.82,
+        "n": 97420
+      },
+      "ply_2": {
+        "mean": 447.9,
+        "std": 0.92,
+        "n": 99586
+      },
+      "ply_32": {
+        "mean": 452.53,
+        "std": 32.83,
+        "n": 89596
+      },
+      "ply_64": {
+        "mean": 366.07,
+        "std": 40.65,
+        "n": 48798
+      },
+      "ply_8": {
+        "mean": 483.04,
+        "std": 22.75,
+        "n": 99011
+      }
+    },
+    "naive_4bit": {
+      "ply_16": {
+        "mean": 265.0,
+        "std": 0.0,
+        "n": 97420
+      },
+      "ply_2": {
+        "mean": 265.0,
+        "std": 0.0,
+        "n": 99586
+      },
+      "ply_32": {
+        "mean": 265.0,
+        "std": 0.0,
+        "n": 89596
+      },
+      "ply_64": {
+        "mean": 265.0,
+        "std": 0.0,
+        "n": 48798
+      },
+      "ply_8": {
+        "mean": 265.0,
+        "std": 0.0,
+        "n": 99011
+      }
+    },
+    "occupancy": {
+      "ply_16": {
+        "mean": 191.91,
+        "std": 6.85,
+        "n": 97420
+      },
+      "ply_2": {
+        "mean": 201.0,
+        "std": 0.0,
+        "n": 99586
+      },
+      "ply_32": {
+        "mean": 174.3,
+        "std": 10.35,
+        "n": 89596
+      },
+      "ply_64": {
+        "mean": 138.27,
+        "std": 13.01,
+        "n": 48798
+      },
+      "ply_8": {
+        "mean": 198.05,
+        "std": 3.87,
+        "n": 99011
+      }
+    },
+    "uci_packed": {
+      "ply_16": {
+        "mean": 192.0,
+        "std": 0.03,
+        "n": 97420
+      },
+      "ply_2": {
+        "mean": 24.0,
+        "std": 0.0,
+        "n": 99586
+      },
+      "ply_32": {
+        "mean": 384.0,
+        "std": 0.08,
+        "n": 89596
+      },
+      "ply_64": {
+        "mean": 768.04,
+        "std": 0.28,
+        "n": 48798
+      },
+      "ply_8": {
+        "mean": 96.0,
+        "std": 0.0,
+        "n": 99011
+      }
+    }
+  }
+}

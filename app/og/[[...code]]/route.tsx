@@ -1,52 +1,52 @@
-import { ImageResponse } from 'next/og';
-import { NextRequest } from 'next/server';
-import { createElement } from 'react';
-import OGTemplate from './og-template';
-import { parseUrlSegment } from '@/lib/utils';
+import { NextRequest } from "next/server";
+import { parseUrlSegment } from "@/lib/utils";
+import { getCachedOgPng } from "@/lib/og-render";
+import ogTop from "@/lib/og-top-codes.json";
 
-export const dynamic = 'force-static';
+export const runtime = "nodejs";
+
+/** Allow on-demand OG for positions outside the lookup top table. */
+export const dynamicParams = true;
+
+/** Prerender the most common lookup-prefix boards at `next build`. */
+export function generateStaticParams() {
+  const codes = (ogTop as { codes?: string[] }).codes ?? [];
+  return codes.map((code) => ({
+    // /og/{code}.png → catch-all segment includes the extension
+    code: [`${code}.png`],
+  }));
+}
 
 export async function GET(
   _req: NextRequest,
-  ctx: RouteContext<'/og/[[...code]]'>
+  ctx: RouteContext<"/og/[[...code]]">,
 ) {
   try {
     const { code } = await ctx.params;
     const raw = parseUrlSegment(code);
-    // Sanitize: strip trailing extension like .png and anything after first dot
-    // Accept forms: "o-<payload>", "o-<payload>.png", "o-<payload>..."
-    const dotIdx = raw.indexOf('.');
-    const codeString = dotIdx === -1 ? raw : raw.slice(0, dotIdx);
-    const query = codeString || undefined;
+    const buf = await getCachedOgPng(raw);
 
-    return new ImageResponse(
-      createElement(OGTemplate, { query }),
-      {
-        width: 800,
-        height: 800,
-        debug: false,
-        headers: {
-          'Cache-Control': 'public, max-age=31536000, immutable',
-          'Content-Type': 'image/png',
-        },
+    return new Response(new Uint8Array(buf), {
+      status: 200,
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CDN-Cache-Control": "public, max-age=31536000, immutable",
       },
-    );
+    });
   } catch (e: unknown) {
-    console.log(`${e instanceof Error ? e.message : String(e)}`);
-
-    return new ImageResponse(
-      createElement(OGTemplate, {
-        query: undefined,
-      }),
-      {
-        width: 800,
-        height: 800,
-        debug: false,
+    console.error("[og]", e instanceof Error ? e.message : String(e));
+    try {
+      const buf = await getCachedOgPng("");
+      return new Response(new Uint8Array(buf), {
+        status: 200,
         headers: {
-          'Cache-Control': 'public, max-age=31536000, immutable',
-          'Content-Type': 'image/png',
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=3600",
         },
-      },
-    );
+      });
+    } catch {
+      return new Response("OG render failed", { status: 500 });
+    }
   }
 }

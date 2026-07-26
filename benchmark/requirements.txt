@@ -1,0 +1,3 @@
+# Python deps for the chess URL compression benchmark.
+# System packages also required: zstd (provides zstd / zstdcat).
+python-chess>=1.10,<2

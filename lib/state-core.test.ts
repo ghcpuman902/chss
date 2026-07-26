@@ -33,11 +33,23 @@ describe('parseCode', () => {
 
   it('round-trips f- FEN encoding', () => {
     const after = parseCode('e2e4e7e5');
-    const code = generateCode(after);
+    const code = `f-${base64urlEncode(after.fen)}`;
     expect(code.startsWith('f-')).toBe(true);
     const again = parseCode(code);
     expect(again.fen).toBe(after.fen);
     expect(again.sideToMove).toBe(after.sideToMove);
+  });
+
+  it('round-trips hybrid generateCode', () => {
+    const after = parseCode('e2e4e7e5');
+    const code = generateCode(after);
+    expect(code.startsWith('h-')).toBe(true);
+    const again = parseCode(code);
+    expect(again.fen.split(' ').slice(0, 4).join(' ')).toBe(
+      after.fen.split(' ').slice(0, 4).join(' '),
+    );
+    expect(again.sideToMove).toBe(after.sideToMove);
+    expect(again.uci).toBe('e2e4e7e5');
   });
 
   it('resolves u- keys when lookup is provided', () => {
@@ -71,10 +83,32 @@ describe('generateCode', () => {
     expect(generateCode(state, tinyKeys)).toBe('u-abc');
   });
 
-  it('uses f- when no key map (client path)', () => {
+  it('uses hybrid h- when no key map (client path)', () => {
     const state = parseCode('e2e4');
     const code = generateCode(state);
-    expect(code.startsWith('f-')).toBe(true);
+    expect(code.startsWith('h-')).toBe(true);
+    const again = parseCode(code);
+    expect(again.fen.split(' ').slice(0, 4).join(' ')).toBe(
+      state.fen.split(' ').slice(0, 4).join(' '),
+    );
+  });
+
+  it('hybrid stays short through several plies', () => {
+    let state = parseCode('');
+    for (const [from, to] of [
+      ['e2', 'e4'],
+      ['e7', 'e5'],
+      ['g1', 'f3'],
+    ] as const) {
+      const result = makeMove(state, from, to);
+      expect(result.success).toBe(true);
+      state = result.newState!;
+    }
+    const code = generateCode(state);
+    expect(code.startsWith('h-')).toBe(true);
+    // Packed path wins early; full URL stays well under native FEN (~100).
+    expect(code.length).toBeLessThan(40);
+    expect(parseCode(code).uci).toBe('e2e4e7e5g1f3');
   });
 });
 
@@ -125,10 +159,11 @@ describe('makeMove', () => {
 });
 
 describe('OG encoding parity', () => {
-  it('builds the same o- code for FEN + sideToMove', () => {
+  it('builds fast b- code for FEN + sideToMove', () => {
     const parsed = parseCode('e2e4');
     const code = buildOgCode(parsed.fen, parsed.sideToMove);
-    expect(code.startsWith('o-')).toBe(true);
+    expect(code.startsWith('b-')).toBe(true);
+    expect(code).toHaveLength(67);
     expect(fenToBoard64(parsed.fen)).toHaveLength(64);
     // Recipient view after e2e4 is black
     expect(code).toBe(buildOgCode(parsed.fen, 'b'));

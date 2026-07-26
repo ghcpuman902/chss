@@ -1,0 +1,357 @@
+{
+  "meta": {
+    "train": "data/standard/corpus/hash/2026-06.train.compact.jsonl.zst",
+    "val": "data/standard/corpus/hash/2026-06.val.compact.jsonl.zst",
+    "test": "data/standard/corpus/hash/2026-06.test.compact.jsonl.zst",
+    "depths": [
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      16
+    ],
+    "sizes": [
+      64,
+      256,
+      1024,
+      4096,
+      16384
+    ],
+    "train_limit": null,
+    "eval_limit": null,
+    "elapsed_sec": 62.32,
+    "encoding_model": {
+      "dict": "2 tag + ceil(log2(#depths)) depth + ceil(log2(K)) index + packed suffix",
+      "uci": "2 tag + 12 bits/move (+2 promo)",
+      "hybrid": "min(dict, uci)"
+    }
+  },
+  "train_prefix_mass": {
+    "depth_2_k_64": {
+      "pct_of_depth_mass": 95.07,
+      "unique_prefixes": 392
+    },
+    "depth_4_k_64": {
+      "pct_of_depth_mass": 50.07,
+      "unique_prefixes": 27965
+    },
+    "depth_6_k_64": {
+      "pct_of_depth_mass": 21.45,
+      "unique_prefixes": 220631
+    },
+    "depth_8_k_64": {
+      "pct_of_depth_mass": 7.87,
+      "unique_prefixes": 635636
+    },
+    "depth_10_k_64": {
+      "pct_of_depth_mass": 3.02,
+      "unique_prefixes": 1143486
+    },
+    "depth_12_k_64": {
+      "pct_of_depth_mass": 1.24,
+      "unique_prefixes": 1562648
+    },
+    "depth_16_k_64": {
+      "pct_of_depth_mass": 0.31,
+      "unique_prefixes": 1916063
+    },
+    "depth_2_k_256": {
+      "pct_of_depth_mass": 99.91,
+      "unique_prefixes": 392
+    },
+    "depth_4_k_256": {
+      "pct_of_depth_mass": 71.29,
+      "unique_prefixes": 27965
+    },
+    "depth_6_k_256": {
+      "pct_of_depth_mass": 33.94,
+      "unique_prefixes": 220631
+    },
+    "depth_8_k_256": {
+      "pct_of_depth_mass": 14.95,
+      "unique_prefixes": 635636
+    },
+    "depth_10_k_256": {
+      "pct_of_depth_mass": 5.86,
+      "unique_prefixes": 1143486
+    },
+    "depth_12_k_256": {
+      "pct_of_depth_mass": 2.45,
+      "unique_prefixes": 1562648
+    },
+    "depth_16_k_256": {
+      "pct_of_depth_mass": 0.61,
+      "unique_prefixes": 1916063
+    },
+    "depth_2_k_1024": {
+      "pct_of_depth_mass": 100.0,
+      "unique_prefixes": 392
+    },
+    "depth_4_k_1024": {
+      "pct_of_depth_mass": 86.95,
+      "unique_prefixes": 27965
+    },
+    "depth_6_k_1024": {
+      "pct_of_depth_mass": 50.17,
+      "unique_prefixes": 220631
+    },
+    "depth_8_k_1024": {
+      "pct_of_depth_mass": 24.49,
+      "unique_prefixes": 635636
+    },
+    "depth_10_k_1024": {
+      "pct_of_depth_mass": 10.69,
+      "unique_prefixes": 1143486
+    },
+    "depth_12_k_1024": {
+      "pct_of_depth_mass": 4.62,
+      "unique_prefixes": 1562648
+    },
+    "depth_16_k_1024": {
+      "pct_of_depth_mass": 1.11,
+      "unique_prefixes": 1916063
+    },
+    "depth_2_k_4096": {
+      "pct_of_depth_mass": 100.0,
+      "unique_prefixes": 392
+    },
+    "depth_4_k_4096": {
+      "pct_of_depth_mass": 95.92,
+      "unique_prefixes": 27965
+    },
+    "depth_6_k_4096": {
+      "pct_of_depth_mass": 66.75,
+      "unique_prefixes": 220631
+    },
+    "depth_8_k_4096": {
+      "pct_of_depth_mass": 36.65,
+      "unique_prefixes": 635636
+    },
+    "depth_10_k_4096": {
+      "pct_of_depth_mass": 17.78,
+      "unique_prefixes": 1143486
+    },
+    "depth_12_k_4096": {
+      "pct_of_depth_mass": 8.13,
+      "unique_prefixes": 1562648
+    },
+    "depth_16_k_4096": {
+      "pct_of_depth_mass": 2.03,
+      "unique_prefixes": 1916063
+    },
+    "depth_2_k_16384": {
+      "pct_of_depth_mass": 100.0,
+      "unique_prefixes": 392
+    },
+    "depth_4_k_16384": {
+      "pct_of_depth_mass": 99.41,
+      "unique_prefixes": 27965
+    },
+    "depth_6_k_16384": {
+      "pct_of_depth_mass": 80.95,
+      "unique_prefixes": 220631
+    },
+    "depth_8_k_16384": {
+      "pct_of_depth_mass": 50.79,
+      "unique_prefixes": 635636
+    },
+    "depth_10_k_16384": {
+      "pct_of_depth_mass": 27.48,
+      "unique_prefixes": 1143486
+    },
+    "depth_12_k_16384": {
+      "pct_of_depth_mass": 13.63,
+      "unique_prefixes": 1562648
+    },
+    "depth_16_k_16384": {
+      "pct_of_depth_mass": 3.76,
+      "unique_prefixes": 1916063
+    }
+  },
+  "held_out_val": {
+    "k_64": {
+      "games": 269455,
+      "hit_rate_pct": 94.94,
+      "mean_match_plies": 3.61,
+      "mean_bits_uci_tagged": 798.76,
+      "mean_bits_dict": 764.02,
+      "mean_bits_hybrid": 764.02,
+      "saving_vs_uci_pct": 4.35,
+      "hit_by_depth": {
+        "2": 120345,
+        "6": 36376,
+        "10": 5258,
+        "4": 76772,
+        "8": 13659,
+        "12": 2596,
+        "16": 807
+      }
+    },
+    "k_256": {
+      "games": 269455,
+      "hit_rate_pct": 99.74,
+      "mean_match_plies": 4.6,
+      "mean_bits_uci_tagged": 798.76,
+      "mean_bits_dict": 754.58,
+      "mean_bits_hybrid": 754.58,
+      "saving_vs_uci_pct": 5.53,
+      "hit_by_depth": {
+        "4": 99785,
+        "8": 24737,
+        "2": 77306,
+        "6": 50521,
+        "10": 9763,
+        "12": 5074,
+        "16": 1574
+      }
+    },
+    "k_1024": {
+      "games": 269455,
+      "hit_rate_pct": 99.84,
+      "mean_match_plies": 5.56,
+      "mean_bits_uci_tagged": 798.76,
+      "mean_bits_dict": 744.99,
+      "mean_bits_hybrid": 744.99,
+      "saving_vs_uci_pct": 6.73,
+      "hit_by_depth": {
+        "4": 98611,
+        "8": 36914,
+        "2": 35843,
+        "10": 16685,
+        "6": 68660,
+        "12": 9583,
+        "16": 2729
+      }
+    },
+    "k_4096": {
+      "games": 269455,
+      "hit_rate_pct": 99.84,
+      "mean_match_plies": 6.53,
+      "mean_bits_uci_tagged": 798.76,
+      "mean_bits_dict": 735.33,
+      "mean_bits_hybrid": 735.33,
+      "saving_vs_uci_pct": 7.94,
+      "hit_by_depth": {
+        "4": 78795,
+        "10": 26147,
+        "2": 11807,
+        "6": 80540,
+        "8": 50481,
+        "12": 16710,
+        "16": 4545
+      }
+    },
+    "k_16384": {
+      "games": 269455,
+      "hit_rate_pct": 99.84,
+      "mean_match_plies": 7.44,
+      "mean_bits_uci_tagged": 798.76,
+      "mean_bits_dict": 726.41,
+      "mean_bits_hybrid": 726.41,
+      "saving_vs_uci_pct": 9.06,
+      "hit_by_depth": {
+        "6": 81494,
+        "10": 37626,
+        "4": 50678,
+        "12": 26831,
+        "8": 62355,
+        "16": 6927,
+        "2": 3114
+      }
+    }
+  },
+  "held_out_test": {
+    "k_64": {
+      "games": 269356,
+      "hit_rate_pct": 94.88,
+      "mean_match_plies": 3.61,
+      "mean_bits_uci_tagged": 798.35,
+      "mean_bits_dict": 763.62,
+      "mean_bits_hybrid": 763.62,
+      "saving_vs_uci_pct": 4.35,
+      "hit_by_depth": {
+        "2": 120194,
+        "4": 77028,
+        "12": 2663,
+        "6": 35918,
+        "10": 5381,
+        "8": 13602,
+        "16": 783
+      }
+    },
+    "k_256": {
+      "games": 269356,
+      "hit_rate_pct": 99.74,
+      "mean_match_plies": 4.6,
+      "mean_bits_uci_tagged": 798.35,
+      "mean_bits_dict": 754.12,
+      "mean_bits_hybrid": 754.12,
+      "saving_vs_uci_pct": 5.54,
+      "hit_by_depth": {
+        "2": 77327,
+        "4": 99418,
+        "12": 5277,
+        "6": 50903,
+        "8": 24408,
+        "10": 9775,
+        "16": 1558
+      }
+    },
+    "k_1024": {
+      "games": 269356,
+      "hit_rate_pct": 99.83,
+      "mean_match_plies": 5.57,
+      "mean_bits_uci_tagged": 798.35,
+      "mean_bits_dict": 744.54,
+      "mean_bits_hybrid": 744.54,
+      "saving_vs_uci_pct": 6.74,
+      "hit_by_depth": {
+        "2": 35933,
+        "6": 68812,
+        "4": 98346,
+        "12": 9749,
+        "8": 36739,
+        "10": 16527,
+        "16": 2793
+      }
+    },
+    "k_4096": {
+      "games": 269356,
+      "hit_rate_pct": 99.83,
+      "mean_match_plies": 6.53,
+      "mean_bits_uci_tagged": 798.35,
+      "mean_bits_dict": 734.94,
+      "mean_bits_hybrid": 734.94,
+      "saving_vs_uci_pct": 7.94,
+      "hit_by_depth": {
+        "4": 78687,
+        "2": 11964,
+        "8": 50316,
+        "6": 80573,
+        "12": 16729,
+        "10": 26009,
+        "16": 4621
+      }
+    },
+    "k_16384": {
+      "games": 269356,
+      "hit_rate_pct": 99.83,
+      "mean_match_plies": 7.44,
+      "mean_bits_uci_tagged": 798.35,
+      "mean_bits_dict": 726.02,
+      "mean_bits_hybrid": 726.02,
+      "saving_vs_uci_pct": 9.06,
+      "hit_by_depth": {
+        "4": 50823,
+        "8": 62246,
+        "6": 81419,
+        "12": 26792,
+        "10": 37387,
+        "16": 7051,
+        "2": 3181
+      }
+    }
+  }
+}
