@@ -1,59 +1,91 @@
 import { TurnIndicator, type GameInfo } from '@/components/turn-indicator';
 
+const BASE: Omit<GameInfo, 'sideToMove'> = {
+  fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  isCheck: false,
+  isCheckmate: false,
+  isStalemate: false,
+  isDraw: false,
+  outcome: 'ongoing',
+  drawReason: undefined,
+  onlyMove: false,
+  legalMoves: [],
+  lastMove: null,
+  code: '',
+};
+
+const VARIANTS: Array<{ label: string; info: GameInfo }> = [
+  {
+    label: 'White to move (perspective: white)',
+    info: { ...BASE, sideToMove: 'w', perspective: 'white' },
+  },
+  {
+    label: 'Black to move (perspective: black)',
+    info: { ...BASE, sideToMove: 'b', perspective: 'black' },
+  },
+  {
+    label: 'Check (white to move)',
+    info: { ...BASE, sideToMove: 'w', isCheck: true, perspective: 'white' },
+  },
+  {
+    label: 'Only move (black to move)',
+    info: { ...BASE, sideToMove: 'b', onlyMove: true, perspective: 'black' },
+  },
+  {
+    label: 'Checkmate (white to move → Black wins)',
+    info: {
+      ...BASE,
+      sideToMove: 'w',
+      isCheckmate: true,
+      outcome: 'checkmate',
+      perspective: 'white',
+    },
+  },
+  {
+    label: 'Stalemate / Draw',
+    info: {
+      ...BASE,
+      sideToMove: 'b',
+      isStalemate: true,
+      isDraw: true,
+      outcome: 'draw',
+      drawReason: 'stalemate',
+      perspective: 'black',
+    },
+  },
+  {
+    label: 'Draw — 50-move rule',
+    info: {
+      ...BASE,
+      sideToMove: 'w',
+      outcome: 'draw',
+      drawReason: 'fifty-move',
+      perspective: 'white',
+    },
+  },
+  {
+    label: 'Draw — Insufficient material',
+    info: {
+      ...BASE,
+      sideToMove: 'b',
+      outcome: 'draw',
+      drawReason: 'insufficient',
+      perspective: 'black',
+    },
+  },
+  {
+    label: 'Draw — Threefold repetition',
+    info: {
+      ...BASE,
+      sideToMove: 'w',
+      outcome: 'draw',
+      drawReason: 'threefold',
+      perspective: 'white',
+    },
+  },
+];
+
 export default function TurnIndicatorKitchenSinkPage() {
-  const base: Omit<GameInfo, 'sideToMove'> = {
-    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-    isCheck: false,
-    isCheckmate: false,
-    isStalemate: false,
-    isDraw: false,
-    outcome: 'ongoing',
-    drawReason: undefined,
-    onlyMove: false,
-    legalMoves: [],
-    lastMove: null,
-    code: ''
-  };
-
-  const variants: Array<{ label: string; info: GameInfo }> = [
-    {
-      label: 'White to move (perspective: white)',
-      info: { ...base, sideToMove: 'w', perspective: 'white' }
-    },
-    {
-      label: 'Black to move (perspective: black)',
-      info: { ...base, sideToMove: 'b', perspective: 'black' }
-    },
-    {
-      label: 'Check (white to move)',
-      info: { ...base, sideToMove: 'w', isCheck: true, perspective: 'white' }
-    },
-    {
-      label: 'Only move (black to move)',
-      info: { ...base, sideToMove: 'b', onlyMove: true, perspective: 'black' }
-    },
-    {
-      label: 'Checkmate (white to move → Black wins)',
-      info: { ...base, sideToMove: 'w', isCheckmate: true, outcome: 'checkmate', perspective: 'white' }
-    },
-    {
-      label: 'Stalemate / Draw',
-      info: { ...base, sideToMove: 'b', isStalemate: true, isDraw: true, outcome: 'draw', drawReason: 'stalemate', perspective: 'black' }
-    },
-    {
-      label: 'Draw — 50-move rule',
-      info: { ...base, sideToMove: 'w', outcome: 'draw', drawReason: 'fifty-move', perspective: 'white' }
-    },
-    {
-      label: 'Draw — Insufficient material',
-      info: { ...base, sideToMove: 'b', outcome: 'draw', drawReason: 'insufficient', perspective: 'black' }
-    },
-    {
-      label: 'Draw — Threefold repetition',
-      info: { ...base, sideToMove: 'w', outcome: 'draw', drawReason: 'threefold', perspective: 'white' }
-    }
-  ];
-
   return (
     <main className="bg-background">
       <section className="relative overflow-hidden">
@@ -65,8 +97,8 @@ export default function TurnIndicatorKitchenSinkPage() {
             </div>
 
             <div className="flex flex-col gap-12">
-              {variants.map(({ label, info }, idx) => (
-                <div key={idx} className="space-y-4">
+              {VARIANTS.map(({ label, info }) => (
+                <div key={label} className="space-y-4">
                   <div className="text-sm font-medium text-muted-foreground">{label}</div>
                   <div className="relative mx-auto w-full">
                     <div className="aspect-square w-full bg-muted rounded-xs" />

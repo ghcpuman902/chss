@@ -12,6 +12,7 @@ import { TurnIndicator, type GameInfo, type Outcome, type DrawReason } from './t
 import { Chess, type Move, type Square } from 'chess.js';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { readUciMoveAt } from '@/lib/uci';
 import { Undo2 } from 'lucide-react';
 
 interface ChessBoardProps {
@@ -55,7 +56,10 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
   const historyRef = useRef<ParsedState[]>([initialState]);
   const [canUndo, setCanUndo] = useState<boolean>(false);
   const historyStepRef = useRef<number>(0);
-  const initialCodeRef = useRef<string>(generateCode(initialState));
+  const initialCodeRef = useRef<string | null>(null);
+  if (initialCodeRef.current === null) {
+    initialCodeRef.current = generateCode(initialState);
+  }
   const gameStateRef = useRef<ParsedState>(initialState);
   const onStateChangeRef = useRef(onStateChange);
   const router = useRouter();
@@ -70,8 +74,8 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
   // Promotion picker state
   const [promotionOpen, setPromotionOpen] = useState<boolean>(false);
-  const [promotionFrom, setPromotionFrom] = useState<string | null>(null);
-  const [promotionTo, setPromotionTo] = useState<string | null>(null);
+  const promotionFromRef = useRef<string | null>(null);
+  const promotionToRef = useRef<string | null>(null);
   const [promotionAnchor, setPromotionAnchor] = useState<string | null>(null);
   const [promotionSide, setPromotionSide] = useState<'w' | 'b'>('w');
   const promotionBaseStateRef = useRef<ParsedState | null>(null);
@@ -156,14 +160,15 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         if (!uci || uci.length < 4) return {};
         const chess = new Chess();
         for (let i = 0; i < uci.length;) {
-          const from = uci.slice(i, i + 2);
-          const to = uci.slice(i + 2, i + 4);
-          const next = uci[i + 4];
-          const promo = next && /[nbrq]/i.test(next) ? next.toLowerCase() : undefined;
-          const step = promo ? 5 : 4;
-          const res = chess.move({ from, to, promotion: promo as Move['promotion'] });
+          const chunk = readUciMoveAt(uci, i);
+          if (!chunk) break;
+          const res = chess.move({
+            from: chunk.from,
+            to: chunk.to,
+            promotion: chunk.promotion as Move['promotion'] | undefined,
+          });
           if (!res) break;
-          i += step;
+          i += chunk.step;
           if (i >= uci.length) {
             const pieceMap: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
             return { to: String(res.to).toLowerCase(), pieceName: pieceMap[String(res.piece).toLowerCase()] };
@@ -288,8 +293,8 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         const candidate = verboseMoves.find((m: Move) => m.to === square);
         if (candidate && (candidate as Move).promotion) {
           // Initialize promotion context
-          setPromotionFrom(selectedSquare);
-          setPromotionTo(square);
+          promotionFromRef.current = selectedSquare;
+          promotionToRef.current = square;
           setPromotionAnchor(square);
           setPromotionSide(gameState.sideToMove);
           promotionBaseStateRef.current = gameState;
@@ -354,6 +359,8 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
   // Apply a promotion choice; supports re-choosing while popover remains open
   const handleChoosePromotion = useCallback((piece: 'q' | 'r' | 'b' | 'n') => {
+    const promotionFrom = promotionFromRef.current;
+    const promotionTo = promotionToRef.current;
     if (!promotionFrom || !promotionTo || isTerminal) return;
 
     // If user already applied a choice while the popover is open, revert to base before re-applying
@@ -403,13 +410,13 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
     // Update page title for promotion move
     try {
       const movedColor = moveResult.newState.sideToMove === 'w' ? 'Black' : 'White';
-      document.title = `${movedColor} moved to ${promotionTo?.toLowerCase()} | chss.chat`;
+      document.title = `${movedColor} moved to ${promotionTo.toLowerCase()} | chss.chat`;
     } catch {}
 
     onStateChange?.(moveResult.newState);
     prewarmOg(moveResult.newState.fen, moveResult.newState.sideToMove);
     promotionAppliedRef.current = true;
-  }, [gameState, onStateChange, promotionFrom, promotionTo, isTerminal, prewarmOg]);
+  }, [gameState, onStateChange, isTerminal, prewarmOg]);
 
   const handleShare = useCallback(async () => {
     // Prevent sharing before any move has been made
@@ -477,6 +484,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
   const renderBoard = () => {
     const board = chessMemo.board();
     const squares = [] as React.ReactNode[];
+    const legalMoveSet = new Set(legalMoves);
 
     const rankOrder = perspective === 'white' ? [0, 1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1, 0];
     const fileOrder = perspective === 'white' ? [0, 1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1, 0];
@@ -488,7 +496,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
         const piece = board[rank][file];
         const isLight = (rank + file) % 2 === 0;
         const isSelected = selectedSquare === square;
-        const isLegalMove = legalMoves.includes(square);
+        const isLegalMove = legalMoveSet.has(square);
         const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
 
         const squareDiv = (
@@ -497,19 +505,11 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
             role="button"
             tabIndex={0}
             aria-label={`Square ${square}`}
-            className={`chess-square ${isLight ? 'light' : 'dark'} ${isLegalMove ? 'legal-move' : ''} ${isLastMove ? 'last-move' : ''} ${isTerminal ? 'cursor-default' : ''}`}
+            aria-pressed={isSelected}
+            className={`chess-square ${isLight ? 'light' : 'dark'} ${isLegalMove ? 'legal-move' : ''} ${isLastMove ? 'last-move' : ''} ${isSelected ? 'selected' : ''} ${isTerminal ? 'cursor-default' : ''}`}
             onClick={() => handleSquareClick(square)}
             onKeyDown={(e) => handleSquareKeyDown(e, square)}
           >
-            <input
-              type="radio"
-              name="selected-square"
-              checked={isSelected}
-              onChange={() => { }}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              tabIndex={-1}
-              aria-hidden="true"
-            />
             <div className="square-content w-full h-full flex items-center justify-center">
               {piece && (() => {
                 const key = (piece.color + piece.type.toUpperCase()) as PieceKey;
@@ -534,8 +534,8 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
               if (!o) {
                 // Closing: clear context
                 setPromotionAnchor(null);
-                setPromotionFrom(null);
-                setPromotionTo(null);
+                promotionFromRef.current = null;
+                promotionToRef.current = null;
                 promotionBaseStateRef.current = null;
                 promotionAppliedRef.current = false;
               }
@@ -619,6 +619,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
       {/* Action Buttons */}
       <div className="mt-6 flex flex-row gap-4 justify-center">
         <button
+          type="button"
           onClick={handleUndo}
           disabled={!canUndo}
           aria-disabled={!canUndo}
@@ -672,6 +673,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
           return (
             <button
+              type="button"
               onClick={handleShare}
               disabled={shareDisabled}
               aria-disabled={shareDisabled}
@@ -686,6 +688,7 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
 
       <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
           <button
+            type="button"
             onClick={handleNewGame}
             aria-label="New Game"
             className="px-8 py-3 border border-border rounded-lg font-medium"

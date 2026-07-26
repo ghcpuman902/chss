@@ -2,6 +2,7 @@
 
 import { Chess, type Move, type Square } from "chess.js";
 import { base64urlEncode } from "@/lib/base64url";
+import { readUciMoveAt } from "@/lib/uci";
 
 export const URL_ORIGIN = "https://chss.chat/p/";
 
@@ -298,30 +299,34 @@ export const encodeBestThree = (
   };
 };
 
-const PLY_TARGETS = [2, 4, 8, 12, 16, 24, 32, 40, 48, 64] as const;
+/**
+ * Italian Game (Giuoco Piano) continuation — deterministic demo.
+ * Long enough for path codecs to grow while occupancy stays flatter.
+ */
+export const MEASURE_DEMO_UCI =
+  "e2e4e7e5g1f3b8c6f1c4f8c5c2c3g8f6d2d4e5d4c3d4c5b4b1c3f6e4e1g1b4c3d4d5c3f6f1e1c6e7e1e4d7d6c1g5f6g5f3g5e8g8g5h7g8h7d1h5h7g8e4h4f7f5h5h7g8f7h4h6e7g6h7g6f7g8";
 
-const randomInt = (max: number) => Math.floor(Math.random() * max);
-
-/** Build N random legal positions across shallow→deep plies. */
-export const generateRandomSamples = (n: number): PositionSample[] => {
+/** Snapshot a fixed UCI game after every move (ordered progression). */
+export const generateFixedGameSamples = (uci: string): PositionSample[] => {
+  const chess = new Chess();
+  const moves: Move[] = [];
   const samples: PositionSample[] = [];
 
-  for (let i = 0; i < n; i += 1) {
-    const target = PLY_TARGETS[i % PLY_TARGETS.length]!;
-    const chess = new Chess();
-    const moves: Move[] = [];
-
-    for (let ply = 0; ply < target; ply += 1) {
-      const legal = chess.moves({ verbose: true });
-      if (legal.length === 0) break;
-      const move = legal[randomInt(legal.length)]!;
-      chess.move(move);
-      moves.push(move);
-    }
+  for (let i = 0; i < uci.length; ) {
+    const chunk = readUciMoveAt(uci, i);
+    if (!chunk) break;
+    const move = chess.move({
+      from: chunk.from,
+      to: chunk.to,
+      promotion: chunk.promotion,
+    });
+    if (!move) break;
+    moves.push(move);
+    i += chunk.step;
 
     const { candidates, hybrid } = encodeBestThree(chess, moves);
     samples.push({
-      fen: chess.fen(),
+      fen: chess.fen({ forceEnpassantSquare: true }),
       ply: moves.length,
       pieceCount: pieceCountOf(chess),
       candidates,
@@ -329,13 +334,8 @@ export const generateRandomSamples = (n: number): PositionSample[] => {
     });
   }
 
-  // Shuffle so the loop doesn't walk ply in strict order
-  for (let i = samples.length - 1; i > 0; i -= 1) {
-    const j = randomInt(i + 1);
-    const tmp = samples[i]!;
-    samples[i] = samples[j]!;
-    samples[j] = tmp;
-  }
-
   return samples;
 };
+
+/** Precomputed “What we measure” loop — no client-side random walks. */
+export const MEASURE_DEMO_SAMPLES = generateFixedGameSamples(MEASURE_DEMO_UCI);

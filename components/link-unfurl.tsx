@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import {
   Message,
@@ -80,11 +81,12 @@ const TypingDots = () => (
 
 const LinkPreviewCard = () => (
   <article className="w-full max-w-full overflow-hidden rounded-xl border border-border bg-background">
-    <img
+    <Image
       src={OG_SRC}
       alt="Chess board after White played Nf3, shown from Black's perspective"
       width={800}
       height={800}
+      unoptimized
       className="aspect-square w-full object-cover"
     />
     <div className="space-y-1 border-t border-border px-3 py-2.5">
@@ -105,41 +107,32 @@ export const LinkUnfurl = () => {
   const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced) {
+      return () => {};
+    }
 
-    let cancelled = false;
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    let cycleIndex = 0;
+    const origin = Date.now();
+    setCycle(0);
+    setStep("incoming");
 
-    const clearTimers = () => {
-      for (const t of timers) clearTimeout(t);
-      timers.length = 0;
-    };
-
-    const runCycle = () => {
-      if (cancelled) return;
-      clearTimers();
-      setCycle((c) => c + 1);
-      setStep("incoming");
-      for (const { at, step: next } of TIMELINE) {
-        if (at === 0) continue;
-        timers.push(
-          setTimeout(() => {
-            if (!cancelled) setStep(next);
-          }, at),
-        );
+    const id = window.setInterval(() => {
+      const total = Date.now() - origin;
+      const nextCycle = Math.floor(total / LOOP_MS);
+      if (nextCycle !== cycleIndex) {
+        cycleIndex = nextCycle;
+        setCycle(nextCycle);
       }
-      timers.push(
-        setTimeout(() => {
-          if (!cancelled) runCycle();
-        }, LOOP_MS),
-      );
-    };
-
-    runCycle();
+      const elapsed = total % LOOP_MS;
+      let next: Step = "incoming";
+      for (const item of TIMELINE) {
+        if (elapsed >= item.at) next = item.step;
+      }
+      setStep(next);
+    }, 100);
 
     return () => {
-      cancelled = true;
-      clearTimers();
+      window.clearInterval(id);
     };
   }, [reduced]);
 

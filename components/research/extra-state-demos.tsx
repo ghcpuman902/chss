@@ -255,6 +255,8 @@ const useLoopStep = (length: number, ms: number, paused = false) => {
 
 const fileIndex = (square: string) => square.charCodeAt(0) - 97;
 
+const EMPTY_SQUARES: string[] = [];
+
 type FullBoardProps = {
   fen: string;
   focusSquares?: string[];
@@ -268,8 +270,8 @@ type FullBoardProps = {
 
 const FullBoard = ({
   fen,
-  focusSquares = [],
-  highlights = [],
+  focusSquares = EMPTY_SQUARES,
+  highlights = EMPTY_SQUARES,
   epSquare = null,
   reduceMotion = false,
   label,
@@ -277,13 +279,17 @@ const FullBoard = ({
   href,
 }: FullBoardProps) => {
   const prevPiecesRef = useRef<BoardPiece[] | null>(null);
-  const pieces = useMemo(() => {
-    const matched = matchPieceIds(prevPiecesRef.current, fen);
-    prevPiecesRef.current = matched;
-    return matched;
-  }, [fen]);
+  const pieces = useMemo(
+    () => matchPieceIds(prevPiecesRef.current, fen),
+    [fen],
+  );
+
+  useEffect(() => {
+    prevPiecesRef.current = pieces;
+  }, [pieces]);
 
   const focusSet = useMemo(() => new Set(focusSquares), [focusSquares]);
+  const highlightSet = useMemo(() => new Set(highlights), [highlights]);
   const hasFocus = focusSet.size > 0 || focusSide !== null;
 
   const board = (
@@ -304,7 +310,7 @@ const FullBoard = ({
                 className={cn(
                   "chess-square cursor-default",
                   isLight ? "light" : "dark",
-                  highlights.includes(square) && "last-move",
+                  highlightSet.has(square) && "last-move",
                   epSquare === square && "legal-move",
                 )}
               />

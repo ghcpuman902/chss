@@ -297,13 +297,8 @@
     @apply bg-[#b58863];
   }
 
-  /* Radio button for square selection - hidden */
-  .chess-square input[type="radio"] {
-    @apply absolute inset-0 opacity-0 cursor-pointer;
-  }
-
   /* Selected square highlighting */
-  .chess-square input[type="radio"]:checked+.square-content {
+  .chess-square.selected .square-content {
     @apply ring-0 bg-blue-200/40;
   }
 
