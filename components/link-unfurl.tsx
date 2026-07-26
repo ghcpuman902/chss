@@ -2,34 +2,41 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { Bubble, BubbleContent } from "@/components/ui/bubble";
-import {
-  Message,
-  MessageContent,
-  MessageGroup,
-} from "@/components/ui/message";
+import { ArrowUp, ChevronLeft, ChevronRight, Plus, Video } from "lucide-react";
 import { buildOgCode } from "@/lib/og-encoding";
-import { buildShareTitle } from "@/lib/share-title";
 import { cn } from "@/lib/utils";
 
-/** Position after 1.e4 e5 2.Nf3. Black to move, board shown from Black's side. */
-const FEN_AFTER_NF3 =
-  "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
+/**
+ * Deep Blue vs Kasparov, Game 2 (1997).
+ * After 36…axb5 (Kasparov) → White to move.
+ * After 37.Be4 (Deep Blue) → Black to move.
+ */
+const FEN_AFTER_AXB5 =
+  "r1r1q1k1/6p1/3b1p1p/1p1PpP2/1Pp5/2P4P/R1B2QP1/R5K1 w - - 0 37";
+const FEN_AFTER_BE4 =
+  "r1r1q1k1/6p1/3b1p1p/1p1PpP2/1Pp1B3/2P4P/R4QP1/R5K1 b - - 1 37";
 
-const EXAMPLE_PATH = "/p/e2e4e7e5g1f3";
+const KASPAROV_PATH = "/p/h-QaEZUFVQKg6RkNRERmRkbmZzN6AAASg";
+const DEEP_BLUE_PATH = "/p/h-RaEYUFVQKg6RkUREZORkbmZzN4AAISg";
 
-const OG_SRC = `/og/${buildOgCode(FEN_AFTER_NF3, "b")}.png`;
-const SHARE_TITLE = buildShareTitle("b", "f3");
+const KASPAROV_OG = `/og/${buildOgCode(FEN_AFTER_AXB5, "w")}.png`;
+const DEEP_BLUE_OG = `/og/${buildOgCode(FEN_AFTER_BE4, "b")}.png`;
 
-type Step = "incoming" | "typing" | "preview";
+/** Shared width so both OG cards match. */
+const CARD_WIDTH = "w-40";
 
-const TIMELINE: { at: number; step: Step }[] = [
-  { at: 0, step: "incoming" },
-  { at: 900, step: "typing" },
-  { at: 1700, step: "preview" },
+const KASPAROV_TEXT = "axb5. pawn acquired. try not to overheat.";
+const DEEP_BLUE_TEXT =
+  "Be4. skipped the free material. spooky enough for you?";
+
+/** Prior plies as text-only bubbles — fills history without five full boards. */
+const PRIOR_MOVES: { align: "start" | "end"; text: string }[] = [
+  { align: "end", text: "35. Bxd6. bishops off." },
+  { align: "start", text: "…Bxd6. ok fine." },
+  { align: "end", text: "36. axb5. a-file's open." },
 ];
 
-const LOOP_MS = 6000;
+type Step = "history" | "typing" | "sent";
 
 const usePrefersReducedMotion = () => {
   const [reduced, setReduced] = useState(false);
@@ -54,7 +61,7 @@ const Enter = ({
 }) => (
   <div
     className={cn(
-      "animate-in fade-in duration-300 ease-out",
+      "animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out fill-mode-both",
       className,
     )}
   >
@@ -64,8 +71,8 @@ const Enter = ({
 
 const TypingDots = () => (
   <div
-    className="flex items-center gap-1 px-1 py-0.5"
-    aria-label="Typing"
+    className="flex items-center gap-1"
+    aria-label="Deep Blue is typing"
     role="status"
   >
     {[0, 1, 2].map((i) => (
@@ -79,125 +86,188 @@ const TypingDots = () => (
   </div>
 );
 
-const LinkPreviewCard = () => (
-  <article className="w-full max-w-full overflow-hidden rounded-xl border border-border bg-background">
-    <Image
-      src={OG_SRC}
-      alt="Chess board after White played Nf3, shown from Black's perspective"
-      width={800}
-      height={800}
-      unoptimized
-      className="aspect-square w-full object-cover"
-    />
-    <div className="space-y-1 border-t border-border px-3 py-2.5">
-      <p className="text-sm font-medium leading-snug text-balance text-foreground">
-        {SHARE_TITLE}
-      </p>
+type LinkPreviewCardProps = {
+  ogSrc: string;
+  alt: string;
+  title: string;
+};
+
+const LinkPreviewCard = ({ ogSrc, alt, title }: LinkPreviewCardProps) => (
+  <article className="w-full overflow-hidden rounded-[12px] border border-border bg-card shadow-sm">
+    <div className="overflow-hidden bg-[#f0d9b5]">
+      <Image
+        src={ogSrc}
+        alt={alt}
+        width={640}
+        height={640}
+        unoptimized
+        className="aspect-square w-full object-cover"
+      />
+    </div>
+    <div className="space-y-0.5 border-t border-border px-2.5 py-2">
+      <p className="text-sm font-semibold leading-snug text-foreground">{title}</p>
       <p className="text-xs text-muted-foreground">chss.chat</p>
-      <p className="truncate font-mono text-xs text-muted-foreground">
-        chss.chat{EXAMPLE_PATH}
-      </p>
     </div>
   </article>
 );
 
+const TextBubble = ({
+  children,
+  align,
+}: {
+  children: ReactNode;
+  align: "start" | "end";
+}) => (
+  <div
+    className={cn(
+      "w-fit max-w-[16rem] px-3 py-2 text-[13px] leading-snug",
+      align === "end"
+        ? "self-end rounded-[16px] rounded-br-[4px] bg-primary text-primary-foreground"
+        : "self-start rounded-[16px] rounded-bl-[4px] border border-border bg-card text-foreground",
+    )}
+  >
+    {children}
+  </div>
+);
+
 export const LinkUnfurl = () => {
   const reduced = usePrefersReducedMotion();
-  const [step, setStep] = useState<Step>("incoming");
-  const [cycle, setCycle] = useState(0);
+  const [step, setStep] = useState<Step>(reduced ? "sent" : "history");
 
   useEffect(() => {
     if (reduced) {
+      setStep("sent");
       return () => {};
     }
 
-    let cycleIndex = 0;
-    const origin = Date.now();
-    setCycle(0);
-    setStep("incoming");
-
-    const id = window.setInterval(() => {
-      const total = Date.now() - origin;
-      const nextCycle = Math.floor(total / LOOP_MS);
-      if (nextCycle !== cycleIndex) {
-        cycleIndex = nextCycle;
-        setCycle(nextCycle);
-      }
-      const elapsed = total % LOOP_MS;
-      let next: Step = "incoming";
-      for (const item of TIMELINE) {
-        if (elapsed >= item.at) next = item.step;
-      }
-      setStep(next);
-    }, 100);
+    setStep("history");
+    const typingTimer = window.setTimeout(() => setStep("typing"), 1400);
+    const sentTimer = window.setTimeout(() => setStep("sent"), 2800);
 
     return () => {
-      window.clearInterval(id);
+      window.clearTimeout(typingTimer);
+      window.clearTimeout(sentTimer);
     };
   }, [reduced]);
 
-  const activeStep = reduced ? "preview" : step;
-  const showTyping = activeStep === "typing";
-  const showPreview = activeStep === "preview";
+  const showTyping = step === "typing";
+  const showSent = step === "sent";
 
   return (
     <div
       className="w-full max-w-md mx-auto"
-      aria-label="Example chat message showing a chess link preview"
+      aria-label="Deep Blue messages Garry Kasparov a chess link after Be4"
     >
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
-        <div className="flex items-center gap-2 border-b border-border bg-muted/50 px-4 py-3">
+      <div className="overflow-hidden rounded-2xl border border-border bg-muted shadow-sm">
+        {/* Mid-chat header (not compose / New Message) */}
+        <header className="flex items-center gap-1.5 border-b border-border/70 bg-card/90 px-2 py-1.5 backdrop-blur-sm">
           <span
-            className="size-2 rounded-full bg-primary"
+            className="flex items-center gap-0.5 text-primary"
             aria-hidden="true"
-          />
-          <span className="text-sm text-muted-foreground">Messages</span>
-        </div>
+          >
+            <ChevronLeft className="size-5" strokeWidth={2.25} />
+            <span className="flex size-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold">
+              19
+            </span>
+          </span>
 
-        {/* Fixed height + justify-end: messages grow upward, page layout stays put */}
-        <MessageGroup className="h-[28rem] justify-end gap-3 overflow-hidden p-4 sm:h-[30rem]">
-          <Enter key={`incoming-${cycle}`}>
-            <Message align="start">
-              <MessageContent>
-                <Bubble variant="muted" align="start">
-                  <BubbleContent>Your move</BubbleContent>
-                </Bubble>
-              </MessageContent>
-            </Message>
+          <div className="flex min-w-0 flex-1 flex-col items-center">
+            <span
+              className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary"
+              aria-hidden="true"
+            >
+              GK
+            </span>
+            <div className="flex items-center gap-0.5">
+              <h2 className="truncate text-[12px] font-semibold tracking-tight text-foreground">
+                Gary Kasparov
+              </h2>
+              <ChevronRight
+                className="size-3 text-muted-foreground"
+                strokeWidth={2.5}
+                aria-hidden="true"
+              />
+            </div>
+          </div>
+
+          <span
+            className="flex size-8 items-center justify-center text-primary"
+            aria-hidden="true"
+          >
+            <Video className="size-5" strokeWidth={1.75} />
+          </span>
+        </header>
+
+        {/* Bottom-pinned thread: prior plies fill the top so empty history isn't obvious */}
+        <div className="flex h-[32rem] flex-col justify-end gap-1.5 overflow-hidden px-3 py-2.5">
+          {PRIOR_MOVES.map((move) => (
+            <div
+              key={move.text}
+              className={cn(
+                "flex",
+                move.align === "end" ? "justify-end" : "justify-start",
+              )}
+            >
+              <TextBubble align={move.align}>{move.text}</TextBubble>
+            </div>
+          ))}
+
+          <Enter>
+            <div className={cn("flex flex-col gap-1.5 self-start", CARD_WIDTH)}>
+              <LinkPreviewCard
+                ogSrc={KASPAROV_OG}
+                alt={`Position after Kasparov played axb5 (chss.chat${KASPAROV_PATH}), White to move`}
+                title="White's turn"
+              />
+              <TextBubble align="start">{KASPAROV_TEXT}</TextBubble>
+            </div>
           </Enter>
 
           {showTyping ? (
-            <Enter key={`typing-${cycle}`}>
-              <Message align="end">
-                <MessageContent>
-                  <Bubble variant="default" align="end">
-                    <BubbleContent>
-                      <TypingDots />
-                    </BubbleContent>
-                  </Bubble>
-                </MessageContent>
-              </Message>
+            <Enter className="flex justify-end">
+              <div className="rounded-[16px] rounded-br-[4px] bg-primary px-3.5 py-2.5">
+                <TypingDots />
+              </div>
             </Enter>
           ) : null}
 
-          {showPreview ? (
-            <Enter key={`preview-${cycle}`}>
-              <Message align="end">
-                <MessageContent className="max-w-[85%]">
-                  <Bubble
-                    variant="ghost"
-                    align="end"
-                    className="max-w-full data-[variant=ghost]:max-w-full"
-                  >
-                    <BubbleContent className="w-full max-w-full">
-                      <LinkPreviewCard />
-                    </BubbleContent>
-                  </Bubble>
-                </MessageContent>
-              </Message>
+          {showSent ? (
+            <Enter className="flex flex-col items-end gap-1.5">
+              <div className={CARD_WIDTH}>
+                <LinkPreviewCard
+                  ogSrc={DEEP_BLUE_OG}
+                  alt={`Position after Deep Blue played Be4 (chss.chat${DEEP_BLUE_PATH}), Black to move`}
+                  title="Black's turn"
+                />
+              </div>
+              <TextBubble align="end">{DEEP_BLUE_TEXT}</TextBubble>
             </Enter>
           ) : null}
-        </MessageGroup>
+        </div>
+
+        <div className="flex items-center gap-2 border-t border-border/70 bg-card/80 px-3 py-2">
+          <span
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+            aria-hidden="true"
+          >
+            <Plus className="size-4" strokeWidth={2.5} />
+          </span>
+          <div className="flex min-h-9 min-w-0 flex-1 items-center rounded-full border border-border bg-background px-3.5 text-sm text-muted-foreground">
+            Message
+          </div>
+          <span
+            className={cn(
+              "flex size-8 shrink-0 items-center justify-center rounded-full transition-[transform,background-color] duration-200 ease-out",
+              showSent || showTyping
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground",
+              showSent && "scale-95",
+            )}
+            aria-hidden="true"
+          >
+            <ArrowUp className="size-4" strokeWidth={2.5} />
+          </span>
+        </div>
       </div>
     </div>
   );

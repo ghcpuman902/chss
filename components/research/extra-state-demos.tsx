@@ -207,7 +207,7 @@ const FullBoard = ({
                 reducedMotion || !animate ? "none" : PIECE_TRANSITION,
             }}
           >
-            <Icon className="block w-[72%] h-[72%]" aria-hidden />
+            <Icon className="block size-[88%]" aria-hidden />
           </span>
         );
       })}

@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   description: "Play chess over any messaging app. No download, no sign up.",
   icons: {
-    icon: "/Pawn.svg",
+    icon: "/v2/Pawn.svg",
   },
   appleWebApp: {
     title: "chss.chat",

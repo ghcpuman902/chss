@@ -28,7 +28,7 @@ export const getCachedOgPng = async (rawCode: string): Promise<Buffer> => {
   const code = stripExtension(rawCode.trim());
   const b64 = await unstable_cache(
     async (c: string) => renderOgPngBase64(c),
-    ["og-png-v3-b64"],
+    ["og-png-v5-b64"],
     {
       revalidate: false,
       tags: [`og:${code.slice(0, 80)}`],

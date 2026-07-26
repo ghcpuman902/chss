@@ -510,15 +510,15 @@ export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBo
             onClick={() => handleSquareClick(square)}
             onKeyDown={(e) => handleSquareKeyDown(e, square)}
           >
-            <div className="square-content w-full h-full flex items-center justify-center">
+            <div className="square-content w-full h-full flex items-end justify-center">
               {piece && (() => {
                 const key = (piece.color + piece.type.toUpperCase()) as PieceKey;
                 const Icon = PIECE_COMPONENT[key];
                 const isKing = piece.type === 'k';
                 const kingInCheck = isKing && piece.color === gameState.sideToMove && indicatorInfo.isCheck;
                 return (
-                  <span className={`chess-piece inline-flex items-center justify-center ${isKing ? 'king ' : ''}${kingInCheck ? 'king-in-check ' : ''}${piece.color === 'w' ? 'white' : 'black'}`}>
-                    <Icon className="block w-[72%] h-[72%]" />
+                  <span className={`chess-piece inline-flex w-[88%] aspect-square items-end justify-center ${isKing ? 'king ' : ''}${kingInCheck ? 'king-in-check ' : ''}${piece.color === 'w' ? 'white' : 'black'}`}>
+                    <Icon className="block size-full" />
                   </span>
                 );
               })()}
