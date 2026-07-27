@@ -70,12 +70,10 @@ const FILES = "abcdefgh";
 const RANKS = [8, 7, 6, 5, 4, 3, 2, 1] as const;
 const FRAME_MS = 700;
 
-/** Cap UCI preview height; overflow scrolls so a full-game path stays readable. */
-const UCI_PREVIEW_CLASS =
-  "max-h-[calc(3*1.35*0.625rem)] sm:max-h-[calc(3*1.35*0.6875rem)] overflow-y-auto";
+/** Reserve ~3.5 lines; overflow scrolls so a full-game path stays readable. */
+const UCI_PREVIEW_CLASS = "h-[3.5lh] overflow-y-auto";
 
-const FEN_PREVIEW_CLASS =
-  "min-h-[calc(2*1.35*0.625rem)] sm:min-h-[calc(2*1.35*0.6875rem)]";
+const FEN_PREVIEW_CLASS = "min-h-[3.5lh]";
 
 const pieceCountOf = (fen: string) =>
   fen

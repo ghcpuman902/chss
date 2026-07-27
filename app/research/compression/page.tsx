@@ -393,15 +393,38 @@ const CROSSOVER_METHODS = [
   "hybrid_min",
 ] as const;
 
-/** First scoreboard: story codecs only. trim_fen / naive_4bit live in the compact map. */
+/** First scoreboard: story codecs only. trim_fen lives in the compact map. */
 const BASELINE_METHODS = [
   "native_fen",
   "native_uci",
   "packed_uci",
   "occupancy",
+  "naive_4bit",
   "gzip_uci",
   "gzip_fen",
 ] as const;
+
+/** One-line gloss under scoreboard links. Avoids repeating title words. */
+const METHOD_BLURB: Record<string, string> = {
+  native_fen:
+    "Keeps the whole printable board text so the decoder can reload any mid-game position.",
+  native_uci:
+    "Lists every ply from the start as from-to squares, readable as typed.",
+  packed_uci:
+    "Twelve bits per ply from the start, then padded into URL-safe characters.",
+  occupancy:
+    "Marks filled squares once, then names what sits on each, plus the clocks.",
+  naive_4bit:
+    "Assigns a fixed nibble to every square, empty or not, so length never changes.",
+  gzip_uci:
+    "Runs a general compressor on the move string, then expands bytes for the URL.",
+  gzip_fen:
+    "Runs a general compressor on the board string, then expands bytes for the URL.",
+  lookup_k1024:
+    "Replaces a familiar opening with a short index into a frozen codebook.",
+  hybrid_min:
+    "Tries three codecs and keeps whichever yields the shortest share link.",
+};
 
 const methodAnchorId = (method: string) =>
   METHOD_DETAILS.find((d) => d.method === method)?.id ?? `method-${method}`;
@@ -645,17 +668,39 @@ const PhaseCell = ({
 const MethodNameLink = ({
   method,
   label,
+  showBlurb = false,
 }: {
   method: string;
   label: string;
-}) => (
-  <a
-    href={`#${methodAnchorId(method)}`}
-    className="font-medium underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-    aria-label={`${label}, jump to explanation`}
-  >
-    {label}
-  </a>
+  showBlurb?: boolean;
+}) => {
+  const blurb = showBlurb ? METHOD_BLURB[method] : undefined;
+  return (
+    <div className={blurb ? "space-y-1" : undefined}>
+      <a
+        href={`#${methodAnchorId(method)}`}
+        className="font-medium underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        aria-label={`${label}, jump to explanation`}
+      >
+        {label}
+      </a>
+      {blurb ? (
+        <p className="text-xs text-muted-foreground leading-snug">
+          {blurb}
+        </p>
+      ) : null}
+    </div>
+  );
+};
+
+/**
+ * Prose stays max-w-3xl; scoreboard tables may use up to max-w-5xl.
+ * Horizontal scroll only when the viewport is narrower than the table floor.
+ */
+const WideTableScroll = ({ children }: { children: React.ReactNode }) => (
+  <div className="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 px-4 overflow-x-auto">
+    <div className="mx-auto w-full max-w-5xl">{children}</div>
+  </div>
 );
 
 const LookupCodebookSample = () => (
@@ -951,7 +996,8 @@ export default function CompressionResearchPage() {
   });
 
   return (
-    <main className="container mx-auto max-w-3xl px-4 py-12 md:py-16 [font-family:var(--font-geist-sans),ui-sans-serif,system-ui,sans-serif]">
+    <main className="overflow-x-clip py-12 md:py-16 [font-family:var(--font-geist-sans),ui-sans-serif,system-ui,sans-serif]">
+      <div className="container mx-auto max-w-3xl px-4">
       <p className="text-sm text-muted-foreground mb-6">
         <Link
           href="/"
@@ -1226,8 +1272,8 @@ export default function CompressionResearchPage() {
             the complete URL, not just the payload. Make a prediction, then read
             the means.
           </p>
-          <div className="overflow-x-auto -mx-4 px-4">
-            <table className="w-full min-w-[28rem] text-sm border-collapse">
+          <WideTableScroll>
+            <table className="w-full min-w-md text-sm border-collapse">
               <caption className="caption-top text-left text-muted-foreground mb-3">
                 Checkpoint means from a random Lichess hash sample (
                 {meta.games.toLocaleString()} games,{" "}
@@ -1301,6 +1347,7 @@ export default function CompressionResearchPage() {
                             <MethodNameLink
                               method={row.method}
                               label={row.label}
+                              showBlurb
                             />
                           </td>
                           <td className="py-3 pl-2 align-middle">
@@ -1358,17 +1405,19 @@ export default function CompressionResearchPage() {
               Overlay reads mean ± σ [min–max]. Tall band = observed min–max;
               mid band = ±σ; coloured bar = mean.
             </p>
-          </div>
+          </WideTableScroll>
           <p>
             Occupancy lands around{" "}
             <span className="font-mono text-foreground">
               {format(occupancyUrl, 0)}
             </span>{" "}
             URL characters as a standalone mean, against roughly{" "}
-            {format(nativeUrl, 0)} for native FEN. Packed paths win early and
-            lose later. gzip loses throughout. Among the standalone codecs,
-            occupancy has the shortest overall mean because it stores the
-            current state without growing with the move count.
+            {format(nativeUrl, 0)} for native FEN. The fixed square-by-square
+            encoding sits between those ideas and never adapts: every position
+            costs the same. Packed paths win early and lose later. gzip loses
+            throughout. Among the standalone codecs, occupancy has the shortest
+            overall mean because it stores the current state without growing
+            with the move count.
           </p>
           <p>
             Inference can trim some meta later. The next leap is different:
@@ -1499,8 +1548,8 @@ export default function CompressionResearchPage() {
             favour occupancy. Hybrid hugs the cheaper explanation. Greener cells
             are shorter within each column.
           </p>
-          <div className="overflow-x-auto -mx-4 px-4">
-            <table className="w-full min-w-[32rem] text-sm border-collapse">
+          <WideTableScroll>
+            <table className="w-full min-w-lg text-sm border-collapse">
               <caption className="caption-top text-left text-muted-foreground mb-3">
                 Mean URL length at plies {CHECKPOINTS.map((c) => c.ply).join(", ")}.
                 Four codecs that show the crossover once dictionaries and hybrid
@@ -1546,7 +1595,7 @@ export default function CompressionResearchPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </WideTableScroll>
           <p className="text-muted-foreground">
             At ply 2, hybrid and lookup sit near 25 characters while occupancy
             still carries a full board near 60. By ply 32, occupancy and hybrid
@@ -1639,8 +1688,8 @@ export default function CompressionResearchPage() {
             <span className="font-medium text-foreground">{DEMO_SAN}</span>{" "}
             (<code className="text-sm">{DEMO_UCI}</code>) unless noted.
           </p>
-          <div className="overflow-x-auto -mx-4 px-4">
-            <table className="w-full min-w-[32rem] text-sm border-collapse">
+          <WideTableScroll>
+            <table className="w-full min-w-lg text-sm border-collapse">
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
                   <th className="py-2 pr-3 font-medium">Method</th>
@@ -1680,7 +1729,7 @@ export default function CompressionResearchPage() {
                 })}
               </tbody>
             </table>
-          </div>
+          </WideTableScroll>
           <div className="space-y-0">
             {METHOD_DETAILS.map((detail) => (
               <MethodExplainBlock
@@ -1848,6 +1897,7 @@ curl -L --continue-at - \\
           </p>
         </section>
       </article>
+      </div>
     </main>
   );
 }

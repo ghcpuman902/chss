@@ -46,20 +46,5 @@
     "typescript": "~5.9.3",
     "vitest": "^4.1.10"
   },
-  "pnpm": {
-    "overrides": {
-      "@babel/core": ">=7.29.6",
-      "ajv@<6.14.0": "6.14.0",
-      "brace-expansion@<2": "1.1.16",
-      "brace-expansion@>=2 <5": "2.1.2",
-      "brace-expansion@>=5": "5.0.8",
-      "flatted": ">=3.4.0",
-      "minimatch@<3.1.5": "3.1.5",
-      "minimatch@>=9 <9.0.7": "9.0.9",
-      "picomatch@<2.3.2": "2.3.2",
-      "picomatch@>=4 <4.0.4": "4.0.5",
-      "postcss@<8.5.10": "8.5.23",
-      "sharp": ">=0.35.0"
-    }
-  }
+  "packageManager": "pnpm@11.17.0+sha512.cca3cea332ad254bb84145f966d19f4879615210346fc92c79a047f23a0d7b3cca3c3792f0076ba1f1831d277efbcf0a9119b31a9a60eca7fb3d6231f331ef72"
 }

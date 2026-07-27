@@ -174,10 +174,15 @@ const MonoPayload = ({
   text: string;
   shortest: boolean;
 }) => (
-  <div className={cn("overflow-hidden", PAYLOAD_PREVIEW_CLASS)}>
+  <div
+    className={cn(
+      "overflow-hidden font-mono text-[10px] sm:text-[11px] leading-[1.35]",
+      PAYLOAD_PREVIEW_CLASS,
+    )}
+  >
     <p
       className={cn(
-        "font-mono text-[10px] sm:text-[11px] leading-[1.35] break-all line-clamp-2",
+        "break-all line-clamp-3",
         shortest ? "text-foreground" : "text-foreground/70",
       )}
       aria-label={text}
@@ -196,8 +201,7 @@ const HYBRID_SHORT: Record<CodecMethod, string> = {
   lookup_k1024: "dict",
 };
 
-const PAYLOAD_PREVIEW_CLASS =
-  "min-h-[calc(2*1.35*0.625rem)] sm:min-h-[calc(2*1.35*0.6875rem)]";
+const PAYLOAD_PREVIEW_CLASS = "min-h-[3.5lh]";
 
 const barWidthPct = (chars: number) =>
   Math.min(100, Math.max((chars / SCALE_MAX_CHARS) * 100, 1));
@@ -279,7 +283,7 @@ const HybridMinRow = ({
       )}
       aria-hidden="true"
     >
-      <p className="line-clamp-2">min(path, board, dict)</p>
+      <p className="line-clamp-3">min(path, board, dict)</p>
     </div>
   </div>
 );

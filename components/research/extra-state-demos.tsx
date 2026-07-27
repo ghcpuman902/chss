@@ -257,7 +257,7 @@ const InteractiveBoardPanel = ({
           )}
         </button>
         <p
-          className="min-h-8 flex-1 pt-0.5 text-xs leading-snug text-muted-foreground"
+          className="min-h-[3.5lh] flex-1 pt-0.5 text-xs leading-snug text-muted-foreground"
           aria-live="polite"
         >
           {frame.label}
