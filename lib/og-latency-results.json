@@ -62,7 +62,21 @@
     "speedup_vs_baseline": 8.0
   },
   "production": {
-    "status": "pending_pv1",
+    "status": "pv1_done",
+    "artifact": "benchmark/og/results/prod_it01-03_2026-08-10.json",
+    "logs_artifact": "benchmark/og/results/vercel_logs_it01-03_2026-08-10.json",
+    "summary": {
+      "ply1_whatsapp_curl_cache": "HIT",
+      "ply1_whatsapp_p50_ms": 24,
+      "ply1_twitterbot_cache": "BYPASS (cacheReason=crawler)",
+      "ply1_twitterbot_p50_ms": 173,
+      "ply1_facebook_p50_ms": 381,
+      "midgame_cold_miss_twitterbot_ms": "160-220",
+      "prior_cold_ttfb_ms": 1100,
+      "prerender_header_seen": false,
+      "log_cache_reasons": { "crawler": 22, "collapsed": 24, "empty": 54 }
+    },
+    "verdict": "Latency goal met (~173ms Twitterbot ply-1 vs ~1.1s). PRERENDER prediction wrong for crawler UAs — they BYPASS CDN.",
     "commands": [
       "node benchmark/og/prod-probe.mjs --tag it01-03",
       "vercel logs chss.chat --since 10m --json > /tmp/og.jsonl",

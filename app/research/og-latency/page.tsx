@@ -148,14 +148,24 @@ export default function OgLatencyResearchPage() {
       </ol>
 
       <h2 className="mt-12 font-serif text-2xl tracking-tight">
-        What production still has to confirm
+        What production showed
       </h2>
       <p className="mt-4 leading-relaxed">
-        Local numbers cannot see CDN fill or crawler user-agents. After deploy,
-        the probe walks fixtures with Twitterbot / Facebook / WhatsApp headers
-        and joins Vercel logs for <code className="text-sm">cacheReason</code>.
-        Success looks like ply-1 returning PRERENDER, and a never-seen midgame
-        cold miss landing well under the prior ~1.1&nbsp;s.
+        After deploy we probed the same fixtures with crawler user-agents. The
+        latency goal held: Twitterbot ply-1 landed around{" "}
+        {results.production.summary.ply1_twitterbot_p50_ms}&nbsp;ms (was ~1.1&nbsp;s),
+        and cold midgame misses sat near{" "}
+        {results.production.summary.midgame_cold_miss_twitterbot_ms}&nbsp;ms. WhatsApp
+        and curl then hit the CDN in ~{results.production.summary.ply1_whatsapp_p50_ms}
+        &nbsp;ms.
+      </p>
+      <p className="mt-4 leading-relaxed">
+        The PRERENDER prediction was wrong for the interesting clients.
+        Twitterbot and Facebook get <code className="text-sm">BYPASS</code> with{" "}
+        <code className="text-sm">cacheReason=crawler</code> — they do not keep a
+        CDN HIT the way WhatsApp does. Concurrent probes also collapse into
+        BYPASS. So the win is mostly a faster origin (Takumi), not a free static
+        edge hit for every crawler.
       </p>
 
       <pre className="mt-4 overflow-x-auto rounded-md bg-muted/40 p-4 text-xs leading-relaxed">

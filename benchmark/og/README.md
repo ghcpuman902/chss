@@ -90,4 +90,6 @@ If `fixtures_sha` changes, before/after rows are not comparable.
 | Baseline | next/og | 55.7 ms | 0% | 151 |
 | After IT-01..03 | takumi-js | 7.0 ms | 100% | 314 |
 
-See `LEDGER.md` for predictions vs outcomes, including the WASM path we measured and did not ship.
+See `LEDGER.md` for predictions vs outcomes, including the WASM path we measured and did not ship, and PV-1 production numbers (`prod_it01-03_2026-08-10.json`).
+
+**PV-1 headline:** Twitterbot ply-1 ~173 ms (was ~1.1 s); WhatsApp/curl HIT ~20 ms; crawler UAs `BYPASS` with `cacheReason=crawler` — no `PRERENDER` header observed.

@@ -76,23 +76,32 @@ Verdict: **shipped locally**. Prod confirmation is PV-2 (move → wait 2s → pr
 
 ## PV-1 / PV-2 / PV-3 — Production
 
-Scripts are ready. You deploy, then:
-
-```bash
-bash benchmark/og/run-pv1.sh it01-03
-# or step-by-step — see README
-```
-
-### PV-1 (after IT-01..03)
+### PV-1 (after IT-01..03) — done
 
 Prediction: ply-1 → PRERENDER; cold midgame well under prior ~1.1s.  
-After: `results/prod_*.json` + `results/vercel_logs_*.json`  
-Verdict: _pending — run after deploy_
+After: `results/prod_it01-03_2026-08-10.json` + `results/vercel_logs_it01-03_2026-08-10.json`  
+(`fixtures_sha` = `c1bfa31e9cb2d3a7`, git `bcbafe5`)
+
+Observed (`x-vercel-cache` / logs `cacheReason`):
+
+| Slice | Cache | TTFB |
+|---|---|---|
+| ply-1 WhatsApp / curl | HIT (40/40) | p50 **~20–24 ms** |
+| ply-1 Twitterbot | BYPASS (`cacheReason=crawler`) | p50 **~173 ms** (max 842) |
+| ply-1 facebookexternalhit | BYPASS (`crawler`) | p50 **~381 ms** |
+| midgame MISS (cold, Twitterbot) | MISS | **~160–220 ms** |
+| midgame after warm (WhatsApp/curl) | HIT | p50 **~20 ms** |
+| start first hit (Twitterbot) | BYPASS | **982 ms** (cold function outlier) |
+
+Vercel log reasons in the window: `crawler` 22, `collapsed` 24, empty 54 (mostly HIT). No `PRERENDER` string appeared in probe headers.
+
+Verdict: **latency goal met; PRERENDER prediction wrong for crawler UAs.**  
+Takumi + coverage still win: first-share Twitterbot ply-1 is ~173 ms vs prior ~1.1 s, and cold midgame MISS is ~200 ms. Twitterbot / Facebook intentionally **BYPASS** the CDN (`cacheReason=crawler`); WhatsApp and curl get normal HITs. Collapsed concurrent probes also BYPASS. Next lever if crawlers stay slow: make origin cold path even cheaper / ensure prerendered bytes are served without crawler bypass — not gating Share.
 
 ### PV-2 (after IT-05)
 
 Prediction: move → wait 2s → probe exact `b-…` → HIT.  
-Verdict: _pending — run after deploy_
+Verdict: _pending — separate probe after a real move + prewarm_
 
 ### PV-3 (steady state, +1 day)
 
