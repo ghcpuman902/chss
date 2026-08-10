@@ -349,7 +349,7 @@ export const useChessBoardController = ({
           type: "move_applied",
           from: ui.selectedSquare,
           to: square,
-          canUndo: (historyStepRef.current || 0) > 0,
+          canUndo: historyRef.current.length > 1,
         });
 
         try {
@@ -415,7 +415,7 @@ export const useChessBoardController = ({
         type: "move_applied",
         from: promotionFrom,
         to: promotionTo,
-        canUndo: (historyStepRef.current || 0) > 0,
+        canUndo: historyRef.current.length > 1,
       });
 
       try {

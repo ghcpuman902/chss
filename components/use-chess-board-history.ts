@@ -103,30 +103,22 @@ export const useChessBoardHistory = ({
   useEffect(() => {
     try {
       if (window.history?.replaceState) {
-        const current = window.history.state as {
-          step?: number;
-          code?: string;
-          fen?: string;
-        } | null;
-        if (!current || typeof current.step !== "number") {
-          window.history.replaceState(
-            {
-              step: 0,
-              code: initialCode,
-              fen: gameStateRef.current.fen,
-              sideToMove: gameStateRef.current.sideToMove,
-              uci: gameStateRef.current.uci,
-            },
-            "",
-            window.location.pathname + window.location.search,
-          );
-        } else {
-          historyStepRef.current = current.step || 0;
-        }
-        dispatchUi({
-          type: "set_can_undo",
-          value: historyStepRef.current > 0,
-        });
+        // Always start this mount at step 0. Leftover history.state.step from a
+        // prior pushState (e.g. refresh) must not enable Undo/Share — the
+        // in-memory move stack is only [initialState] until the user moves.
+        historyStepRef.current = 0;
+        window.history.replaceState(
+          {
+            step: 0,
+            code: initialCode,
+            fen: gameStateRef.current.fen,
+            sideToMove: gameStateRef.current.sideToMove,
+            uci: gameStateRef.current.uci,
+          },
+          "",
+          window.location.pathname + window.location.search,
+        );
+        dispatchUi({ type: "set_can_undo", value: false });
         setDocumentTitle(gameStateRef.current, undefined);
       }
     } catch {
