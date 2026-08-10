@@ -1,0 +1,26 @@
+{
+  "$schema": "https://react.doctor/schema/config.json",
+  "ignore": {
+    "files": [
+      ".venv-benchmark/**",
+      "benchmark/**",
+      "data/**",
+      "lib/keys*.json",
+      "lib/*_counts*.json",
+      "lib/compression-benchmark*.json"
+    ],
+    "overrides": [
+      {
+        "files": ["app/research/compression/page.tsx"],
+        "rules": [
+          "react-doctor/anchor-target-exists",
+          "react-doctor/no-giant-component"
+        ]
+      },
+      {
+        "files": ["components/pieces.tsx", "lib/piece-svg-cache.ts"],
+        "rules": ["react-doctor/rendering-svg-precision"]
+      }
+    ]
+  }
+}

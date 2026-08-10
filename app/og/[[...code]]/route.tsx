@@ -3,10 +3,16 @@ import { parseUrlSegment } from "@/lib/utils";
 import { getCachedOgPng } from "@/lib/og-render";
 import ogTop from "@/lib/og-top-codes.json";
 
-export const runtime = "nodejs";
+// With cacheComponents: do not export `runtime` / `dynamicParams`
+// (Node is the default; unknown OG codes still resolve on demand).
 
-/** Allow on-demand OG for positions outside the lookup top table. */
-export const dynamicParams = true;
+const IMMUTABLE_PNG_HEADERS = {
+  "Content-Type": "image/png",
+  "Cache-Control": "public, max-age=31536000, immutable",
+  "CDN-Cache-Control": "public, max-age=31536000, immutable",
+  // Warm edge + browser: crawlers often re-fetch; immutable still revalidates via URL
+  "Vercel-CDN-Cache-Control": "public, max-age=31536000, immutable",
+} as const;
 
 /** Prerender the most common lookup-prefix boards at `next build`. */
 export function generateStaticParams() {
@@ -28,11 +34,7 @@ export async function GET(
 
     return new Response(new Uint8Array(buf), {
       status: 200,
-      headers: {
-        "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "CDN-Cache-Control": "public, max-age=31536000, immutable",
-      },
+      headers: IMMUTABLE_PNG_HEADERS,
     });
   } catch (e: unknown) {
     console.error("[og]", e instanceof Error ? e.message : String(e));

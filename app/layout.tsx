@@ -4,22 +4,25 @@ import "./globals.css";
 import { Footer } from "@/components/footer";
 import { FloatingTitle } from "@/components/floating-title";
 import { AppProviders } from "@/components/providers";
-import { Analytics } from "@vercel/analytics/next"
+import { DeferredAnalytics } from "@/components/deferred-analytics";
 import { START_OG_CODE } from "@/lib/og-encoding";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const besley = Besley({
   variable: "--font-besley",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -66,7 +69,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </AppProviders>
-        <Analytics />
+        <DeferredAnalytics />
       </body>
     </html>
   );

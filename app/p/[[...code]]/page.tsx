@@ -1,94 +1,144 @@
 // app/p/[[...code]]/page.tsx
 
-import { parseCode, generateCode } from '@/lib/state';
-import { parseUrlSegment } from '@/lib/utils';
-import { buildOgCode } from '@/lib/og-encoding';
-import { ChessBoard } from '@/components/chess-board';
-import { redirect } from 'next/navigation';
-import { Move } from 'chess.js';
-import { isRawUciString, readUciMoveAt } from '@/lib/uci';
+import { Suspense, cache } from "react";
+import { parseCode, generateCode, START_FEN, type ParsedState } from "@/lib/state";
+import { parseUrlSegment } from "@/lib/utils";
+import { buildOgCode } from "@/lib/og-encoding";
+import { ChessBoard } from "@/components/chess-board";
+import { redirect } from "next/navigation";
+import type { Move } from "chess.js";
+import { isRawUciString, readUciMoveAt } from "@/lib/uci";
 
-export async function generateMetadata(props: PageProps<'/p/[[...code]]'>) {
-  // Decode to get side-to-move → title + OG image path
-  const { code } = await props.params;
+type SearchP = string | string[] | undefined;
+
+/** Per-request dedupe between generateMetadata + page (server-cache-react). */
+const resolveGameState = cache((codeString: string): ParsedState => {
+  try {
+    return parseCode(codeString);
+  } catch {
+    return {
+      fen: START_FEN,
+      sideToMove: "w",
+    };
+  }
+});
+
+const PIECE_NAME: Record<string, string> = {
+  p: "pawn",
+  n: "knight",
+  b: "bishop",
+  r: "rook",
+  q: "queen",
+  k: "king",
+};
+
+const resolvePerspective = (
+  codeString: string,
+  sideToMove: "w" | "b",
+  p: SearchP,
+): "white" | "black" => {
+  if (p === "w" || p === "b") return p === "w" ? "white" : "black";
+  if (!codeString) return "white";
+  return sideToMove === "w" ? "white" : "black";
+};
+
+const pickSearchP = (p: SearchP): "w" | "b" | undefined =>
+  p === "w" || p === "b" ? p : undefined;
+
+export async function generateMetadata(props: PageProps<"/p/[[...code]]">) {
+  const [{ code }, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
   const codeString = parseUrlSegment(code);
-  const { p } = (await (props.searchParams)) || {};
+  const p = pickSearchP(searchParams?.p);
 
   let title = "Your move";
-  let ogCode = '';
+  let ogCode = "";
   try {
-    const parsed = parseCode(codeString);
+    const parsed = resolveGameState(codeString);
     const { sideToMove } = parsed;
 
-    // Derive last move details (piece + to-square) when UCI is available
     let lastToSquare: string | undefined;
     let lastPieceName: string | undefined;
-    // Try to reconstruct from URL when it encodes raw UCI directly
     const uciCandidate = (() => {
-      if (!codeString) return '';
-      if (codeString.startsWith('u-')) return codeString.slice(2);
-      if (codeString.startsWith('f-')) return '';
-      if (/^[tponzgdh]-/.test(codeString)) return parsed.uci || '';
+      if (!codeString) return "";
+      if (codeString.startsWith("u-")) return codeString.slice(2);
+      if (codeString.startsWith("f-")) return "";
+      if (/^[tponzgdh]-/.test(codeString)) return parsed.uci || "";
       return codeString;
     })();
     const useUci = !!uciCandidate && isRawUciString(uciCandidate);
-    const uciToSimulate = useUci ? uciCandidate : (parsed.uci || '');
+    const uciToSimulate = useUci ? uciCandidate : parsed.uci || "";
     if (uciToSimulate && uciToSimulate.length >= 4) {
-      const { Chess } = await import('chess.js');
+      const { Chess } = await import("chess.js");
       const chess = new Chess();
-      for (let i = 0; i < uciToSimulate.length;) {
+      for (let i = 0; i < uciToSimulate.length; ) {
         const chunk = readUciMoveAt(uciToSimulate, i);
         if (!chunk) break;
         const res = chess.move({
           from: chunk.from,
           to: chunk.to,
-          promotion: chunk.promotion as Move['promotion'] | undefined,
+          promotion: chunk.promotion as Move["promotion"] | undefined,
         });
         if (!res) break;
         i += chunk.step;
         if (i >= uciToSimulate.length) {
           lastToSquare = String(res.to).toLowerCase();
-          const pieceMap: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
-          lastPieceName = pieceMap[String(res.piece).toLowerCase()] || undefined;
+          lastPieceName = PIECE_NAME[String(res.piece).toLowerCase()];
         }
       }
     }
 
     if (lastToSquare && lastPieceName) {
-      const movedColor = sideToMove === 'w' ? 'Black' : 'White';
-      const nextColor = sideToMove === 'w' ? "white" : "black";
+      const movedColor = sideToMove === "w" ? "Black" : "White";
+      const nextColor = sideToMove === "w" ? "white" : "black";
       title = `${movedColor} ${lastPieceName} to ${lastToSquare}, ${nextColor}'s turn`;
     } else {
-      // Fallback: we don't know the last move detail (e.g., short u-keys)
-      const nextColor = sideToMove === 'w' ? "White" : "Black";
+      const nextColor = sideToMove === "w" ? "White" : "Black";
       title = `${nextColor}'s turn`;
     }
-    // Determine perspective for OG: query param overrides, else side-to-move; empty code -> white
-    const perspectiveLetter: 'w' | 'b' = p === 'w' || p === 'b' ? p : (codeString ? sideToMove : 'w');
+    const perspectiveLetter: "w" | "b" =
+      p ?? (codeString ? sideToMove : "w");
     ogCode = buildOgCode(parsed.fen, perspectiveLetter);
-  } catch { }
+  } catch {
+    /* keep defaults */
+  }
   return {
     title,
     openGraph: { title, images: [`https://chss.chat/og/${ogCode}.png`] },
-    twitter: { card: 'summary_large_image', title, images: [`https://chss.chat/og/${ogCode}.png`] },
+    twitter: {
+      card: "summary_large_image" as const,
+      title,
+      images: [`https://chss.chat/og/${ogCode}.png`],
+    },
   };
 }
 
-export default async function Page(props: PageProps<'/p/[[...code]]'>) {
-  const { code } = await props.params;
-  const codeString = parseUrlSegment(code);
-  const { p } = await props.searchParams
+const BoardFallback = () => (
+  <main className="bg-background">
+    <section className="relative overflow-hidden">
+      <div className="container mx-auto max-w-2xl px-4 py-24">
+        <div
+          className="mx-auto aspect-square w-full max-w-md animate-pulse rounded-sm bg-muted"
+          aria-hidden="true"
+        />
+      </div>
+    </section>
+  </main>
+);
 
-  let gameState;
-  try {
-    gameState = parseCode(codeString);
-  } catch {
-    // Fallback to initial position
-    gameState = {
-      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-      sideToMove: 'w' as const
-    };
-  }
+async function PlayPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ code?: string[] }>;
+  searchParams: Promise<{ p?: string | string[] }>;
+}) {
+  const [{ code }, { p: rawP }] = await Promise.all([params, searchParams]);
+  const codeString = parseUrlSegment(code);
+  const p = pickSearchP(rawP);
+  const gameState = resolveGameState(codeString);
 
   // Canonicalize URL:
   // - Bare UCI and native u-<UCI> history: keep as-is for detailed titles / demos
@@ -117,30 +167,27 @@ export default async function Page(props: PageProps<'/p/[[...code]]'>) {
     redirect(`/p/${encodeURIComponent(preferred)}${search}`);
   }
 
-  // Determine perspective:
-  // 1. If 'p' parameter is provided, use it
-  // 2. For empty board (no code), default to white perspective
-  // 3. Otherwise, use side-to-move perspective (opponent's view)
-  let perspective: 'white' | 'black';
-  if (p === 'w' || p === 'b') {
-    perspective = p === 'w' ? 'white' : 'black';
-  } else if (!codeString || codeString === '') {
-    perspective = 'white'; // Default to white for empty board
-  } else {
-    perspective = gameState.sideToMove === 'w' ? 'white' : 'black';
-  }
+  const perspective = resolvePerspective(
+    codeString,
+    gameState.sideToMove,
+    p,
+  );
 
   return (
     <main className="bg-background">
-      {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="container max-w-2xl mx-auto px-4 py-24">
-          <ChessBoard
-            initialState={gameState}
-            perspective={perspective}
-          />
+        <div className="container mx-auto max-w-2xl px-4 py-24">
+          <ChessBoard initialState={gameState} perspective={perspective} />
         </div>
       </section>
     </main>
+  );
+}
+
+export default function Page(props: PageProps<"/p/[[...code]]">) {
+  return (
+    <Suspense fallback={<BoardFallback />}>
+      <PlayPage params={props.params} searchParams={props.searchParams} />
+    </Suspense>
   );
 }

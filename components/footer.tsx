@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+/** Module-scope — avoids request-time Date (Cache Components / static shell). */
+const COPYRIGHT_YEAR = 2026;
+
 export const Footer = () => {
   return (
     <footer className="border-t bg-muted/30">
@@ -8,7 +11,7 @@ export const Footer = () => {
           <div className="flex items-center gap-2">
             <span className="font-semibold">chss.chat</span>
             <span className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()}
+              © {COPYRIGHT_YEAR}
             </span>
           </div>
           <nav

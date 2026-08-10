@@ -938,13 +938,11 @@ export default function CompressionResearchPage() {
   };
 
   const bestUrl = Math.min(...table.map((r) => r.url));
-  const bestBaselineUrl = Math.min(
-    ...table
-      .filter((r) =>
-        (BASELINE_METHODS as readonly string[]).includes(r.method),
-      )
-      .map((r) => r.url),
-  );
+  let bestBaselineUrl = Number.POSITIVE_INFINITY;
+  for (const r of table) {
+    if (!(BASELINE_METHODS as readonly string[]).includes(r.method)) continue;
+    if (r.url < bestBaselineUrl) bestBaselineUrl = r.url;
+  }
   const maxUrl = Math.max(
     ...table.map((r) =>
       Math.max(r.url, enrichSpread(r.method, "url", r.url, r.url_min, r.url_max, r.url_std).max ?? r.url),

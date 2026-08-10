@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { unstable_cache } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { createElement } from "react";
 import OGTemplate, { OG_SIZE } from "@/app/og/[[...code]]/og-template";
 
@@ -20,19 +20,19 @@ async function renderOgPngBase64(code: string): Promise<string> {
 }
 
 /**
- * Render + Data-Cache the PNG for an OG code.
+ * Cached PNG bytes for an OG code (`b-…` / legacy `o-…`).
+ * `use cache` + cacheLife('max') → first hit pays Satori; later hits are Data-Cache.
  * Cache stores base64 (JSON-serializable); Buffer is rebuilt on read.
- * First hit pays Satori; later hits (incl. crawlers after prewarm) are cheap.
  */
+async function getCachedOgPngBase64(code: string): Promise<string> {
+  "use cache";
+  cacheLife("max");
+  cacheTag(`og:${code.slice(0, 80)}`);
+  return renderOgPngBase64(code);
+}
+
 export const getCachedOgPng = async (rawCode: string): Promise<Buffer> => {
   const code = stripExtension(rawCode.trim());
-  const b64 = await unstable_cache(
-    async (c: string) => renderOgPngBase64(c),
-    ["og-png-v5-b64"],
-    {
-      revalidate: false,
-      tags: [`og:${code.slice(0, 80)}`],
-    },
-  )(code);
+  const b64 = await getCachedOgPngBase64(code);
   return Buffer.from(b64, "base64");
 };

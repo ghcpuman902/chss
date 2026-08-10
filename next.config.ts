@@ -1,10 +1,16 @@
 import type { NextConfig } from "next";
-const path = require('path')
+import path from "path";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Partial Prerendering + `use cache` (replaces experimental.ppr / unstable_cache)
+  cacheComponents: true,
+  experimental: {
+    // Tree-shake lucide / radix barrels → smaller client JS (LCP / INP)
+    optimizePackageImports: ["lucide-react", "radix-ui"],
+  },
   turbopack: {
-    root: path.join(__dirname, '..'),
+    // Keep resolution rooted at this app (not the parent monorepo folder)
+    root: path.join(__dirname),
   },
 };
 

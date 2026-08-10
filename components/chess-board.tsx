@@ -1,19 +1,10 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
-import type React from 'react';
-import { PawnIcon, KnightIcon, BishopIcon, RookIcon, QueenIcon, KingIcon } from './pieces';
-import { useRouter } from 'next/navigation';
-import { makeMove, generateCode, parseCode, type ParsedState } from '@/lib/state-core';
-import { buildOgCode, buildOgPath } from '@/lib/og-encoding';
-import { prewarmOgImage } from '@/app/actions/prewarm-og';
-import { buildShareTitle } from '@/lib/share-title';
-import { TurnIndicator, type GameInfo, type Outcome, type DrawReason } from './turn-indicator';
-import { Chess, type Move, type Square } from 'chess.js';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { readUciMoveAt } from '@/lib/uci';
-import { Undo2 } from 'lucide-react';
+import type { ParsedState } from '@/lib/state-core';
+import { TurnIndicator } from './turn-indicator';
+import { ChessBoardGrid } from './chess-board-grid';
+import { ChessBoardActions } from './chess-board-actions';
+import { useChessBoardController } from './use-chess-board-controller';
 
 interface ChessBoardProps {
   initialState: ParsedState;
@@ -21,681 +12,86 @@ interface ChessBoardProps {
   onStateChange?: (newState: ParsedState) => void;
 }
 
-type PieceKey = 'wP' | 'wN' | 'wB' | 'wR' | 'wQ' | 'wK' | 'bP' | 'bN' | 'bB' | 'bR' | 'bQ' | 'bK';
-type PieceComponentType = React.FC<React.SVGProps<SVGSVGElement>>;
+const FILES_WHITE = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
+const FILES_BLACK = ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] as const;
+const RANKS_WHITE = ['8', '7', '6', '5', '4', '3', '2', '1'] as const;
+const RANKS_BLACK = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
 
-const PIECE_COMPONENT: Record<PieceKey, PieceComponentType> = {
-  wP: PawnIcon,
-  wN: KnightIcon,
-  wB: BishopIcon,
-  wR: RookIcon,
-  wQ: QueenIcon,
-  wK: KingIcon,
-  bP: PawnIcon,
-  bN: KnightIcon,
-  bB: BishopIcon,
-  bR: RookIcon,
-  bQ: QueenIcon,
-  bK: KingIcon,
-};
+export const ChessBoard = ({
+  initialState,
+  perspective,
+  onStateChange,
+}: ChessBoardProps) => {
+  const {
+    gameState,
+    ui,
+    chessMemo,
+    indicatorInfo,
+    isTerminal,
+    handleSquareClick,
+    handleSquareKeyDown,
+    handleChoosePromotion,
+    handlePromotionOpenChange,
+    handleShare,
+    handleUndo,
+    handleNewGame,
+  } = useChessBoardController({ initialState, perspective, onStateChange });
 
-const legalTargetsFrom = (chess: Chess, from: string): string[] => {
-  try {
-    const moves = chess.moves({ square: from as Square, verbose: true }) as Move[];
-    return moves.map((m) => m.to);
-  } catch {
-    return [];
-  }
-};
-
-export const ChessBoard = ({ initialState, perspective, onStateChange }: ChessBoardProps) => {
-  const [gameState, setGameState] = useState<ParsedState>(initialState);
-  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
-  const [legalMoves, setLegalMoves] = useState<string[]>([]);
-  const [lastMove, setLastMove] = useState<{ from: string, to: string } | null>(null);
-  const historyRef = useRef<ParsedState[]>([initialState]);
-  const [canUndo, setCanUndo] = useState<boolean>(false);
-  const historyStepRef = useRef<number>(0);
-  const initialCodeRef = useRef<string | null>(null);
-  if (initialCodeRef.current === null) {
-    initialCodeRef.current = generateCode(initialState);
-  }
-  const gameStateRef = useRef<ParsedState>(initialState);
-  const onStateChangeRef = useRef(onStateChange);
-  const router = useRouter();
-
-  useEffect(() => {
-    gameStateRef.current = gameState;
-  }, [gameState]);
-
-  useEffect(() => {
-    onStateChangeRef.current = onStateChange;
-  }, [onStateChange]);
-
-  // Promotion picker state
-  const [promotionOpen, setPromotionOpen] = useState<boolean>(false);
-  const promotionFromRef = useRef<string | null>(null);
-  const promotionToRef = useRef<string | null>(null);
-  const [promotionAnchor, setPromotionAnchor] = useState<string | null>(null);
-  const [promotionSide, setPromotionSide] = useState<'w' | 'b'>('w');
-  const promotionBaseStateRef = useRef<ParsedState | null>(null);
-  const promotionAppliedRef = useRef<boolean>(false);
-
-  // Memoize chess instance for read-only queries
-  const chessMemo = useMemo(() => {
-    try {
-      return new Chess(gameState.fen);
-    } catch {
-      return new Chess();
-    }
-  }, [gameState.fen]);
-
-  // Aggregate game info for the TurnIndicator (dynamic island)
-  const indicatorInfo: GameInfo = useMemo(() => {
-    const moveCount = chessMemo.moves().length;
-    const isCheck = typeof chessMemo.isCheck === 'function' ? chessMemo.isCheck() : false;
-    const isCheckmate = typeof chessMemo.isCheckmate === 'function' ? chessMemo.isCheckmate() : false;
-    const isStalemate = typeof chessMemo.isStalemate === 'function' ? chessMemo.isStalemate() : false;
-    const isThreefold = typeof (chessMemo as Chess).isThreefoldRepetition === 'function' ? (chessMemo as Chess).isThreefoldRepetition() : false;
-    const isFifty = typeof (chessMemo as Chess).isDrawByFiftyMoves === 'function' ? (chessMemo as Chess).isDrawByFiftyMoves() : false;
-    const isInsufficient = typeof chessMemo.isInsufficientMaterial === 'function' ? chessMemo.isInsufficientMaterial() : false;
-    const isDraw = typeof chessMemo.isDraw === 'function' ? chessMemo.isDraw() : false;
-
-    const outcome: Outcome = isCheckmate ? 'checkmate' : (isStalemate || isDraw || isThreefold || isFifty || isInsufficient) ? 'draw' : 'ongoing';
-    const drawReason: DrawReason | undefined = outcome === 'draw'
-      ? (isStalemate ? 'stalemate' : isFifty ? 'fifty-move' : isThreefold ? 'threefold' : isInsufficient ? 'insufficient' : 'other')
-      : undefined;
-    const info: GameInfo = {
-      fen: gameState.fen,
-      sideToMove: gameState.sideToMove,
-      isCheck,
-      isCheckmate,
-      isStalemate,
-      isDraw,
-      outcome,
-      drawReason,
-      onlyMove: moveCount === 1,
-      legalMoves: [],
-      lastMove,
-      code: generateCode(gameState),
-      perspective,
-    };
-    return info;
-  }, [chessMemo, gameState, lastMove, perspective]);
-
-  const isTerminal = indicatorInfo.outcome !== 'ongoing';
-
-  // Server Data-Cache + CDN warm so Share / messengers hit a rendered PNG.
-  const lastWarmedOgRef = useRef<string | null>(null);
-  const prewarmOg = useCallback((fen?: string, side?: 'w' | 'b') => {
-    const nextFen = fen ?? gameState.fen;
-    const nextSide = side ?? gameState.sideToMove;
-    const code = buildOgCode(nextFen, nextSide);
-    const ogUrl = buildOgPath(
-      nextFen,
-      nextSide,
-      typeof window !== 'undefined' ? window.location.origin : '',
-    );
-    if (lastWarmedOgRef.current === code) return;
-    lastWarmedOgRef.current = code;
-
-    // 1) Server: same `b-…` code as `/og/{code}.png` (log will match the GET)
-    void prewarmOgImage(code).catch(() => {});
-
-    // 2) Client: hit the route so CDN / browser cache the bytes too
-    if (typeof window !== 'undefined') {
-      fetch(ogUrl, { cache: 'force-cache', keepalive: true }).catch(() => {});
-    }
-  }, [gameState.fen, gameState.sideToMove]);
-
-  // Warm as soon as the position changes (after a move, before Share)
-  useEffect(() => {
-    prewarmOg();
-  }, [prewarmOg]);
-
-  // Initialize history state and handle browser back/forward
-  useEffect(() => {
-    const computeLastMoveDetails = (uci?: string): { to?: string; pieceName?: string } => {
-      try {
-        if (!uci || uci.length < 4) return {};
-        const chess = new Chess();
-        for (let i = 0; i < uci.length;) {
-          const chunk = readUciMoveAt(uci, i);
-          if (!chunk) break;
-          const res = chess.move({
-            from: chunk.from,
-            to: chunk.to,
-            promotion: chunk.promotion as Move['promotion'] | undefined,
-          });
-          if (!res) break;
-          i += chunk.step;
-          if (i >= uci.length) {
-            const pieceMap: Record<string, string> = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
-            return { to: String(res.to).toLowerCase(), pieceName: pieceMap[String(res.piece).toLowerCase()] };
-          }
-        }
-      } catch {}
-      return {};
-    };
-
-    const setDocumentTitle = (state: ParsedState, details?: { to?: string; pieceName?: string }) => {
-      try {
-        const site = 'chss.chat';
-        const nextColorLc = state.sideToMove === 'w' ? 'white' : 'black';
-        if (details && details.to && details.pieceName) {
-          const movedColor = state.sideToMove === 'w' ? 'Black' : 'White';
-          document.title = `${movedColor} ${details.pieceName} to ${details.to}, ${nextColorLc}'s turn | ${site}`;
-        } else {
-          document.title = `${nextColorLc}'s turn | ${site}`;
-        }
-      } catch {}
-    };
-
-    const getCodeFromLocation = (): string => {
-      try {
-        const path = window.location.pathname || '';
-        const prefix = '/p';
-        const idx = path.indexOf(prefix);
-        if (idx === -1) return '';
-        const after = path.slice(idx + prefix.length);
-        if (!after || after === '/') return '';
-        const seg = after.startsWith('/') ? after.slice(1) : after;
-        return decodeURIComponent(seg);
-      } catch {
-        return '';
-      }
-    };
-
-    // Ensure current entry has a baseline state
-    try {
-      if (window.history && window.history.replaceState) {
-        const current = window.history.state as { step?: number; code?: string; fen?: string } | null;
-        if (!current || typeof current.step !== 'number') {
-          window.history.replaceState(
-            { step: 0, code: initialCodeRef.current, fen: gameStateRef.current.fen, sideToMove: gameStateRef.current.sideToMove, uci: gameStateRef.current.uci },
-            '',
-            window.location.pathname + window.location.search,
-          );
-        } else {
-          historyStepRef.current = current.step || 0;
-        }
-        setCanUndo(historyStepRef.current > 0);
-        setDocumentTitle(gameStateRef.current, undefined);
-      }
-    } catch {}
-
-    const onPopState = (event: PopStateEvent) => {
-      try {
-        const codeStr = getCodeFromLocation();
-        const step = event.state && typeof event.state.step === 'number' ? event.state.step : (codeStr && codeStr !== initialCodeRef.current ? 1 : 0);
-        historyStepRef.current = step;
-        const desiredLen = Math.max(1, step + 1);
-        if (historyRef.current.length !== desiredLen) {
-          historyRef.current.length = desiredLen;
-        }
-
-        // Prefer in-memory history or history.state fen so u- keys work without the map
-        const fromHistory = historyRef.current[desiredLen - 1];
-        const stateFromHistoryApi = event.state && typeof event.state.fen === 'string'
-          ? {
-              fen: event.state.fen as string,
-              sideToMove: (event.state.sideToMove === 'b' ? 'b' : 'w') as 'w' | 'b',
-              uci: typeof event.state.uci === 'string' ? event.state.uci as string : undefined,
-              uKey: typeof event.state.uKey === 'string' ? event.state.uKey as string : undefined,
-            }
-          : null;
-        const parsed = fromHistory ?? stateFromHistoryApi ?? parseCode(codeStr);
-        historyRef.current[desiredLen - 1] = parsed;
-
-        setGameState(parsed);
-        setSelectedSquare(null);
-        setLegalMoves([]);
-        setLastMove(null);
-        setCanUndo(historyStepRef.current > 0);
-        onStateChangeRef.current?.(parsed);
-        const details = computeLastMoveDetails(parsed.uci);
-        setDocumentTitle(parsed, details);
-      } catch {}
-    };
-    window.addEventListener('popstate', onPopState);
-    return () => {
-      window.removeEventListener('popstate', onPopState);
-    };
-  }, []);
-
-  const handleSquareClick = useCallback((square: string) => {
-    if (isTerminal) return;
-
-    // If no square is selected, select this square if it has a piece of the current player
-    if (!selectedSquare) {
-      const piece = chessMemo.get(square as Square);
-
-      if (piece && piece.color === gameState.sideToMove) {
-        setSelectedSquare(square);
-        setLegalMoves(legalTargetsFrom(chessMemo, square));
-        return;
-      }
-    }
-
-    // If a square is selected, try to make a move
-    if (selectedSquare === square) {
-      // Deselect if clicking the same square
-      setSelectedSquare(null);
-      setLegalMoves([]);
-      return;
-    }
-
-    // Check if this is a legal move
-    if (legalMoves.includes(square) && selectedSquare) {
-      // Detect if this move is a promotion; if so, open promotion picker instead of moving immediately
-      try {
-        const verboseMoves = chessMemo.moves({ square: selectedSquare as Square, verbose: true }) as Move[];
-        const candidate = verboseMoves.find((m: Move) => m.to === square);
-        if (candidate && (candidate as Move).promotion) {
-          // Initialize promotion context
-          promotionFromRef.current = selectedSquare;
-          promotionToRef.current = square;
-          setPromotionAnchor(square);
-          setPromotionSide(gameState.sideToMove);
-          promotionBaseStateRef.current = gameState;
-          promotionAppliedRef.current = false;
-          setPromotionOpen(true);
-          return;
-        }
-      } catch {}
-
-      const moveResult = makeMove(gameState, selectedSquare, square);
-
-      if (moveResult.success && moveResult.newState) {
-        setGameState(moveResult.newState);
-        setLastMove({ from: selectedSquare, to: square });
-        setSelectedSquare(null);
-        setLegalMoves([]);
-
-        // Push to in-session history and update undo availability
-        historyRef.current.push(moveResult.newState);
-
-        // Update URL via pushState so browser back undoes the move
-        const newCode = generateCode(moveResult.newState);
-        const newUrl = newCode ? `/p/${encodeURIComponent(newCode)}` : '/p';
-        if (typeof window !== 'undefined' && window.history && window.history.pushState) {
-          const nextStep = (historyStepRef.current || 0) + 1;
-          historyStepRef.current = nextStep;
-          window.history.pushState({
-            step: nextStep,
-            code: newCode,
-            fen: moveResult.newState.fen,
-            sideToMove: moveResult.newState.sideToMove,
-            uci: moveResult.newState.uci,
-            uKey: moveResult.newState.uKey,
-          }, '', newUrl);
-        }
-        setCanUndo((historyStepRef.current || 0) > 0);
-
-        // Update page title: moved color is opposite of sideToMove after move
-        try {
-          const movedColor = moveResult.newState.sideToMove === 'w' ? 'Black' : 'White';
-          document.title = `${movedColor} moved to ${square.toLowerCase()} | chss.chat`;
-        } catch {}
-
-        // Notify parent component
-        onStateChange?.(moveResult.newState);
-        // Kick OG render immediately (don't wait for effect) so Send is warm
-        prewarmOg(moveResult.newState.fen, moveResult.newState.sideToMove);
-      }
-    } else {
-      // Try to select a different piece
-      const piece = chessMemo.get(square as Square);
-
-      if (piece && piece.color === gameState.sideToMove) {
-        setSelectedSquare(square);
-        setLegalMoves(legalTargetsFrom(chessMemo, square));
-      } else {
-        setSelectedSquare(null);
-        setLegalMoves([]);
-      }
-    }
-  }, [selectedSquare, legalMoves, gameState, onStateChange, chessMemo, isTerminal, prewarmOg]);
-
-  // Apply a promotion choice; supports re-choosing while popover remains open
-  const handleChoosePromotion = useCallback((piece: 'q' | 'r' | 'b' | 'n') => {
-    const promotionFrom = promotionFromRef.current;
-    const promotionTo = promotionToRef.current;
-    if (!promotionFrom || !promotionTo || isTerminal) return;
-
-    // If user already applied a choice while the popover is open, revert to base before re-applying
-    if (promotionAppliedRef.current && historyRef.current.length > 1) {
-      historyRef.current.pop();
-    }
-
-    const base = promotionBaseStateRef.current ?? gameState;
-    const moveResult = makeMove(base, promotionFrom, promotionTo, piece);
-    if (!moveResult.success || !moveResult.newState) return;
-
-    setGameState(moveResult.newState);
-    setLastMove({ from: promotionFrom, to: promotionTo });
-    setSelectedSquare(null);
-    setLegalMoves([]);
-
-    // Maintain history: replace last if re-choosing, else push new
-    if (promotionAppliedRef.current) {
-      // Replace current entry
-      historyRef.current[historyRef.current.length - 1] = moveResult.newState;
-    } else {
-      historyRef.current.push(moveResult.newState);
-    }
-
-    // Update URL using push/replaceState aligned with promotion re-choose behavior
-    const newCode = generateCode(moveResult.newState);
-    const newUrl = newCode ? `/p/${encodeURIComponent(newCode)}` : '/p';
-    const historyPayload = {
-      step: historyStepRef.current,
-      code: newCode,
-      fen: moveResult.newState.fen,
-      sideToMove: moveResult.newState.sideToMove,
-      uci: moveResult.newState.uci,
-      uKey: moveResult.newState.uKey,
-    };
-    if (typeof window !== 'undefined' && window.history) {
-      if (promotionAppliedRef.current && window.history.replaceState) {
-        window.history.replaceState({ ...historyPayload, step: historyStepRef.current }, '', newUrl);
-      } else if (window.history.pushState) {
-        const nextStep = (historyStepRef.current || 0) + 1;
-        historyStepRef.current = nextStep;
-        window.history.pushState({ ...historyPayload, step: nextStep }, '', newUrl);
-      }
-    }
-    setCanUndo((historyStepRef.current || 0) > 0);
-
-    // Update page title for promotion move
-    try {
-      const movedColor = moveResult.newState.sideToMove === 'w' ? 'Black' : 'White';
-      document.title = `${movedColor} moved to ${promotionTo.toLowerCase()} | chss.chat`;
-    } catch {}
-
-    onStateChange?.(moveResult.newState);
-    prewarmOg(moveResult.newState.fen, moveResult.newState.sideToMove);
-    promotionAppliedRef.current = true;
-  }, [gameState, onStateChange, isTerminal, prewarmOg]);
-
-  const handleShare = useCallback(async () => {
-    // Prevent sharing before any move has been made
-    if (historyRef.current.length <= 1) return;
-
-    const url = window.location.href;
-    // Warm OG non-blocking (side-to-move / crawler view)
-    prewarmOg();
-
-    const alignedTitle = buildShareTitle(gameState.sideToMove, lastMove?.to);
-
-    const baseShare: ShareData = {
-      title: alignedTitle,
-      text: 'Open, make your move, and reply-share to keep the game going.',
-      url,
-    };
-
-    type NavigatorWithShare = Navigator & {
-      canShare?: (data?: ShareData) => boolean;
-      share?: (data?: ShareData) => Promise<void>;
-    };
-    const nav = navigator as NavigatorWithShare;
-
-    if (typeof nav.share === 'function') {
-      try {
-        await nav.share(baseShare);
-        return; // Success
-      } catch (error: unknown) {
-        // If user explicitly cancelled the sheet, do nothing
-        const name = (error as Error)?.name;
-        if (name === 'AbortError') {
-          return;
-        }
-        // For any other share error, do not fallback to copy when Web Share exists
-        return;
-      }
-    }
-
-    // No Web Share API available → copy the URL to clipboard only
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {}
-  }, [gameState.sideToMove, lastMove, prewarmOg]);
-
-  const handleUndo = useCallback(() => {
-    try {
-      if (typeof window !== 'undefined' && window.history) {
-        window.history.back();
-      }
-    } catch {}
-  }, []);
-
-  const handleNewGame = useCallback(() => {
-    router.push('/p');
-  }, [router]);
-
-  const handleSquareKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>, square: string) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      handleSquareClick(square);
-    }
-  }, [handleSquareClick]);
-
-  // Generate board squares (orientation via iteration order)
-  const renderBoard = () => {
-    const board = chessMemo.board();
-    const squares = [] as React.ReactNode[];
-    const legalMoveSet = new Set(legalMoves);
-
-    const rankOrder = perspective === 'white' ? [0, 1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1, 0];
-    const fileOrder = perspective === 'white' ? [0, 1, 2, 3, 4, 5, 6, 7] : [7, 6, 5, 4, 3, 2, 1, 0];
-
-    for (const rank of rankOrder) {
-      for (const file of fileOrder) {
-        // Model-square coordinates (independent of visual perspective)
-        const square = String.fromCharCode(97 + file) + (8 - rank);
-        const piece = board[rank][file];
-        const isLight = (rank + file) % 2 === 0;
-        const isSelected = selectedSquare === square;
-        const isLegalMove = legalMoveSet.has(square);
-        const isLastMove = lastMove && (lastMove.from === square || lastMove.to === square);
-
-        const squareDiv = (
-          <div
-            key={square}
-            role="button"
-            tabIndex={0}
-            aria-label={`Square ${square}`}
-            aria-pressed={isSelected}
-            className={`chess-square ${isLight ? 'light' : 'dark'} ${isLegalMove ? 'legal-move' : ''} ${isLastMove ? 'last-move' : ''} ${isSelected ? 'selected' : ''} ${isTerminal ? 'cursor-default' : ''}`}
-            onClick={() => handleSquareClick(square)}
-            onKeyDown={(e) => handleSquareKeyDown(e, square)}
-          >
-            <div className="square-content w-full h-full flex items-end justify-center">
-              {piece && (() => {
-                const key = (piece.color + piece.type.toUpperCase()) as PieceKey;
-                const Icon = PIECE_COMPONENT[key];
-                const isKing = piece.type === 'k';
-                const kingInCheck = isKing && piece.color === gameState.sideToMove && indicatorInfo.isCheck;
-                return (
-                  <span className={`chess-piece inline-flex w-[88%] aspect-square items-end justify-center ${isKing ? 'king ' : ''}${kingInCheck ? 'king-in-check ' : ''}${piece.color === 'w' ? 'white' : 'black'}`}>
-                    <Icon className="block size-full" />
-                  </span>
-                );
-              })()}
-            </div>
-          </div>
-        );
-
-        // Wrap with Popover trigger if this is the promotion anchor square
-        if (promotionAnchor === square) {
-          squares.push(
-            <Popover key={`${square}-popover`} open={promotionOpen} onOpenChange={(o) => {
-              setPromotionOpen(o);
-              if (!o) {
-                // Closing: clear context
-                setPromotionAnchor(null);
-                promotionFromRef.current = null;
-                promotionToRef.current = null;
-                promotionBaseStateRef.current = null;
-                promotionAppliedRef.current = false;
-              }
-            }}>
-              <PopoverTrigger asChild>
-                {squareDiv}
-              </PopoverTrigger>
-              <PopoverContent align="center" side="top" className="w-auto p-2 rounded-xl">
-                <div className="flex items-center gap-2">
-                  {([
-                    { k: 'q', Icon: QueenIcon, label: 'Promote to Queen' },
-                    { k: 'r', Icon: RookIcon, label: 'Promote to Rook' },
-                    { k: 'b', Icon: BishopIcon, label: 'Promote to Bishop' },
-                    { k: 'n', Icon: KnightIcon, label: 'Promote to Knight' },
-                  ] as const).map(({ k, Icon, label }) => (
-                    <button
-                      key={k}
-                      type="button"
-                      aria-label={label}
-                      tabIndex={0}
-                      onClick={(e) => { e.stopPropagation(); handleChoosePromotion(k); }}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleChoosePromotion(k); } }}
-                      className="h-12 w-12 rounded-full border border-border bg-neutral-200 inset-shadow-xs inset-shadow-neutral-300 hover:bg-muted flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    >
-                      <Icon className={cn('size-7', promotionSide === 'w' ? 'text-white' : 'text-black')} />
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          );
-        } else {
-          squares.push(squareDiv);
-        }
-      }
-    }
-
-    return squares;
-  };
+  const files = perspective === 'white' ? FILES_WHITE : FILES_BLACK;
+  const ranks = perspective === 'white' ? RANKS_WHITE : RANKS_BLACK;
 
   return (
     <div className="relative w-full">
-      {/* Top-right New Game */}
-      {/* Board + Side Indicator */
-      /* Position indicator absolutely so the board stays centered */}
       <div className="relative mx-auto w-fit">
-        <div className="relative group">
-          <div className={`chess-board`}>
-            {renderBoard()}
+        <div className="group relative">
+          <ChessBoardGrid
+            chess={chessMemo}
+            perspective={perspective}
+            selectedSquare={ui.selectedSquare}
+            legalMoves={ui.legalMoves}
+            lastMove={ui.lastMove}
+            sideToMove={gameState.sideToMove}
+            isCheck={indicatorInfo.isCheck}
+            isTerminal={isTerminal}
+            promotionOpen={ui.promotionOpen}
+            promotionAnchor={ui.promotionAnchor}
+            promotionSide={ui.promotionSide}
+            onSquareClick={handleSquareClick}
+            onSquareKeyDown={handleSquareKeyDown}
+            onPromotionOpenChange={handlePromotionOpenChange}
+            onChoosePromotion={handleChoosePromotion}
+          />
+          <div className="pointer-events-none absolute -bottom-5 right-0 left-0 select-none px-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+            <div className="flex w-full justify-between text-[10px] text-foreground/30 sm:text-xs">
+              {files.map((f) => (
+                <span key={`file-${f}`} className="w-[12.5%] text-center leading-none">
+                  {f}
+                </span>
+              ))}
+            </div>
           </div>
-          {(() => {
-            const files = (perspective === 'white'
-              ? ['a','b','c','d','e','f','g','h']
-              : ['h','g','f','e','d','c','b','a']);
-            const ranks = (perspective === 'white'
-              ? ['8','7','6','5','4','3','2','1']
-              : ['1','2','3','4','5','6','7','8']);
-            return (
-              <>
-                <div className="pointer-events-none select-none absolute -bottom-5 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                  <div className="flex w-full justify-between text-[10px] sm:text-xs text-foreground/30 px-1">
-                    {files.map((f) => (
-                      <span key={`file-${f}`} className="w-[12.5%] text-center leading-none">{f}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className="pointer-events-none select-none absolute top-0 bottom-0 -left-5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                  <div className="flex h-full flex-col justify-between text-[10px] sm:text-xs text-foreground/30 py-1">
-                    {ranks.map((r) => (
-                      <span key={`rank-${r}`} className="h-[12.5%] flex items-center leading-none">{r}</span>
-                    ))}
-                  </div>
-                </div>
-              </>
-            );
-          })()}
+          <div className="pointer-events-none absolute top-0 -left-5 bottom-0 select-none py-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+            <div className="flex h-full flex-col justify-between text-[10px] text-foreground/30 sm:text-xs">
+              {ranks.map((r) => (
+                <span key={`rank-${r}`} className="flex h-[12.5%] items-center leading-none">
+                  {r}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-          <TurnIndicator info={indicatorInfo} />
+        <TurnIndicator info={indicatorInfo} />
       </div>
 
-      {/* Action Buttons */}
-      <div className="mt-6 flex flex-row gap-4 justify-center">
-        <button
-          type="button"
-          onClick={handleUndo}
-          disabled={!canUndo}
-          aria-disabled={!canUndo}
-          aria-label="Undo move"
-          className={`px-3 py-3 sm:px-8 border border-border rounded-lg font-medium transition-colors ${canUndo ? 'hover:bg-muted' : 'opacity-50'}`}
-        >
-          <Undo2 className="h-5 w-5 sm:hidden" />
-          <span className="hidden sm:inline">Undo</span>
-        </button>
-        {(() => {
-          const canSharePosition = canUndo;
-
-          const isCheckmateTerminal = indicatorInfo.outcome === 'checkmate';
-          const isAnyDraw = indicatorInfo.outcome === 'draw';
-          const winnerColor = indicatorInfo.sideToMove === 'w' ? 'black' : 'white';
-          const isViewerWinner = perspective === winnerColor;
-
-          let shareText = 'Share';
-          let shareDisabled = !canSharePosition;
-
-          if (isTerminal) {
-            if (isCheckmateTerminal) {
-              if (isViewerWinner) {
-                shareText = 'Checkmate — You win (share to them)';
-                shareDisabled = !canSharePosition ? true : false;
-              } else {
-                shareText = 'Checkmate — They win';
-                shareDisabled = true;
-              }
-            } else if (isAnyDraw) {
-              const reasonMap: Record<DrawReason, string> = {
-                'stalemate': 'Stalemate',
-                'fifty-move': '50-move',
-                'threefold': 'Threefold',
-                'insufficient': 'Insufficient',
-                'other': 'Draw',
-              };
-              const reasonLabel = indicatorInfo.drawReason ? reasonMap[indicatorInfo.drawReason] : 'Draw';
-              shareText = `Draw — ${reasonLabel} (share result)`;
-              shareDisabled = !canSharePosition ? true : false;
-            }
-          } else {
-            const isInCheck = indicatorInfo.isCheck;
-            shareText = canSharePosition
-              ? isInCheck
-                ? `Send to ${perspective === 'white' ? 'Black' : 'White'} (in check!)`
-                : `Send to ${perspective === 'white' ? 'Black' : 'White'}`
-              : 'Share';
-            shareDisabled = !canSharePosition;
-          }
-
-          return (
-            <button
-              type="button"
-              onClick={handleShare}
-              disabled={shareDisabled}
-              aria-disabled={shareDisabled}
-              aria-label={shareText}
-              className={`px-3 py-3 sm:px-8 bg-primary text-primary-foreground rounded-lg font-medium transition-colors ${!shareDisabled ? 'hover:bg-primary/90' : 'opacity-50'}`}
-            >
-              {shareText}
-            </button>
-          );
-        })()}
-      </div>
-
-      <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
-          <button
-            type="button"
-            onClick={handleNewGame}
-            aria-label="New Game"
-            className="px-8 py-3 border border-border rounded-lg font-medium"
-          >
-            <span className="text-lg">New Game</span>
-          </button>
-        </div>
+      <ChessBoardActions
+        canUndo={ui.canUndo}
+        perspective={perspective}
+        indicatorInfo={indicatorInfo}
+        isTerminal={isTerminal}
+        onUndo={handleUndo}
+        onShare={handleShare}
+        onNewGame={handleNewGame}
+      />
     </div>
   );
 };

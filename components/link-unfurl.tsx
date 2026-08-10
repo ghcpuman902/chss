@@ -90,9 +90,16 @@ type LinkPreviewCardProps = {
   ogSrc: string;
   alt: string;
   title: string;
+  /** First visible OG card is LCP on the home hero — prioritize it. */
+  priority?: boolean;
 };
 
-const LinkPreviewCard = ({ ogSrc, alt, title }: LinkPreviewCardProps) => (
+const LinkPreviewCard = ({
+  ogSrc,
+  alt,
+  title,
+  priority = false,
+}: LinkPreviewCardProps) => (
   <article className="w-full overflow-hidden rounded-[12px] border border-border bg-card shadow-sm">
     <div className="overflow-hidden bg-[#f0d9b5]">
       <Image
@@ -101,6 +108,8 @@ const LinkPreviewCard = ({ ogSrc, alt, title }: LinkPreviewCardProps) => (
         width={640}
         height={640}
         unoptimized
+        priority={priority}
+        fetchPriority={priority ? "high" : "auto"}
         className="aspect-square w-full object-cover"
       />
     </div>
@@ -221,6 +230,7 @@ export const LinkUnfurl = () => {
                   ogSrc={KASPAROV_OG}
                   alt={`Position after Kasparov played axb5 (chss.chat${KASPAROV_PATH}), White to move`}
                   title="White's turn"
+                  priority
                 />
                 <TextBubble align="start">{KASPAROV_TEXT}</TextBubble>
               </div>

@@ -98,30 +98,80 @@ type BoardFrame = {
   label: string;
 };
 
+const CASTLING_LEFT_FRAMES: BoardFrame[] = [
+  {
+    fen: `${CASTLING_KING_AWAY} b kq - 1 7`,
+    label: "White king steps to g1",
+  },
+  {
+    fen: `${CASTLING_PLACEMENT} w kq - 0 7`,
+    label:
+      "The king moved earlier; back on e1, but castling is lost",
+  },
+];
+
+const CASTLING_RIGHT_FRAMES: BoardFrame[] = [
+  {
+    fen: `${CASTLING_PLACEMENT} w KQkq - 0 7`,
+    label: "King and rook still on their home squares",
+  },
+  {
+    fen: `${CASTLING_CASTLED} b kq - 1 7`,
+    label: "White castles kingside",
+  },
+];
+
+const EN_PASSANT_LEFT_FRAMES: BoardFrame[] = [
+  {
+    fen: `${BEFORE_EN_PASSANT_SINGLE} b KQ - 0 8`,
+    label: "White pawn on d5; black pawn on e6",
+  },
+  {
+    fen: `${EN_PASSANT_PLACEMENT} w KQ - 0 8`,
+    label: "Black plays e6–e5; no en passant capture",
+  },
+];
+
+const EN_PASSANT_RIGHT_FRAMES: BoardFrame[] = [
+  {
+    fen: `${BEFORE_EN_PASSANT_DOUBLE} b KQ - 0 7`,
+    label: "White pawn on d5; black pawn on e7",
+  },
+  {
+    fen: `${EN_PASSANT_PLACEMENT} w KQ e6 0 8`,
+    label: "Black plays e7–e5; en passant target on e6",
+  },
+  {
+    fen: `${AFTER_EN_PASSANT_CAPTURE} b KQ - 0 8`,
+    label: "White captures d5×e6 on the empty square",
+  },
+];
+
 const useBoardLoop = (frameCount: number, reducedMotion: boolean) => {
   const [step, setStep] = useState(0);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(() => !reducedMotion);
   const [skipTransition, setSkipTransition] = useState(false);
+  const prevStepRef = useRef(0);
+
+  // Derive play intent — reduced motion always wins (no prop→state sync effect)
+  const isPlaying = reducedMotion ? false : playing;
 
   useEffect(() => {
-    if (reducedMotion) setPlaying(false);
-  }, [reducedMotion]);
-
-  useEffect(() => {
-    if (!playing || reducedMotion || frameCount <= 1) return;
+    if (!isPlaying || frameCount <= 1) return;
 
     const interval = window.setInterval(() => {
-      setStep((currentStep) => {
-        const nextStep = (currentStep + 1) % frameCount;
-        if (nextStep === 0) {
-          setSkipTransition(true);
-        }
-        return nextStep;
-      });
+      setStep((currentStep) => (currentStep + 1) % frameCount);
     }, FRAME_MS);
 
     return () => window.clearInterval(interval);
-  }, [frameCount, playing, reducedMotion]);
+  }, [frameCount, isPlaying]);
+
+  useEffect(() => {
+    if (prevStepRef.current !== 0 && step === 0) {
+      setSkipTransition(true);
+    }
+    prevStepRef.current = step;
+  }, [step]);
 
   useEffect(() => {
     if (!skipTransition) return;
@@ -132,7 +182,7 @@ const useBoardLoop = (frameCount: number, reducedMotion: boolean) => {
     setPlaying((current) => !current);
   };
 
-  return { step, playing, handleTogglePlay, skipTransition };
+  return { step, playing: isPlaying, handleTogglePlay, skipTransition };
 };
 
 type FullBoardProps = {
@@ -309,42 +359,19 @@ const CastlingComparison = ({
   reducedMotion,
 }: {
   reducedMotion: boolean;
-}) => {
-  const leftFrames: BoardFrame[] = [
-    {
-      fen: `${CASTLING_KING_AWAY} b kq - 1 7`,
-      label: "White king steps to g1",
-    },
-    {
-      fen: `${CASTLING_PLACEMENT} w kq - 0 7`,
-      label:
-        "The king moved earlier; back on e1, but castling is lost",
-    },
-  ];
-  const rightFrames: BoardFrame[] = [
-    {
-      fen: `${CASTLING_PLACEMENT} w KQkq - 0 7`,
-      label: "King and rook still on their home squares",
-    },
-    {
-      fen: `${CASTLING_CASTLED} b kq - 1 7`,
-      label: "White castles kingside",
-    },
-  ];
-
-  return (
+}) => (
     <StateComparison
       title="Castling rights"
       leftPanel={
         <InteractiveBoardPanel
-          frames={leftFrames}
+          frames={CASTLING_LEFT_FRAMES}
           reducedMotion={reducedMotion}
           controlLabel="castling history"
         />
       }
       rightPanel={
         <InteractiveBoardPanel
-          frames={rightFrames}
+          frames={CASTLING_RIGHT_FRAMES}
           reducedMotion={reducedMotion}
           controlLabel="castling move"
         />
@@ -355,52 +382,25 @@ const CastlingComparison = ({
       before: one history moved the king and permanently removed castling rights;
       the other never did.
     </StateComparison>
-  );
-};
+);
 
 const EnPassantComparison = ({
   reducedMotion,
 }: {
   reducedMotion: boolean;
-}) => {
-  const leftFrames: BoardFrame[] = [
-    {
-      fen: `${BEFORE_EN_PASSANT_SINGLE} b KQ - 0 8`,
-      label: "White pawn on d5; black pawn on e6",
-    },
-    {
-      fen: `${EN_PASSANT_PLACEMENT} w KQ - 0 8`,
-      label: "Black plays e6–e5; no en passant capture",
-    },
-  ];
-  const rightFrames: BoardFrame[] = [
-    {
-      fen: `${BEFORE_EN_PASSANT_DOUBLE} b KQ - 0 7`,
-      label: "White pawn on d5; black pawn on e7",
-    },
-    {
-      fen: `${EN_PASSANT_PLACEMENT} w KQ e6 0 8`,
-      label: "Black plays e7–e5; en passant target on e6",
-    },
-    {
-      fen: `${AFTER_EN_PASSANT_CAPTURE} b KQ - 0 8`,
-      label: "White captures d5×e6 on the empty square",
-    },
-  ];
-
-  return (
+}) => (
     <StateComparison
       title="En passant"
       leftPanel={
         <InteractiveBoardPanel
-          frames={leftFrames}
+          frames={EN_PASSANT_LEFT_FRAMES}
           reducedMotion={reducedMotion}
           controlLabel="one-square pawn advance"
         />
       }
       rightPanel={
         <InteractiveBoardPanel
-          frames={rightFrames}
+          frames={EN_PASSANT_RIGHT_FRAMES}
           reducedMotion={reducedMotion}
           controlLabel="two-square pawn advance"
         />
@@ -410,8 +410,7 @@ const EnPassantComparison = ({
       left, Black just played the normal one-square move e6–e5. On the right,
       Black jumped from e7 to e5, so White may capture on e6 for this move only.
     </StateComparison>
-  );
-};
+);
 
 export const ExtraStateDemos = () => {
   const reducedMotion = usePrefersReducedMotion();
