@@ -1,7 +1,23 @@
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { LinkUnfurl } from "@/components/link-unfurl";
 import { ArrowRightCircle } from "lucide-react";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Chess that lives in the link you share",
+  description:
+    "Make a move, send the URL. Your chat unfurls the board from their perspective. No download, no sign up.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Chess that lives in the link you share",
+    description:
+      "Make a move, send the URL. Your chat unfurls the board from their perspective.",
+    url: "/",
+  },
+};
 
 export default function HomePage() {
   return (

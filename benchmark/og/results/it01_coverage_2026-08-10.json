@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "iteration": "it01_coverage",
+    "git_sha": "6fab51f",
+    "date": "2026-08-10T09:45:58.459Z",
+    "host": "Mac.localdomain (Apple M3 Pro / darwin)",
+    "engine": "n/a",
+    "node": "v24.18.0",
+    "fixtures_sha": "c1bfa31e9cb2d3a7"
+  },
+  "render": null,
+  "coverage": {
+    "total_codes": 314,
+    "ply_1_pct": 100,
+    "ply_2_pct": 100,
+    "start_pct": 100,
+    "midgame_pct": 33.3,
+    "by_category": {
+      "start": {
+        "total": 1,
+        "hit": 1,
+        "pct": 100
+      },
+      "ply1": {
+        "total": 20,
+        "hit": 20,
+        "pct": 100
+      },
+      "ply2": {
+        "total": 20,
+        "hit": 20,
+        "pct": 100
+      },
+      "midgame": {
+        "total": 9,
+        "hit": 3,
+        "pct": 33.3
+      },
+      "endgame": {
+        "total": 1,
+        "hit": 0,
+        "pct": 0
+      },
+      "promotion": {
+        "total": 2,
+        "hit": 0,
+        "pct": 0
+      }
+    }
+  },
+  "prod": null
+}

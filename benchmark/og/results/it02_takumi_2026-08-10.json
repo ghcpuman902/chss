@@ -1,0 +1,391 @@
+{
+  "meta": {
+    "iteration": "it02_takumi",
+    "git_sha": "6fab51f",
+    "date": "2026-08-10T09:46:34.665Z",
+    "host": "Mac.localdomain (Apple M3 Pro / darwin)",
+    "engine": "takumi-js",
+    "node": "v24.18.0",
+    "fixtures_sha": "c1bfa31e9cb2d3a7",
+    "note": "Local origin render cost only — not crawler TTFB.",
+    "fixtures_sha_check": "c1bfa31e9cb2d3a7",
+    "git": "6fab51f"
+  },
+  "render": {
+    "n": 106,
+    "mean_ms": 7.69,
+    "p50_ms": 7.8,
+    "p95_ms": 8.26,
+    "p99_ms": 8.5,
+    "min_ms": 4.99,
+    "max_ms": 8.54,
+    "bytes_p50": 15786,
+    "bytes_p95": 18776,
+    "bytes_mean": 15723,
+    "size_px": 640,
+    "rounds": 2,
+    "warmup": 1
+  },
+  "coverage": {
+    "total_codes": 314,
+    "ply_1_pct": 100,
+    "ply_2_pct": 100,
+    "start_pct": 100,
+    "midgame_pct": 33.3,
+    "by_category": {
+      "start": {
+        "total": 1,
+        "hit": 1,
+        "pct": 100
+      },
+      "ply1": {
+        "total": 20,
+        "hit": 20,
+        "pct": 100
+      },
+      "ply2": {
+        "total": 20,
+        "hit": 20,
+        "pct": 100
+      },
+      "midgame": {
+        "total": 9,
+        "hit": 3,
+        "pct": 33.3
+      },
+      "endgame": {
+        "total": 1,
+        "hit": 0,
+        "pct": 0
+      },
+      "promotion": {
+        "total": 2,
+        "hit": 0,
+        "pct": 0
+      }
+    }
+  },
+  "prod": null,
+  "extra": {
+    "per_position": [
+      {
+        "id": "start",
+        "ms": 8.5,
+        "bytes": 14686,
+        "sha256_16": "1e80301c9fa6ac8e"
+      },
+      {
+        "id": "ply1_a2a3",
+        "ms": 8.38,
+        "bytes": 15258,
+        "sha256_16": "199cb7c6a825cf7a"
+      },
+      {
+        "id": "ply1_a2a4",
+        "ms": 8.24,
+        "bytes": 15248,
+        "sha256_16": "0aa592b1113e3026"
+      },
+      {
+        "id": "ply1_b2b3",
+        "ms": 8.09,
+        "bytes": 15327,
+        "sha256_16": "8e0079d5b1d8667e"
+      },
+      {
+        "id": "ply1_b2b4",
+        "ms": 7.77,
+        "bytes": 15332,
+        "sha256_16": "9c976f1c367e1b1b"
+      },
+      {
+        "id": "ply1_c2c3",
+        "ms": 7.73,
+        "bytes": 15415,
+        "sha256_16": "aac0aa021bd04b23"
+      },
+      {
+        "id": "ply1_c2c4",
+        "ms": 7.73,
+        "bytes": 15408,
+        "sha256_16": "e12443be672899f6"
+      },
+      {
+        "id": "ply1_d2d3",
+        "ms": 7.9,
+        "bytes": 15505,
+        "sha256_16": "423adba5a55ec451"
+      },
+      {
+        "id": "ply1_d2d4",
+        "ms": 7.83,
+        "bytes": 15510,
+        "sha256_16": "1f617ad5faa9b397"
+      },
+      {
+        "id": "ply1_e2e3",
+        "ms": 7.8,
+        "bytes": 15536,
+        "sha256_16": "504a7cbb25f567fd"
+      },
+      {
+        "id": "ply1_e2e4",
+        "ms": 7.7,
+        "bytes": 15530,
+        "sha256_16": "2fceab0e1c6cde65"
+      },
+      {
+        "id": "ply1_f2f3",
+        "ms": 7.9,
+        "bytes": 15559,
+        "sha256_16": "354ee86d6306368d"
+      },
+      {
+        "id": "ply1_f2f4",
+        "ms": 7.89,
+        "bytes": 15564,
+        "sha256_16": "7c4c4266423ea2da"
+      },
+      {
+        "id": "ply1_g2g3",
+        "ms": 7.83,
+        "bytes": 15429,
+        "sha256_16": "02e95f1d60f329c0"
+      },
+      {
+        "id": "ply1_g2g4",
+        "ms": 7.8,
+        "bytes": 15424,
+        "sha256_16": "67b99593f23d6dac"
+      },
+      {
+        "id": "ply1_h2h3",
+        "ms": 7.77,
+        "bytes": 15150,
+        "sha256_16": "d774af4d26f00a67"
+      },
+      {
+        "id": "ply1_h2h4",
+        "ms": 7.79,
+        "bytes": 15158,
+        "sha256_16": "9a551331d6c995d5"
+      },
+      {
+        "id": "ply1_b1a3",
+        "ms": 7.85,
+        "bytes": 14951,
+        "sha256_16": "7fb6e140480458ef"
+      },
+      {
+        "id": "ply1_b1c3",
+        "ms": 7.81,
+        "bytes": 15097,
+        "sha256_16": "509b4d09bd06f7cf"
+      },
+      {
+        "id": "ply1_g1f3",
+        "ms": 7.47,
+        "bytes": 15113,
+        "sha256_16": "9c1a7a0dc7eb4d66"
+      },
+      {
+        "id": "ply1_g1h3",
+        "ms": 7.56,
+        "bytes": 14829,
+        "sha256_16": "27fdca9e66121651"
+      },
+      {
+        "id": "ply2_e2e4e7e5",
+        "ms": 7.94,
+        "bytes": 16174,
+        "sha256_16": "28f3a40ca31ebbbf"
+      },
+      {
+        "id": "ply2_d2d4d7d5",
+        "ms": 7.89,
+        "bytes": 16236,
+        "sha256_16": "9745c913799b3c30"
+      },
+      {
+        "id": "ply2_e2e4c7c5",
+        "ms": 7.85,
+        "bytes": 16224,
+        "sha256_16": "b80d8a58f1e245b1"
+      },
+      {
+        "id": "ply2_e2e4d7d5",
+        "ms": 7.83,
+        "bytes": 16204,
+        "sha256_16": "49e393caf0e721e2"
+      },
+      {
+        "id": "ply2_e2e4e7e6",
+        "ms": 7.54,
+        "bytes": 16175,
+        "sha256_16": "af6982810ac4a73e"
+      },
+      {
+        "id": "ply2_e2e4c7c6",
+        "ms": 7.77,
+        "bytes": 16225,
+        "sha256_16": "05cda922d87a43b4"
+      },
+      {
+        "id": "ply2_d2d4g8f6",
+        "ms": 7.78,
+        "bytes": 15786,
+        "sha256_16": "316cca909ebc8079"
+      },
+      {
+        "id": "ply2_d2d4e7e6",
+        "ms": 7.78,
+        "bytes": 16209,
+        "sha256_16": "3a214ddf6ed496a8"
+      },
+      {
+        "id": "ply2_e2e4d7d6",
+        "ms": 7.83,
+        "bytes": 16204,
+        "sha256_16": "7576576bace27dee"
+      },
+      {
+        "id": "ply2_e2e4g7g6",
+        "ms": 7.73,
+        "bytes": 16005,
+        "sha256_16": "566066d82037c753"
+      },
+      {
+        "id": "ply2_d2d4e7e5",
+        "ms": 7.71,
+        "bytes": 16208,
+        "sha256_16": "066da90c52cae6f5"
+      },
+      {
+        "id": "ply2_d2d4g7g6",
+        "ms": 7.68,
+        "bytes": 16035,
+        "sha256_16": "b49ed6c7ca7dbd95"
+      },
+      {
+        "id": "ply2_d2d4c7c5",
+        "ms": 7.76,
+        "bytes": 16256,
+        "sha256_16": "936da373e225e969"
+      },
+      {
+        "id": "ply2_e2e4b7b6",
+        "ms": 7.87,
+        "bytes": 16089,
+        "sha256_16": "de5afbe04e6026bc"
+      },
+      {
+        "id": "ply2_d2d4c7c6",
+        "ms": 7.89,
+        "bytes": 16256,
+        "sha256_16": "f56febd6b2a43837"
+      },
+      {
+        "id": "ply2_g1f3d7d5",
+        "ms": 7.7,
+        "bytes": 15787,
+        "sha256_16": "45f7c7e7315c2e0f"
+      },
+      {
+        "id": "ply2_e2e4g8f6",
+        "ms": 7.96,
+        "bytes": 15753,
+        "sha256_16": "33ad564c7dd2a980"
+      },
+      {
+        "id": "ply2_d2d4d7d6",
+        "ms": 7.96,
+        "bytes": 16237,
+        "sha256_16": "f3f3c335182c75fa"
+      },
+      {
+        "id": "ply2_c2c4e7e5",
+        "ms": 8.23,
+        "bytes": 16230,
+        "sha256_16": "b5f2a7e154cb0dca"
+      },
+      {
+        "id": "ply2_e2e4b8c6",
+        "ms": 8.26,
+        "bytes": 15786,
+        "sha256_16": "b7db2c8dd30049c1"
+      },
+      {
+        "id": "mid_p8_e2e4c7c5g1f3d7d6",
+        "ms": 8.07,
+        "bytes": 16946,
+        "sha256_16": "e73e99cf965f208b"
+      },
+      {
+        "id": "mid_p8_e2e4e7e5g1f3b8c6",
+        "ms": 7.91,
+        "bytes": 15808,
+        "sha256_16": "66c761fcbd52d33b"
+      },
+      {
+        "id": "mid_p8_e2e4e7e5g1f3b8c6",
+        "ms": 8.1,
+        "bytes": 17748,
+        "sha256_16": "d17a7cb0f153b514"
+      },
+      {
+        "id": "mid_p16_e2e4c7c5g1f3b8c6",
+        "ms": 8.07,
+        "bytes": 18776,
+        "sha256_16": "d92b629068d8dcd8"
+      },
+      {
+        "id": "mid_p16_e2e4c7c5g1f3d7d6",
+        "ms": 8.54,
+        "bytes": 18877,
+        "sha256_16": "f581927520c6baca"
+      },
+      {
+        "id": "mid_p16_e2e4e7e5g1f3b8c6",
+        "ms": 7.83,
+        "bytes": 17569,
+        "sha256_16": "caffea14584c2dae"
+      },
+      {
+        "id": "mid_p24_e2e4e7e5g1f3b8c6",
+        "ms": 7.8,
+        "bytes": 18864,
+        "sha256_16": "87166b5118a35409"
+      },
+      {
+        "id": "mid_p24_e2e4e7e5g1f3b8c6",
+        "ms": 7.53,
+        "bytes": 18511,
+        "sha256_16": "e1592d97dfd34a93"
+      },
+      {
+        "id": "mid_p24_e2e4e7e6d2d4d7d5",
+        "ms": 7.46,
+        "bytes": 18174,
+        "sha256_16": "73c9b45173b8a7ab"
+      },
+      {
+        "id": "endgame_kqk",
+        "ms": 5.12,
+        "bytes": 10039,
+        "sha256_16": "c98d975eac8b2c9e"
+      },
+      {
+        "id": "promo_before",
+        "ms": 4.99,
+        "bytes": 9387,
+        "sha256_16": "59299629d62bafc2"
+      },
+      {
+        "id": "promo_after",
+        "ms": 5.21,
+        "bytes": 9529,
+        "sha256_16": "9689956cd0484ead"
+      }
+    ]
+  }
+}

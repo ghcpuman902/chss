@@ -27,10 +27,23 @@ export async function GET(
   _req: NextRequest,
   ctx: RouteContext<"/og/[[...code]]">,
 ) {
+  const t0 = performance.now();
   try {
     const { code } = await ctx.params;
     const raw = parseUrlSegment(code);
+    const tDecode = performance.now();
     const buf = await getCachedOgPng(raw);
+    const tDone = performance.now();
+    console.info(
+      JSON.stringify({
+        msg: "og_timing",
+        code: raw.slice(0, 80),
+        decode_ms: Number((tDecode - t0).toFixed(1)),
+        render_or_cache_ms: Number((tDone - tDecode).toFixed(1)),
+        total_ms: Number((tDone - t0).toFixed(1)),
+        bytes: buf.byteLength,
+      }),
+    );
 
     return new Response(new Uint8Array(buf), {
       status: 200,

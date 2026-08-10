@@ -26,8 +26,14 @@ const AGGREGATE_PATH = path.join(
   "aggregate_2026-06.json",
 );
 
-/** Depths used by the scoreboard lookup_k1024 row. */
+/**
+ * Depths present in the Lichess aggregate / lookup table (even plies only).
+ * Odd plies (Black to move) are derived while replaying: every intermediate
+ * position along each prefix is emitted, plus all legal ply-1 moves.
+ */
 const LOOKUP_DEPTHS = [2, 4, 6, 8, 10, 12];
+/** Snapshot every ply along a prefix so Black-to-move boards prerender. */
+const SNAPSHOT_INTERMEDIATE_PLIES = true;
 
 const START_FEN =
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -77,23 +83,6 @@ const splitUci = (uci) => {
   return moves;
 };
 
-const replayUci = (uci) => {
-  const parts = splitUci(uci);
-  if (!parts) return null;
-  const chess = new Chess();
-  for (const mv of parts) {
-    if (!/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(mv)) return null;
-    const from = mv.slice(0, 2);
-    const to = mv.slice(2, 4);
-    const promotion = mv.length === 5 ? mv[4] : undefined;
-    try {
-      if (!chess.move({ from, to, promotion })) return null;
-    } catch {
-      return null;
-    }
-  }
-  return chess;
-};
 
 const writeLookupFromAggregate = () => {
   if (!fs.existsSync(AGGREGATE_PATH)) {
@@ -160,26 +149,79 @@ const buildOgTopCodes = () => {
     count: Number.MAX_SAFE_INTEGER,
   });
 
+  // Every legal first move → Black to move (the first-share cold-miss gap).
+  {
+    const root = new Chess();
+    let ply1Index = 0;
+    for (const m of root.moves({ verbose: true })) {
+      const g = new Chess();
+      g.move(m);
+      const uci = `${m.from}${m.to}${m.promotion || ""}`;
+      addFen(g.fen(), g.turn(), {
+        source: "legal_ply1",
+        depth: 1,
+        index: ply1Index,
+        uci,
+        count: Number.MAX_SAFE_INTEGER - 1 - ply1Index,
+      });
+      ply1Index += 1;
+    }
+  }
+
   for (const d of book.meta?.depths || LOOKUP_DEPTHS) {
     const rows = book.by_depth?.[String(d)] || [];
     for (const row of rows) {
-      const chess = replayUci(row.uci);
-      if (!chess) {
+      const parts = splitUci(row.uci);
+      if (!parts) {
         console.warn(
-          `[og-top] skip illegal prefix depth=${d} index=${row.index} uci=${row.uci}`,
+          `[og-top] skip bad uci depth=${d} index=${row.index} uci=${row.uci}`,
         );
         continue;
       }
-      const fen = chess.fen();
-      const side = chess.turn();
-      addFen(fen, side, {
-        source: `lookup_k1024/depth_${d}`,
-        depth: d,
-        index: row.index,
-        uci: row.uci,
-        count: row.count ?? 0,
-        pct: row.pct ?? 0,
-      });
+      const chess = new Chess();
+      let prefix = "";
+      let ok = true;
+      for (let i = 0; i < parts.length; i += 1) {
+        const mv = parts[i];
+        if (!/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(mv)) {
+          ok = false;
+          break;
+        }
+        try {
+          if (
+            !chess.move({
+              from: mv.slice(0, 2),
+              to: mv.slice(2, 4),
+              promotion: mv.length === 5 ? mv[4] : undefined,
+            })
+          ) {
+            ok = false;
+            break;
+          }
+        } catch {
+          ok = false;
+          break;
+        }
+        prefix += mv;
+        const ply = i + 1;
+        const isTerminal = ply === parts.length;
+        if (!SNAPSHOT_INTERMEDIATE_PLIES && !isTerminal) continue;
+        addFen(chess.fen(), chess.turn(), {
+          source: isTerminal
+            ? `lookup_k1024/depth_${d}`
+            : `lookup_k1024/depth_${d}/ply_${ply}`,
+          depth: ply,
+          index: row.index,
+          uci: prefix,
+          count: row.count ?? 0,
+          pct: row.pct ?? 0,
+        });
+      }
+      if (!ok) {
+        console.warn(
+          `[og-top] skip illegal prefix depth=${d} index=${row.index} uci=${row.uci}`,
+        );
+      }
     }
   }
 
@@ -192,7 +234,7 @@ const buildOgTopCodes = () => {
       depths: book.meta?.depths ?? LOOKUP_DEPTHS,
       n: entries.length,
       format: "b-<board64><w|b>",
-      note: "Prerendered by generateStaticParams on /og/[[...code]] at next build.",
+      note: "Prerendered by generateStaticParams on /og/[[...code]] at next build. Includes start, all legal ply-1, and intermediate plies along lookup prefixes (odd = Black to move).",
     },
     codes: entries.map((e) => e.code),
     entries,

@@ -25,29 +25,37 @@ const besley = Besley({
   display: "swap",
 });
 
+const siteDescription =
+  "Play chess over any messaging app. Share a link, your chat unfurls the board from their side. No download, no sign up.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://chss.chat'),
+  metadataBase: new URL("https://chss.chat"),
   title: {
-    template: '%s | chss.chat',
-    default: 'chss.chat',
+    template: "%s | chss.chat",
+    default: "chss.chat — chess in a link",
   },
-  description: "Play chess over any messaging app. No download, no sign up.",
-  icons: {
-    icon: "/v2/Pawn.svg",
+  description: siteDescription,
+  applicationName: "chss.chat",
+  alternates: {
+    canonical: "/",
   },
   appleWebApp: {
     title: "chss.chat",
     statusBarStyle: "black-translucent",
   },
   openGraph: {
-    title: "chss.chat",
-    description: "Play chess over any messaging app. No download, no sign up.",
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: "chss.chat",
+    title: "chss.chat — chess in a link",
+    description: siteDescription,
     images: [`/og/${START_OG_CODE}.png`],
   },
   twitter: {
     card: "summary_large_image",
-    title: "chss.chat",
-    description: "Play chess over any messaging app. No download, no sign up.",
+    title: "chss.chat — chess in a link",
+    description: siteDescription,
     images: [`/og/${START_OG_CODE}.png`],
   },
 };

@@ -8,8 +8,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "node ./node_modules/vitest/vitest.mjs run",
+    "test:watch": "node ./node_modules/vitest/vitest.mjs",
+    "bench:og:render": "node ./node_modules/tsx/dist/cli.mjs --tsconfig tsconfig.json benchmark/og/render-bench.ts",
+    "bench:og:coverage": "node benchmark/og/coverage-check.mjs",
+    "bench:og:prod-probe": "node benchmark/og/prod-probe.mjs",
+    "bench:og:parse-logs": "node benchmark/og/parse-vercel-logs.mjs",
     "build:og:top": "node scripts/build-og-top-codes.cjs",
     "build:og:top:from-aggregate": "node scripts/build-og-top-codes.cjs --from-aggregate",
     "build:fen:counts": "node scripts/build-fen-counts.js",
@@ -32,7 +36,8 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "takumi-js": "^2.5.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -42,6 +47,7 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.5",
     "tw-animate-css": "^1.4.0",
     "typescript": "~5.9.3",
     "vitest": "^4.1.10"

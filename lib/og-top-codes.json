@@ -10,33 +10,61 @@
       10,
       12
     ],
-    "n": 151,
+    "n": 314,
     "format": "b-<board64><w|b>",
-    "note": "Prerendered by generateStaticParams on /og/[[...code]] at next build."
+    "note": "Prerendered by generateStaticParams on /og/[[...code]] at next build. Includes start, all legal ply-1, and intermediate plies along lookup prefixes (odd = Black to move)."
   },
   "codes": [
     "b-rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNRw",
+    "b-rnbqkbnrpppppppp........................P........PPPPPPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp................P................PPPPPPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp.........................P......P.PPPPPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp.................P..............P.PPPPPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp..........................P.....PP.PPPPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp..................P.............PP.PPPPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp...........................P....PPP.PPPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp...................P............PPP.PPPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp............................P...PPPP.PPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp....................P...........PPPP.PPPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp.............................P..PPPPP.PPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp.....................P..........PPPPP.PPRNBQKBNRb",
+    "b-rnbqkbnrpppppppp..............................P.PPPPPP.PRNBQKBNRb",
+    "b-rnbqkbnrpppppppp......................P.........PPPPPP.PRNBQKBNRb",
+    "b-rnbqkbnrpppppppp...............................PPPPPPPP.RNBQKBNRb",
+    "b-rnbqkbnrpppppppp.......................P........PPPPPPP.RNBQKBNRb",
+    "b-rnbqkbnrpppppppp........................N.......PPPPPPPPR.BQKBNRb",
+    "b-rnbqkbnrpppppppp..........................N.....PPPPPPPPR.BQKBNRb",
+    "b-rnbqkbnrpppppppp.............................N..PPPPPPPPRNBQKB.Rb",
+    "b-rnbqkbnrpppppppp...............................NPPPPPPPPRNBQKB.Rb",
     "b-rnbqkbnrpppp.ppp............p.......P...........PPPP.PPPRNBQKBNRw",
     "b-rnbqkbnrppp.pppp...........p.......P............PPP.PPPPRNBQKBNRw",
     "b-rnbqkbnrpp.ppppp..........p.........P...........PPPP.PPPRNBQKBNRw",
+    "b-rnbqkbnrpppp.ppp............p.......P........N..PPPP.PPPRNBQKB.Rb",
     "b-r.bqkbnrpppp.ppp..n.........p.......P........N..PPPP.PPPRNBQKB.Rw",
     "b-rnbqkbnrppp.pppp...........p........P...........PPPP.PPPRNBQKBNRw",
     "b-rnbqkbnrpppp.ppp....p...............P...........PPPP.PPPRNBQKBNRw",
     "b-rnbqkbnrpp.ppppp..p.................P...........PPPP.PPPRNBQKBNRw",
     "b-rnbqkb.rpppppppp.....n.............P............PPP.PPPPRNBQKBNRw",
+    "b-rnbqkbnrppp.pppp...........P....................PPPP.PPPRNBQKBNRb",
     "b-rnb.kbnrppp.pppp...........q....................PPPP.PPPRNBQKBNRw",
     "b-rnbqkbnrpppp.ppp....p..............P............PPP.PPPPRNBQKBNRw",
     "b-rnbqkbnrppp.pppp...p................P...........PPPP.PPPRNBQKBNRw",
+    "b-rnbqkbnrpp.ppppp..p................PP...........PPP..PPPRNBQKBNRb",
     "b-rnbqkbnrpp..pppp..p........p.......PP...........PPP..PPPRNBQKBNRw",
+    "b-rnbqkbnrpp.ppppp..........p.........P........N..PPPP.PPPRNBQKB.Rb",
     "b-r.bqkbnrpp.ppppp..n.......p.........P........N..PPPP.PPPRNBQKB.Rw",
     "b-rnbqkbnrpppppp.p......p.............P...........PPPP.PPPRNBQKBNRw",
     "b-rnbqkbnrppp..ppp...p........p.......P........N..PPPP.PPPRNBQKB.Rw",
     "b-rnbqkbnrpppp.ppp............p......P............PPP.PPPPRNBQKBNRw",
+    "b-rnbqkbnrpppp.ppp....p..............PP...........PPP..PPPRNBQKBNRb",
     "b-rnbqkbnrppp..ppp....p......p.......PP...........PPP..PPPRNBQKBNRw",
+    "b-rnbqkbnrpp.ppppp..p.................P........N..PPPP.PPPRNBQKB.Rb",
     "b-rnbqkbnrpp..pppp..p........p........P........N..PPPP.PPPRNBQKB.Rw",
     "b-rnbqkb.rpppp.ppp.....n......p.......P........N..PPPP.PPPRNBQKB.Rw",
+    "b-r.bqkbnrpppp.ppp..n.........p......PP........N..PPP..PPPRNBQKB.Rb",
     "b-r.bqkbnrpppp.ppp..n................pP........N..PPP..PPPRNBQKB.Rw",
     "b-rnbqkbnrpp..pppp...p......p.........P........N..PPPP.PPPRNBQKB.Rw",
+    "b-r.bqkbnrpppp.ppp..n.........p.....B.P........N..PPPP.PPPRNBQK..Rb",
     "b-r.bqkb.rpppp.ppp..n..n......p.....B.P........N..PPPP.PPPRNBQK..Rw",
     "b-rnbqkbnrpppppp.p......p............P............PPP.PPPPRNBQKBNRw",
     "b-rnbqkbnrpp.ppppp..........p........P............PPP.PPPPRNBQKBNRw",
@@ -44,127 +72,262 @@
     "b-rnbqkbnrpp.ppppp..p................P............PPP.PPPPRNBQKBNRw",
     "b-rnbqkbnrppp.pppp...........p.................N..PPPPPPPPRNBQKB.Rw",
     "b-r.bqk.nrpppp.ppp..n.......b.p.....B.P........N..PPPP.PPPRNBQK..Rw",
+    "b-rnbqkbnrpppp.ppp....p...............P........N..PPPP.PPPRNBQKB.Rb",
     "b-rnbqkbnrppp..ppp....p......p........P........N..PPPP.PPPRNBQKB.Rw",
     "b-rnbqkb.rpppppppp.....n..............P...........PPPP.PPPRNBQKBNRw",
     "b-rnbqkbnrppp.pppp...p...............P............PPP.PPPPRNBQKBNRw",
+    "b-rnbqkbnrppp.pppp...........p......PP............PP..PPPPRNBQKBNRb",
     "b-rnbqkbnrppp..ppp....p......p......PP............PP..PPPPRNBQKBNRw",
+    "b-rnbqkbnrpppp.ppp............p......PP...........PPP..PPPRNBQKBNRb",
     "b-rnbqkbnrpppp.ppp...................pP...........PPP..PPPRNBQKBNRw",
+    "b-rnb.kbnrppp.pppp...........q..............N.....PPPP.PPPR.BQKBNRb",
     "b-rnbqkbnrppp.pppp..........................N.....PPPP.PPPR.BQKBNRw",
     "b-rnbqkbnrpp.p.ppp....p.....p.........P........N..PPPP.PPPRNBQKB.Rw",
     "b-rnbqkbnrpppp.ppp............p.....P.............PP.PPPPPRNBQKBNRw",
+    "b-rnbqkbnrpp..pppp..p........P.................N..PPPP.PPPRNBQKB.Rb",
     "b-rnbqkbnrpp..pppp...........p.................N..PPPP.PPPRNBQKB.Rw",
     "b-rnbqkb.rppp.pppp.....n.....P....................PPPP.PPPRNBQKBNRw",
+    "b-rnbqkbnrpppp.ppp............p.....B.P...........PPPP.PPPRNBQK.NRb",
     "b-r.bqkbnrpppp.ppp..n.........p.....B.P...........PPPP.PPPRNBQK.NRw",
     "b-r.bqkbnrpppppppp..n.................P...........PPPP.PPPRNBQKBNRw",
+    "b-r.bqkbnrpp.ppppp..n.......p........PP........N..PPP..PPPRNBQKB.Rb",
     "b-r.bqkbnrpp.ppppp..n................pP........N..PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrpppp.ppp............p.......P.....N.....PPPP.PPPR.BQKBNRb",
     "b-r.bqkbnrpppp.ppp..n.........p.......P.....N.....PPPP.PPPR.BQKBNRw",
     "b-rnbqkbnrppp.pppp..................pP............PP..PPPPRNBQKBNRw",
+    "b-rnbqkbnrpppppp.p......p............PP...........PPP..PPPRNBQKBNRb",
     "b-rnbqk.nrppppppbp......p............PP...........PPP..PPPRNBQKBNRw",
     "b-rnbqkb.rpppp.ppp.....n......p.....B.P...........PPPP.PPPRNBQK.NRw",
     "b-rnbqkbnrpppp.ppp............p...............P...PPPP.PPPRNBQKBNRw",
     "b-rnbqkbnrpp..pppp..p........p......PP............PP..PPPPRNBQKBNRw",
+    "b-rnbqkbnrppp..ppp....p......P.................N..PPPP.PPPRNBQKB.Rb",
     "b-rnbqkbnrppp..ppp...........p.................N..PPPP.PPPRNBQKB.Rw",
     "b-rnb.kbnrppp.pppp........q.................N.....PPPP.PPPR.BQKBNRw",
+    "b-rnbqkbnrpp..pppp...p......p........PP........N..PPP..PPPRNBQKB.Rb",
     "b-rnbqkbnrpp..pppp...p...............pP........N..PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrpp..pppp..p........P.......P............PPP..PPPRNBQKBNRb",
     "b-rnbqkbnrpp..pppp...........p.......P............PPP..PPPRNBQKBNRw",
+    "b-rnbqkbnrpp.ppppp..........p........PP...........PPP..PPPRNBQKBNRb",
     "b-rnbqkbnrpp.ppppp...................pP...........PPP..PPPRNBQKBNRw",
+    "b-rnbqkb.rpppppppp.....n............PP............PP..PPPPRNBQKBNRb",
     "b-rnbqkb.rpppp.ppp....pn............PP............PP..PPPPRNBQKBNRw",
     "b-rnbqkb.rppp.pppp.....n.....p......PP............PP..PPPPRNBQKBNRw",
+    "b-rnbqkbnrppp.pppp...........p.......P.........N..PPP.PPPPRNBQKB.Rb",
     "b-rnbqkb.rppp.pppp.....n.....p.......P.........N..PPP.PPPPRNBQKB.Rw",
+    "b-rnbqkbnrppp.pppp...........p.......P.B..........PPP.PPPPRN.QKBNRb",
     "b-rnbqkb.rppp.pppp.....n.....p.......P.B..........PPP.PPPPRN.QKBNRw",
     "b-rnbqkbnrp.pppppp.p.................P............PPP.PPPPRNBQKBNRw",
+    "b-r.bqkbnrpppp.ppp..n.........p.......P.....N..N..PPPP.PPPR.BQKB.Rb",
     "b-r.bqkb.rpppp.ppp..n..n......p.......P.....N..N..PPPP.PPPR.BQKB.Rw",
+    "b-rnbqkbnrppp..ppp....p......P.......P............PPP..PPPRNBQKBNRb",
     "b-rnbqkbnrppp..ppp...........p.......P............PPP..PPPRNBQKBNRw",
     "b-rnbqkb.rpppppppp.....n.......................N..PPPPPPPPRNBQKB.Rw",
     "b-rnbqkbnrppppp.pp.............p.....P............PPP.PPPPRNBQKBNRw",
+    "b-rnbqkbnrppp..ppp....p......pP......P............PPP..PPPRNBQKBNRb",
     "b-rnbqkbnrpp...ppp....p.....ppP......P............PPP..PPPRNBQKBNRw",
     "b-rnbqkb.rpppppppp.....n............P.............PP.PPPPPRNBQKBNRw",
+    "b-rnbqkbnrpp..pppp..p........pP......P............PPP..PPPRNBQKBNRb",
     "b-rn.qkbnrpp..pppp..p........pPb.....P............PPP..PPPRNBQKBNRw",
     "b-r.bqkbnrpppp.pp...n....p....p.....B.P........N..PPPP.PPPRNBQK..Rw",
+    "b-rnbqkbnrpp..pppp...p...............NP...........PPP..PPPRNBQKB.Rb",
     "b-rnbqkb.rpp..pppp...p.n.............NP...........PPP..PPPRNBQKB.Rw",
+    "b-r.bqkbnrpppp.ppp..n......B..p.......P........N..PPPP.PPPRNBQK..Rb",
     "b-r.bqkbnr.ppp.pppp.n......B..p.......P........N..PPPP.PPPRNBQK..Rw",
     "b-r.bqkb.rpppp.ppp..n..n...B..p.......P........N..PPPP.PPPRNBQK..Rw",
+    "b-rnbqkbnrpp.p.ppp....p.....p........PP........N..PPP..PPPRNBQKB.Rb",
     "b-rnbqkbnrpp.p.ppp....p..............pP........N..PPP..PPPRNBQKB.Rw",
     "b-r.bqkbnrppp..ppp..np.....B..p.......P........N..PPPP.PPPRNBQK..Rw",
+    "b-r.bqkbnrpppp.ppp..n................NP...........PPP..PPPRNBQKB.Rb",
     "b-r.bqkbnrpppp.ppp...................nP...........PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrpp..pppp..p........p.......PP.....N.....PPP..PPPR.BQKBNRb",
     "b-rnbqkbnrpp..pppp..p................Pp.....N.....PPP..PPPR.BQKBNRw",
+    "b-rnbqkbnrppp..ppp....p......p......PP......N.....PP..PPPPR.BQKBNRb",
     "b-rnbqkb.rppp..ppp....pn.....p......PP......N.....PP..PPPPR.BQKBNRw",
+    "b-rnbqkbnrppp..ppp...p........p......PP........N..PPP..PPPRNBQKB.Rb",
     "b-rnbqkbnrppp..ppp...p...............pP........N..PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrpp.ppppp..p...............B.P...........PPPP.PPPRNBQK.NRb",
+    "b-rnbqkbnrpp..pppp..p........p......B.P...........PPPP.PPPRNBQK.NRw",
+    "b-rnbqkbnrpp..pppp..p........P......B.............PPPP.PPPRNBQK.NRb",
     "b-rnbqkbnrpp..pppp...........p......B.............PPPP.PPPRNBQK.NRw",
+    "b-rnbqkb.rpppppp.p.....np...........PP............PP..PPPPRNBQKBNRw",
+    "b-rnbqkb.rpppppp.p.....np...........PP......N.....PP..PPPPR.BQKBNRb",
     "b-rnbqk..rppppppbp.....np...........PP......N.....PP..PPPPR.BQKBNRw",
+    "b-rnbqkbnrpppp.ppp...................QP...........PPP..PPPRNB.KBNRb",
     "b-r.bqkbnrpppp.ppp..n................QP...........PPP..PPPRNB.KBNRw",
+    "b-r.bqkb.rpppp.ppp..n..n......p.N...B.P...........PPPP.PPPRNBQK..Rb",
     "b-r.bqkb.rppp..ppp..n..n.....pp.N...B.P...........PPPP.PPPRNBQK..Rw",
+    "b-rnbqkbnrppp..ppp...........p.......P.........N..PPP..PPPRNBQKB.Rb",
     "b-rnbqkb.rppp..ppp.....n.....p.......P.........N..PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrpp..pppp...........p.......P.........N..PPP..PPPRNBQKB.Rb",
     "b-r.bqkbnrpp..pppp..n........p.......P.........N..PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrpp...ppp....p.....ppP......P......P.....PP...PPPRNBQKBNRb",
     "b-r.bqkbnrpp...ppp..n.p.....ppP......P......P.....PP...PPPRNBQKBNRw",
+    "b-rnbqkb.rpp..pppp...p.n.............NP.....N.....PPP..PPPR.BQKB.Rb",
     "b-rnbqkb.r.p..ppppp..p.n.............NP.....N.....PPP..PPPR.BQKB.Rw",
+    "b-r.bqkbnrpp.ppppp..n................NP...........PPP..PPPRNBQKB.Rb",
     "b-r.bqkbnrpp.p.ppp..n.........p......NP...........PPP..PPPRNBQKB.Rw",
+    "b-r.bqkb.rpppp.ppp..n..n......p.....B.P......P.N..PPP..PPPRNBQK..Rb",
     "b-r.bqk..rpppp.ppp..n..n....b.p.....B.P......P.N..PPP..PPPRNBQK..Rw",
     "b-r.bqk.nrpppp.ppp..n.......b........NP...........PPP..PPPRNBQKB.Rw",
     "b-r.bqkbnrpp.ppp.p..n...p............NP...........PPP..PPPRNBQKB.Rw",
+    "b-r.bqk.nrpppp.ppp..n.......b.p.....B.P.....P..N..PP.P.PPPRNBQK..Rb",
     "b-r.bqk..rpppp.ppp..n..n....b.p.....B.P.....P..N..PP.P.PPPRNBQK..Rw",
     "b-rnbqkb.rpp..pppp.....n.....p.......P.........N..PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrpp..pppp..p................PN...........PPP..PPPR.BQKBNRb",
     "b-rnbqkb.rpp..pppp..p..n.............PN...........PPP..PPPR.BQKBNRw",
+    "b-rnbqkbnrppp.pppp..........................N..N..PPPP.PPPR.BQKB.Rb",
     "b-rnbqkb.rppp.pppp.....n....................N..N..PPPP.PPPR.BQKB.Rw",
+    "b-rnbqkb.rppp.pppp.....n.....P..............N.....PPPP.PPPR.BQKBNRb",
+    "b-rnbqkb.rppp.pppp...........n..............N.....PPPP.PPPR.BQKBNRw",
+    "b-rnbqkb.rppp.pppp...........N....................PPPP.PPPR.BQKBNRb",
     "b-rnb.kb.rppp.pppp...........q....................PPPP.PPPR.BQKBNRw",
     "b-r.bqkb.rpp.ppppp..n..n.............NP...........PPP..PPPRNBQKB.Rw",
     "b-rn.qkbnrpp..pppp...........p.......P..b......N..PPP..PPPRNBQKB.Rw",
+    "b-r.bqkbnr.ppp.pppp.n.........p...B...P........N..PPPP.PPPRNBQK..Rb",
     "b-r.bqkb.r.ppp.pppp.n..n......p...B...P........N..PPPP.PPPRNBQK..Rw",
+    "b-r.bqk.nrpppp.ppp..n.......b.p.....B.P........N..PPPP.PPPRNBQ.RK.b",
     "b-r.bqk..rpppp.ppp..n..n....b.p.....B.P........N..PPPP.PPPRNBQ.RK.w",
+    "b-rnbqk..rppppppbp.....np...........PPP.....N.....PP...PPPR.BQKBNRb",
     "b-rnbqk..rppp.ppbp...p.np...........PPP.....N.....PP...PPPR.BQKBNRw",
+    "b-r.bqkbnr.ppp.pppp.B.........p.......P........N..PPPP.PPPRNBQK..Rb",
     "b-r.bqkbnr.pp..pppp.p.........p.......P........N..PPPP.PPPRNBQK..Rw",
     "b-rn.qkbnrpp..pppp..p..........b.....PN...........PPP..PPPR.BQKBNRw",
+    "b-rnbqkbnrpp.p.ppp....p..............NP...........PPP..PPPRNBQKB.Rb",
     "b-rnbqkbnr.p.p.pppp...p..............NP...........PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrppp.pppp...................P......N.....PPP..PPPR.BQKBNRb",
     "b-rnbqkb.rppp.pppp.....n.............P......N.....PPP..PPPR.BQKBNRw",
+    "b-r.bqkb.rppp..ppp..n..n.....Pp.N...B.............PPPP.PPPRNBQK..Rb",
     "b-r.bqkb.rppp..ppp.....n..n..Pp.N...B.............PPPP.PPPRNBQK..Rw",
     "b-r.bqkb.rpppp.ppp..n..n.............NP...........PPP..PPPRNBQKB.Rw",
+    "b-r.bqkbnrpppp.ppp...................QP...........PPP..PPPRNB.KB.Rb",
     "b-r.bqkbnrppp..ppp...p...............QP...........PPP..PPPRNB.KB.Rw",
+    "b-r.bqk..rpppp.ppp..n..n....b.p.....BPP.....P..N..PP...PPPRNBQK..Rb",
     "b-r.bqk..rpppp.ppp..n..n....b.......BpP.....P..N..PP...PPPRNBQK..Rw",
     "b-r.bqkb.rppp..ppp..n........np.N...B.............PPPP.PPPRNBQK..Rw",
     "b-rnbqkb.rpp..pp.p...p.np............NP.....N.....PPP..PPPR.BQKB.Rw",
+    "b-r.bqkbnrpp...ppp..n.p.....ppP......P......P..N..PP...PPPRNBQKB.Rb",
     "b-r.b.kbnrpp...ppp.qn.p.....ppP......P......P..N..PP...PPPRNBQKB.Rw",
+    "b-rnbqkb.rpp..pppp..p..N.............P............PPP..PPPR.BQKBNRb",
     "b-rnbqkb.rpp...ppp..p..p.............P............PPP..PPPR.BQKBNRw",
+    "b-r.bqkbnrpp.p.ppp..N.........p.......P...........PPP..PPPRNBQKB.Rb",
     "b-r.bqkbnrp..p.ppp..p.........p.......P...........PPP..PPPRNBQKB.Rw",
+    "b-r.bqkbnrpp.ppp.p..n...p............NP.....N.....PPP..PPPR.BQKB.Rb",
     "b-r.bqk.nrpp.pppbp..n...p............NP.....N.....PPP..PPPR.BQKB.Rw",
     "b-r.bqkb.rpppp.ppp.....n.............QP...........PPP..PPPRNB.KB.Rw",
+    "b-rn.qkbnrpp..pppp..p..........b.....P..........N.PPP..PPPR.BQKBNRb",
     "b-rn.qkbnrpp..pppp..p...b............P..........N.PPP..PPPR.BQKBNRw",
+    "b-r.bqkb.rppp..ppp.....n..nB.Pp.N.................PPPP.PPPRNBQK..Rb",
     "b-r.bqkb.rpp...ppp..p..n..nB.Pp.N.................PPPP.PPPRNBQK..Rw",
+    "b-rn.qkbnrpp..pppp..p........pPb.....P.......B....PPP..PPPRNBQK.NRb",
+    "b-rn.qkbnrpp..pppp..p........pP......P.......b....PPP..PPPRNBQK.NRw",
+    "b-rn.qkbnrpp..pppp..p........pP......P.......Q....PPP..PPPRNB.K.NRb",
     "b-rn.qkbnrpp...ppp..p.p......pP......P.......Q....PPP..PPPRNB.K.NRw",
+    "b-r.bqkb.rpppp.ppp..N..n..............P...........PPP..PPPRNBQKB.Rb",
     "b-r.bqkb.rp.pp.ppp..p..n..............P...........PPP..PPPRNBQKB.Rw",
+    "b-r.bqk..rpppp.ppp..n..n....b.......BPP........N..PP...PPPRNBQK..Rb",
     "b-r.bqk..rpppp.ppp..n..n...........bBPP........N..PP...PPPRNBQK..Rw",
     "b-r.bqkbnrpp.p.ppp..........p........QP...........PPP..PPPRNB.KB.Rw",
+    "b-r.bqkb.rpp.ppppp..n..n.............NP.....N.....PPP..PPPR.BQKB.Rb",
     "b-r.bqkb.rpp.p.ppp..n..n......p......NP.....N.....PPP..PPPR.BQKB.Rw",
+    "b-r.bqk.nrppp..ppp..np......b.p.....B.P.....P..N..PP.P.PPPRNBQK..Rw",
+    "b-r.bqk.nrppp..ppp..np......b.p.....BPP.....P..N..PP...PPPRNBQK..Rb",
     "b-r.bqk.nrppp..ppp..np......b.......BpP.....P..N..PP...PPPRNBQK..Rw",
+    "b-r.bqk.nrpppp.ppp..N.......b.........P...........PPP..PPPRNBQKB.Rb",
     "b-r.bqk.nrp.pp.ppp..p.......b.........P...........PPP..PPPRNBQKB.Rw",
+    "b-r.bqkbnrpp.ppp.p..N...p.............P...........PPP..PPPRNBQKB.Rb",
     "b-r.bqkbnrp..ppp.p..p...p.............P...........PPP..PPPRNBQKB.Rw",
+    "b-r.bqkb.rppp..Npp..n........np.....B.............PPPP.PPPRNBQK..Rb",
     "b-r.bq.b.rppp..kpp..n........np.....B.............PPPP.PPPRNBQK..Rw",
+    "b-r.bqkbnrpp.p.ppp..n......N..p.......P...........PPP..PPPRNBQKB.Rb",
     "b-r.bqkbnrpp...ppp..np.....N..p.......P...........PPP..PPPRNBQKB.Rw",
     "b-r.b.kbnrpppp.ppp.....q.............QP...........PPP..PPPRNB.KB.Rw",
+    "b-rnbqkbnrpp..pppp...........p.......P.......B....PPP..PPPRNBQK.NRb",
+    "b-r.bqkbnrpp..pppp..n........p.......P.......B....PPP..PPPRNBQK.NRw",
+    "b-r.bqkbnrpp..pppp..n........p.......P......PB....PP...PPPRNBQK.NRb",
     "b-r.bqkb.rpp..pppp..n..n.....p.......P......PB....PP...PPPRNBQK.NRw",
+    "b-r.bqkb.rppp..ppp..n..n.....pp.....B.P......P.N..PPP..PPPRNBQK..Rw",
+    "b-r.bqkb.rppp..ppp..n..n.....Pp.....B........P.N..PPP..PPPRNBQK..Rb",
     "b-r.bqkb.rppp..ppp..n........np.....B........P.N..PPP..PPPRNBQK..Rw",
+    "b-rnbqkb.rpppp.ppp.....n......N.......P...........PPPP.PPPRNBQKB.Rb",
+    "b-r.bqkb.rpppp.ppp..n..n......N.......P...........PPPP.PPPRNBQKB.Rw",
+    "b-r.bqkb.rpppp.ppp..N..n..............P...........PPPP.PPPRNBQKB.Rb",
+    "b-r.bqkb.rppp..ppp..p..n..............P...........PPPP.PPPRNBQKB.Rw",
+    "b-r.bqkb.rppp..ppp..p..n..............P......P....PPP..PPPRNBQKB.Rb",
     "b-r.bqk..rppp..ppp..p..n....b.........P......P....PPP..PPPRNBQKB.Rw",
+    "b-rnbqkbnrpppp.ppp............P...................PPP.PPPPRNBQKBNRb",
+    "b-r.bqkbnrpppp.ppp..n.........P...................PPP.PPPPRNBQKBNRw",
+    "b-r.bqkbnrpppp.ppp..n.........P................N..PPP.PPPPRNBQKB.Rb",
+    "b-r.b.kbnrppppqppp..n.........P................N..PPP.PPPPRNBQKB.Rw",
+    "b-r.b.kbnrppppqppp..n.........P........B.......N..PPP.PPPPRN.QKB.Rb",
+    "b-r.b.kbnrpppp.ppp..n.........P....q...B.......N..PPP.PPPPRN.QKB.Rw",
+    "b-r.b.kbnrpppp.ppp..n.........P....q...........N..PPPBPPPPRN.QKB.Rb",
     "b-r.b.kbnrpppp.ppp..n.........P................N..PqPBPPPPRN.QKB.Rw",
+    "b-r.bqk.nrpp.pppbp..n...p............NP.....N.B...PPP..PPPR..QKB.Rb",
     "b-r.bqk..rpp.pppbp..n..np............NP.....N.B...PPP..PPPR..QKB.Rw",
+    "b-rnbqkb.r.p..ppppp..p.n........B....NP.....N.....PPP..PPPR..QKB.Rb",
     "b-rnbqkb.r.p...pppp..ppn........B....NP.....N.....PPP..PPPR..QKB.Rw",
+    "b-rnbqkb.rpp..pp.p...p.np............NP.....N.B...PPP..PPPR..QKB.Rb",
     "b-rnbqk..rpp..ppbp...p.np............NP.....N.B...PPP..PPPR..QKB.Rw",
+    "b-r.bqkb.rpp.p.ppp..n..n...N..p.......P.....N.....PPP..PPPR.BQKB.Rb",
     "b-r.bqkb.rpp...ppp..np.n...N..p.......P.....N.....PPP..PPPR.BQKB.Rw",
+    "b-rnbqkb.r.p..ppppp..p.n.............NP.....N.B...PPP..PPPR..QKB.Rb",
     "b-rnbqkb.r.p...pppp..p.n......p......NP.....N.B...PPP..PPPR..QKB.Rw",
+    "b-r.bqkbnrppp..ppp...p...............QP.....N.....PPP..PPPR.B.KB.Rb",
     "b-r.bqkb.rppp..ppp...p.n.............QP.....N.....PPP..PPPR.B.KB.Rw",
+    "b-r.bqkbnrpp...ppp..np.....N..p.......P.....N.....PPP..PPPR.BQKB.Rb",
     "b-r.bqkbnr.p...pppp.np.....N..p.......P.....N.....PPP..PPPR.BQKB.Rw",
+    "b-rnbqkb.rppp.pp.p.....np....p......PP......N.....PP..PPPPR.BQKBNRw",
+    "b-rnbqkb.rppp.pp.p.....np....P.......P......N.....PP..PPPPR.BQKBNRb",
+    "b-rnbqkb.rppp.pp.p......p....n.......P......N.....PP..PPPPR.BQKBNRw",
+    "b-rnbqkb.rppp.pp.p......p....n.......PP.....N.....PP...PPPR.BQKBNRb",
+    "b-rnbqkb.rppp.pp.p......p............PP.....n.....PP...PPPR.BQKBNRw",
+    "b-rnbqkb.rppp.pp.p......p............PP.....P.....P....PPPR.BQKBNRb",
     "b-rnbqk..rppp.ppbp......p............PP.....P.....P....PPPR.BQKBNRw",
+    "b-r.bqkb.r.ppp.pppp.n..n......p...B...P........N..PPPP.PPPRNBQ.RK.b",
+    "b-r.bqk..r.pppbpppp.n..n......p...B...P........N..PPPP.PPPRNBQ.RK.w",
+    "b-r.bqk..r.pppbpppp.n..n......p...B...P........N..PPPP.PPPRNBQR.K.b",
     "b-r.bqk..r..ppbpppp.n..n...p..p...B...P........N..PPPP.PPPRNBQR.K.w",
+    "b-r.bqk.nrppp..ppp..np......b.......BPP........N..PP...PPPRNBQK..Rb",
     "b-r.bqk.nrppp..ppp..np.............bBPP........N..PP...PPPRNBQK..Rw",
     "b-r.bqk.nrppp..ppp.bnp..............BPP........N..PP...PPPRNBQK..Rw",
+    "b-rnbqkbnrppp..ppp....p......p.......PP.....N.....PPP..PPPR.BQKBNRb",
+    "b-rnbqkb.rppp..ppp....pn.....p.......PP.....N.....PPP..PPPR.BQKBNRw",
+    "b-rnbqkb.rppp..ppp....pn.....pP......P......N.....PPP..PPPR.BQKBNRb",
+    "b-rnbqkb.rpppn.ppp....p......pP......P......N.....PPP..PPPR.BQKBNRw",
+    "b-rnbqkb.rpppn.ppp....p......pP......P.P....N.....PPP...PPR.BQKBNRb",
+    "b-rnbqkb.rpp.n.ppp....p.....ppP......P.P....N.....PPP...PPR.BQKBNRw",
+    "b-rnbqkb.rpp.n.ppp....p.....ppP......P.P....N..N..PPP...PPR.BQKB.Rb",
     "b-r.bqkb.rpp.n.ppp..n.p.....ppP......P.P....N..N..PPP...PPR.BQKB.Rw",
+    "b-rnbqkb.rpp...ppp..p..p.............P.........N..PPP..PPPR.BQKB.Rb",
     "b-rnbqk..rpp...ppp..pb.p.............P.........N..PPP..PPPR.BQKB.Rw",
+    "b-r.bqkbnrp..p.ppp..p.........p.......P.....N.....PPP..PPPR.BQKB.Rb",
     "b-r.bqkb.rp..p.ppp..p..n......p.......P.....N.....PPP..PPPR.BQKB.Rw",
+    "b-rnbqkb.r.p..ppppp..p.n............BNP.....N.....PPP..PPPR.BQK..Rb",
     "b-rnbqkb.r.p...pppp..ppn............BNP.....N.....PPP..PPPR.BQK..Rw",
+    "b-rnbqkb.rppp..ppp.....n.....p.......P.......B.N..PPP..PPPRNBQK..Rb",
+    "b-rnbqk..rppp..ppp...b.n.....p.......P.......B.N..PPP..PPPRNBQK..Rw",
+    "b-rnbqk..rppp..ppp...b.n.....p.......P.......B.N..PPP..PPPRNBQ.RK.b",
     "b-rnbq.rk.ppp..ppp...b.n.....p.......P.......B.N..PPP..PPPRNBQ.RK.w",
     "b-r..qkb.rpppb.ppp.....n..nB.Pp.N.................PPPP.PPPRNBQK..Rw",
+    "b-r.b.kbnrpppp.ppp..n.........P.............N..N..PqPBPPPPR..QKB.Rb",
     "b-r.b.k.nrpppp.ppp..n.........P....b........N..N..PqPBPPPPR..QKB.Rw",
+    "b-r.bqk.nrpppp.ppp..n.......b.p....PB.P........N..P.PP.PPPRNBQK..Rb",
+    "b-r.bqk.nrpppp.ppp..n.........p....bB.P........N..P.PP.PPPRNBQK..Rw",
+    "b-r.bqk.nrpppp.ppp..n.........p....bB.P.....P..N..P..P.PPPRNBQK..Rb",
+    "b-r.bqk.nrpppp.ppp..n.......b.p.....B.P.....P..N..P..P.PPPRNBQK..Rw",
+    "b-r.bqk.nrpppp.ppp..n.......b.p.....BPP.....P..N..P....PPPRNBQK..Rb",
     "b-r.bqk.nrpppp.ppp..n.......b.......BpP.....P..N..P....PPPRNBQK..Rw",
+    "b-rnbqkb.rpp...ppp..p..p.............P......P.....PP...PPPR.BQKBNRb",
     "b-rnbqk..rpp...ppp..pb.p.............P......P.....PP...PPPR.BQKBNRw",
+    "b-rnb.kb.rppp.pppp...........q.................N..PPPP.PPPR.BQKB.Rb",
+    "b-rn..kb.rppp.pppp...........q..........b......N..PPPP.PPPR.BQKB.Rw",
+    "b-rn..kb.rppp.pppp...........q..........b......N..PPPPBPPPR.BQK..Rb",
     "b-r...kb.rppp.pppp..n........q..........b......N..PPPPBPPPR.BQK..Rw",
+    "b-r.bqkbnrpppp.ppp..n...............BpP........N..PPP..PPPRNBQK..Rb",
+    "b-r.bqk.nrpppp.ppp..n.......b.......BpP........N..PPP..PPPRNBQK..Rw",
+    "b-r.bqk.nrpppp.ppp..n.......b.......BpP.....P..N..PP...PPPRNBQK..Rb",
+    "b-r.bqk.nrpppp.ppp..n.......b.......B.P.....p..N..PP...PPPRNBQK..Rw",
+    "b-r.bqk.nrpppp.Bpp..n.......b.........P.....p..N..PP...PPPRNBQK..Rb",
     "b-r.bq..nrpppp.kpp..n.......b.........P.....p..N..PP...PPPRNBQK..Rw"
   ],
   "entries": [
@@ -177,6 +340,206 @@
       "index": 0,
       "uci": "",
       "count": 9007199254740991
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp........................P........PPPPPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 0,
+      "uci": "a2a3",
+      "count": 9007199254740990
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp................P................PPPPPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 1,
+      "uci": "a2a4",
+      "count": 9007199254740989
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp.........................P......P.PPPPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/1P6/P1PPPPPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 2,
+      "uci": "b2b3",
+      "count": 9007199254740988
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp.................P..............P.PPPPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/1P6/8/P1PPPPPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 3,
+      "uci": "b2b4",
+      "count": 9007199254740987
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp..........................P.....PP.PPPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/2P5/PP1PPPPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 4,
+      "uci": "c2c3",
+      "count": 9007199254740986
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp..................P.............PP.PPPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 5,
+      "uci": "c2c4",
+      "count": 9007199254740985
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp...........................P....PPP.PPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 6,
+      "uci": "d2d3",
+      "count": 9007199254740984
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp...................P............PPP.PPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 7,
+      "uci": "d2d4",
+      "count": 9007199254740983
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp............................P...PPPP.PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 8,
+      "uci": "e2e3",
+      "count": 9007199254740982
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp....................P...........PPPP.PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 9,
+      "uci": "e2e4",
+      "count": 9007199254740981
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp.............................P..PPPPP.PPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 10,
+      "uci": "f2f3",
+      "count": 9007199254740980
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp.....................P..........PPPPP.PPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/5P2/8/PPPPP1PP/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 11,
+      "uci": "f2f4",
+      "count": 9007199254740979
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp..............................P.PPPPPP.PRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/6P1/PPPPPP1P/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 12,
+      "uci": "g2g3",
+      "count": 9007199254740978
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp......................P.........PPPPPP.PRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 13,
+      "uci": "g2g4",
+      "count": 9007199254740977
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp...............................PPPPPPPP.RNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/7P/PPPPPPP1/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 14,
+      "uci": "h2h3",
+      "count": 9007199254740976
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp.......................P........PPPPPPP.RNBQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/7P/8/PPPPPPP1/RNBQKBNR b KQkq - 0 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 15,
+      "uci": "h2h4",
+      "count": 9007199254740975
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp........................N.......PPPPPPPPR.BQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/N7/PPPPPPPP/R1BQKBNR b KQkq - 1 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 16,
+      "uci": "b1a3",
+      "count": 9007199254740974
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp..........................N.....PPPPPPPPR.BQKBNRb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 17,
+      "uci": "b1c3",
+      "count": 9007199254740973
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp.............................N..PPPPPPPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 18,
+      "uci": "g1f3",
+      "count": 9007199254740972
+    },
+    {
+      "code": "b-rnbqkbnrpppppppp...............................NPPPPPPPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/7N/PPPPPPPP/RNBQKB1R b KQkq - 1 1",
+      "perspective": "b",
+      "source": "legal_ply1",
+      "depth": 1,
+      "index": 19,
+      "uci": "g1h3",
+      "count": 9007199254740971
     },
     {
       "code": "b-rnbqkbnrpppp.ppp............p.......P...........PPPP.PPPRNBQKBNRw",
@@ -210,6 +573,17 @@
       "uci": "e2e4c7c5",
       "count": 241638,
       "pct": 9.3169
+    },
+    {
+      "code": "b-rnbqkbnrpppp.ppp............p.......P........N..PPPP.PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 0,
+      "uci": "e2e4e7e5g1f3",
+      "count": 226373,
+      "pct": 8.7283
     },
     {
       "code": "b-r.bqkbnrpppp.ppp..n.........p.......P........N..PPPP.PPPRNBQKB.Rw",
@@ -267,6 +641,17 @@
       "pct": 4.4908
     },
     {
+      "code": "b-rnbqkbnrppp.pppp...........P....................PPPP.PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 1,
+      "uci": "e2e4d7d5e4d5",
+      "count": 78086,
+      "pct": 3.0108
+    },
+    {
       "code": "b-rnb.kbnrppp.pppp...........q....................PPPP.PPPRNBQKBNRw",
       "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3",
       "perspective": "w",
@@ -300,6 +685,17 @@
       "pct": 2.4426
     },
     {
+      "code": "b-rnbqkbnrpp.ppppp..p................PP...........PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pp1ppppp/2p5/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 2,
+      "uci": "e2e4c7c6d2d4",
+      "count": 54239,
+      "pct": 2.0913
+    },
+    {
       "code": "b-rnbqkbnrpp..pppp..p........p.......PP...........PPP..PPPRNBQKBNRw",
       "fen": "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
       "perspective": "w",
@@ -309,6 +705,17 @@
       "uci": "e2e4c7c6d2d4d7d5",
       "count": 54239,
       "pct": 2.0913
+    },
+    {
+      "code": "b-rnbqkbnrpp.ppppp..........p.........P........N..PPPP.PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 3,
+      "uci": "e2e4c7c5g1f3",
+      "count": 53830,
+      "pct": 2.0755
     },
     {
       "code": "b-r.bqkbnrpp.ppppp..n.......p.........P........N..PPPP.PPPRNBQKB.Rw",
@@ -355,6 +762,17 @@
       "pct": 1.8496
     },
     {
+      "code": "b-rnbqkbnrpppp.ppp....p..............PP...........PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppp1ppp/4p3/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 5,
+      "uci": "e2e4e7e6d2d4",
+      "count": 45647,
+      "pct": 1.76
+    },
+    {
       "code": "b-rnbqkbnrppp..ppp....p......p.......PP...........PPP..PPPRNBQKBNRw",
       "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
       "perspective": "w",
@@ -364,6 +782,17 @@
       "uci": "e2e4e7e6d2d4d7d5",
       "count": 45647,
       "pct": 1.76
+    },
+    {
+      "code": "b-rnbqkbnrpp.ppppp..p.................P........N..PPPP.PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pp1ppppp/2p5/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 6,
+      "uci": "e2e4c7c6g1f3",
+      "count": 36632,
+      "pct": 1.4124
     },
     {
       "code": "b-rnbqkbnrpp..pppp..p........p........P........N..PPPP.PPPRNBQKB.Rw",
@@ -388,6 +817,17 @@
       "pct": 1.4098
     },
     {
+      "code": "b-r.bqkbnrpppp.ppp..n.........p......PP........N..PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 0,
+      "uci": "e2e4e7e5g1f3b8c6d2d4",
+      "count": 34196,
+      "pct": 1.3185
+    },
+    {
       "code": "b-r.bqkbnrpppp.ppp..n................pP........N..PPP..PPPRNBQKB.Rw",
       "fen": "r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
       "perspective": "w",
@@ -408,6 +848,17 @@
       "uci": "e2e4c7c5g1f3d7d6",
       "count": 33685,
       "pct": 1.2988
+    },
+    {
+      "code": "b-r.bqkbnrpppp.ppp..n.........p.....B.P........N..PPPP.PPPRNBQK..Rb",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 1,
+      "uci": "e2e4e7e5g1f3b8c6f1c4",
+      "count": 32477,
+      "pct": 1.2522
     },
     {
       "code": "b-r.bqkb.rpppp.ppp..n..n......p.....B.P........N..PPPP.PPPRNBQK..Rw",
@@ -487,6 +938,17 @@
       "pct": 1.1418
     },
     {
+      "code": "b-rnbqkbnrpppp.ppp....p...............P........N..PPPP.PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pppp1ppp/4p3/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 9,
+      "uci": "e2e4e7e6g1f3",
+      "count": 27368,
+      "pct": 1.0552
+    },
+    {
       "code": "b-rnbqkbnrppp..ppp....p......p........P........N..PPPP.PPPRNBQKB.Rw",
       "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3",
       "perspective": "w",
@@ -520,6 +982,17 @@
       "pct": 1.029
     },
     {
+      "code": "b-rnbqkbnrppp.pppp...........p......PP............PP..PPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 10,
+      "uci": "d2d4d7d5c2c4",
+      "count": 24259,
+      "pct": 0.9354
+    },
+    {
       "code": "b-rnbqkbnrppp..ppp....p......p......PP............PP..PPPPRNBQKBNRw",
       "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
       "perspective": "w",
@@ -531,6 +1004,17 @@
       "pct": 0.9354
     },
     {
+      "code": "b-rnbqkbnrpppp.ppp............p......PP...........PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppp1ppp/8/4p3/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 11,
+      "uci": "e2e4e7e5d2d4",
+      "count": 23179,
+      "pct": 0.8937
+    },
+    {
       "code": "b-rnbqkbnrpppp.ppp...................pP...........PPP..PPPRNBQKBNRw",
       "fen": "rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
       "perspective": "w",
@@ -540,6 +1024,17 @@
       "uci": "e2e4e7e5d2d4e5d4",
       "count": 23179,
       "pct": 0.8937
+    },
+    {
+      "code": "b-rnb.kbnrppp.pppp...........q..............N.....PPPP.PPPR.BQKBNRb",
+      "fen": "rnb1kbnr/ppp1pppp/8/3q4/8/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 3,
+      "uci": "e2e4d7d5e4d5d8d5b1c3",
+      "count": 22805,
+      "pct": 0.8793
     },
     {
       "code": "b-rnbqkbnrppp.pppp..........................N.....PPPP.PPPR.BQKBNRw",
@@ -575,6 +1070,17 @@
       "pct": 0.8701
     },
     {
+      "code": "b-rnbqkbnrpp..pppp..p........P.................N..PPPP.PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pp2pppp/2p5/3P4/8/5N2/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 4,
+      "uci": "e2e4c7c6g1f3d7d5e4d5",
+      "count": 22492,
+      "pct": 0.8672
+    },
+    {
       "code": "b-rnbqkbnrpp..pppp...........p.................N..PPPP.PPPRNBQKB.Rw",
       "fen": "rnbqkbnr/pp2pppp/8/3p4/8/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 4",
       "perspective": "w",
@@ -595,6 +1101,17 @@
       "uci": "e2e4d7d5e4d5g8f6",
       "count": 22456,
       "pct": 0.8658
+    },
+    {
+      "code": "b-rnbqkbnrpppp.ppp............p.....B.P...........PPPP.PPPRNBQK.NRb",
+      "fen": "rnbqkbnr/pppp1ppp/8/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 14,
+      "uci": "e2e4e7e5f1c4",
+      "count": 21714,
+      "pct": 0.8372
     },
     {
       "code": "b-r.bqkbnrpppp.ppp..n.........p.....B.P...........PPPP.PPPRNBQK.NRw",
@@ -619,6 +1136,17 @@
       "pct": 0.8288
     },
     {
+      "code": "b-r.bqkbnrpp.ppppp..n.......p........PP........N..PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pp1ppppp/2n5/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 5,
+      "uci": "e2e4c7c5g1f3b8c6d2d4",
+      "count": 21366,
+      "pct": 0.8238
+    },
+    {
       "code": "b-r.bqkbnrpp.ppppp..n................pP........N..PPP..PPPRNBQKB.Rw",
       "fen": "r1bqkbnr/pp1ppppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
       "perspective": "w",
@@ -628,6 +1156,17 @@
       "uci": "e2e4c7c5g1f3b8c6d2d4c5d4",
       "count": 21366,
       "pct": 0.8238
+    },
+    {
+      "code": "b-rnbqkbnrpppp.ppp............p.......P.....N.....PPPP.PPPR.BQKBNRb",
+      "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 15,
+      "uci": "e2e4e7e5b1c3",
+      "count": 20409,
+      "pct": 0.7869
     },
     {
       "code": "b-r.bqkbnrpppp.ppp..n.........p.......P.....N.....PPPP.PPPR.BQKBNRw",
@@ -650,6 +1189,17 @@
       "uci": "d2d4d7d5c2c4d5c4",
       "count": 20027,
       "pct": 0.7722
+    },
+    {
+      "code": "b-rnbqkbnrpppppp.p......p............PP...........PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppppp1p/6p1/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 17,
+      "uci": "e2e4g7g6d2d4",
+      "count": 18640,
+      "pct": 0.7187
     },
     {
       "code": "b-rnbqk.nrppppppbp......p............PP...........PPP..PPPRNBQKBNRw",
@@ -696,6 +1246,17 @@
       "pct": 0.6746
     },
     {
+      "code": "b-rnbqkbnrppp..ppp....p......P.................N..PPPP.PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/ppp2ppp/4p3/3P4/8/5N2/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 6,
+      "uci": "e2e4e7e6g1f3d7d5e4d5",
+      "count": 16732,
+      "pct": 0.6451
+    },
+    {
       "code": "b-rnbqkbnrppp..ppp...........p.................N..PPPP.PPPRNBQKB.Rw",
       "fen": "rnbqkbnr/ppp2ppp/8/3p4/8/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 4",
       "perspective": "w",
@@ -718,6 +1279,17 @@
       "pct": 0.6449
     },
     {
+      "code": "b-rnbqkbnrpp..pppp...p......p........PP........N..PPP..PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pp2pppp/3p4/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 8,
+      "uci": "e2e4c7c5g1f3d7d6d2d4",
+      "count": 16531,
+      "pct": 0.6374
+    },
+    {
       "code": "b-rnbqkbnrpp..pppp...p...............pP........N..PPP..PPPRNBQKB.Rw",
       "fen": "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
       "perspective": "w",
@@ -727,6 +1299,17 @@
       "uci": "e2e4c7c5g1f3d7d6d2d4c5d4",
       "count": 16531,
       "pct": 0.6374
+    },
+    {
+      "code": "b-rnbqkbnrpp..pppp..p........P.......P............PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pp2pppp/2p5/3P4/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 9,
+      "uci": "e2e4c7c6d2d4d7d5e4d5",
+      "count": 16460,
+      "pct": 0.6347
     },
     {
       "code": "b-rnbqkbnrpp..pppp...........p.......P............PPP..PPPRNBQKBNRw",
@@ -740,6 +1323,17 @@
       "pct": 0.6347
     },
     {
+      "code": "b-rnbqkbnrpp.ppppp..........p........PP...........PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pp1ppppp/8/2p5/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 20,
+      "uci": "e2e4c7c5d2d4",
+      "count": 16225,
+      "pct": 0.6256
+    },
+    {
       "code": "b-rnbqkbnrpp.ppppp...................pP...........PPP..PPPRNBQKBNRw",
       "fen": "rnbqkbnr/pp1ppppp/8/8/3pP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3",
       "perspective": "w",
@@ -749,6 +1343,17 @@
       "uci": "e2e4c7c5d2d4c5d4",
       "count": 16225,
       "pct": 0.6256
+    },
+    {
+      "code": "b-rnbqkb.rpppppppp.....n............PP............PP..PPPPRNBQKBNRb",
+      "fen": "rnbqkb1r/pppppppp/5n2/8/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 21,
+      "uci": "d2d4g8f6c2c4",
+      "count": 15525,
+      "pct": 0.5986
     },
     {
       "code": "b-rnbqkb.rpppp.ppp....pn............PP............PP..PPPPRNBQKBNRw",
@@ -773,6 +1378,17 @@
       "pct": 0.5959
     },
     {
+      "code": "b-rnbqkbnrppp.pppp...........p.......P.........N..PPP.PPPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/ppp1pppp/8/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 23,
+      "uci": "d2d4d7d5g1f3",
+      "count": 15191,
+      "pct": 0.5857
+    },
+    {
       "code": "b-rnbqkb.rppp.pppp.....n.....p.......P.........N..PPP.PPPPRNBQKB.Rw",
       "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3",
       "perspective": "w",
@@ -782,6 +1398,17 @@
       "uci": "d2d4d7d5g1f3g8f6",
       "count": 15191,
       "pct": 0.5857
+    },
+    {
+      "code": "b-rnbqkbnrppp.pppp...........p.......P.B..........PPP.PPPPRN.QKBNRb",
+      "fen": "rnbqkbnr/ppp1pppp/8/3p4/3P1B2/8/PPP1PPPP/RN1QKBNR b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_4/ply_3",
+      "depth": 3,
+      "index": 24,
+      "uci": "d2d4d7d5c1f4",
+      "count": 15053,
+      "pct": 0.5804
     },
     {
       "code": "b-rnbqkb.rppp.pppp.....n.....p.......P.B..........PPP.PPPPRN.QKBNRw",
@@ -806,6 +1433,17 @@
       "pct": 0.5347
     },
     {
+      "code": "b-r.bqkbnrpppp.ppp..n.........p.......P.....N..N..PPPP.PPPR.BQKB.Rb",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 10,
+      "uci": "e2e4e7e5g1f3b8c6b1c3",
+      "count": 13749,
+      "pct": 0.5301
+    },
+    {
       "code": "b-r.bqkb.rpppp.ppp..n..n......p.......P.....N..N..PPPP.PPPR.BQKB.Rw",
       "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/4P3/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 4",
       "perspective": "w",
@@ -815,6 +1453,17 @@
       "uci": "e2e4e7e5g1f3b8c6b1c3g8f6",
       "count": 13749,
       "pct": 0.5301
+    },
+    {
+      "code": "b-rnbqkbnrppp..ppp....p......P.......P............PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/ppp2ppp/4p3/3P4/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 11,
+      "uci": "e2e4e7e6d2d4d7d5e4d5",
+      "count": 13664,
+      "pct": 0.5268
     },
     {
       "code": "b-rnbqkbnrppp..ppp...........p.......P............PPP..PPPRNBQKBNRw",
@@ -850,6 +1499,17 @@
       "pct": 0.5153
     },
     {
+      "code": "b-rnbqkbnrppp..ppp....p......pP......P............PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/ppp2ppp/4p3/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 12,
+      "uci": "e2e4e7e6d2d4d7d5e4e5",
+      "count": 13346,
+      "pct": 0.5146
+    },
+    {
       "code": "b-rnbqkbnrpp...ppp....p.....ppP......P............PPP..PPPRNBQKBNRw",
       "fen": "rnbqkbnr/pp3ppp/4p3/2ppP3/3P4/8/PPP2PPP/RNBQKBNR w KQkq - 0 4",
       "perspective": "w",
@@ -870,6 +1530,17 @@
       "uci": "c2c4g8f6",
       "count": 12888,
       "pct": 0.4969
+    },
+    {
+      "code": "b-rnbqkbnrpp..pppp..p........pP......P............PPP..PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pp2pppp/2p5/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 13,
+      "uci": "e2e4c7c6d2d4d7d5e4e5",
+      "count": 11792,
+      "pct": 0.4547
     },
     {
       "code": "b-rn.qkbnrpp..pppp..p........pPb.....P............PPP..PPPRNBQKBNRw",
@@ -894,6 +1565,17 @@
       "pct": 0.4383
     },
     {
+      "code": "b-rnbqkbnrpp..pppp...p...............NP...........PPP..PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 0,
+      "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4",
+      "count": 10972,
+      "pct": 0.423
+    },
+    {
       "code": "b-rnbqkb.rpp..pppp...p.n.............NP...........PPP..PPPRNBQKB.Rw",
       "fen": "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 1 5",
       "perspective": "w",
@@ -903,6 +1585,17 @@
       "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6",
       "count": 10972,
       "pct": 0.423
+    },
+    {
+      "code": "b-r.bqkbnrpppp.ppp..n......B..p.......P........N..PPPP.PPPRNBQK..Rb",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 15,
+      "uci": "e2e4e7e5g1f3b8c6f1b5",
+      "count": 10631,
+      "pct": 0.4099
     },
     {
       "code": "b-r.bqkbnr.ppp.pppp.n......B..p.......P........N..PPPP.PPPRNBQK..Rw",
@@ -927,6 +1620,17 @@
       "pct": 0.3749
     },
     {
+      "code": "b-rnbqkbnrpp.p.ppp....p.....p........PP........N..PPP..PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pp1p1ppp/4p3/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 17,
+      "uci": "e2e4c7c5g1f3e7e6d2d4",
+      "count": 9449,
+      "pct": 0.3643
+    },
+    {
       "code": "b-rnbqkbnrpp.p.ppp....p..............pP........N..PPP..PPPRNBQKB.Rw",
       "fen": "rnbqkbnr/pp1p1ppp/4p3/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
       "perspective": "w",
@@ -949,6 +1653,17 @@
       "pct": 0.3587
     },
     {
+      "code": "b-r.bqkbnrpppp.ppp..n................NP...........PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 1,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4",
+      "count": 9112,
+      "pct": 0.3513
+    },
+    {
       "code": "b-r.bqkbnrpppp.ppp...................nP...........PPP..PPPRNBQKB.Rw",
       "fen": "r1bqkbnr/pppp1ppp/8/8/3nP3/8/PPP2PPP/RNBQKB1R w KQkq - 0 5",
       "perspective": "w",
@@ -958,6 +1673,17 @@
       "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4c6d4",
       "count": 9112,
       "pct": 0.3513
+    },
+    {
+      "code": "b-rnbqkbnrpp..pppp..p........p.......PP.....N.....PPP..PPPR.BQKBNRb",
+      "fen": "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR b KQkq - 1 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 19,
+      "uci": "e2e4c7c6d2d4d7d5b1c3",
+      "count": 9093,
+      "pct": 0.3506
     },
     {
       "code": "b-rnbqkbnrpp..pppp..p................Pp.....N.....PPP..PPPR.BQKBNRw",
@@ -971,6 +1697,17 @@
       "pct": 0.3506
     },
     {
+      "code": "b-rnbqkbnrppp..ppp....p......p......PP......N.....PP..PPPPR.BQKBNRb",
+      "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq - 1 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 20,
+      "uci": "d2d4d7d5c2c4e7e6b1c3",
+      "count": 8035,
+      "pct": 0.3098
+    },
+    {
       "code": "b-rnbqkb.rppp..ppp....pn.....p......PP......N.....PP..PPPPR.BQKBNRw",
       "fen": "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 2 4",
       "perspective": "w",
@@ -980,6 +1717,17 @@
       "uci": "d2d4d7d5c2c4e7e6b1c3g8f6",
       "count": 8035,
       "pct": 0.3098
+    },
+    {
+      "code": "b-rnbqkbnrppp..ppp...p........p......PP........N..PPP..PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/ppp2ppp/3p4/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 21,
+      "uci": "e2e4e7e5g1f3d7d6d2d4",
+      "count": 7805,
+      "pct": 0.3009
     },
     {
       "code": "b-rnbqkbnrppp..ppp...p...............pP........N..PPP..PPPRNBQKB.Rw",
@@ -993,6 +1741,39 @@
       "pct": 0.3009
     },
     {
+      "code": "b-rnbqkbnrpp.ppppp..p...............B.P...........PPPP.PPPRNBQK.NRb",
+      "fen": "rnbqkbnr/pp1ppppp/2p5/8/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_3",
+      "depth": 3,
+      "index": 22,
+      "uci": "e2e4c7c6f1c4",
+      "count": 7684,
+      "pct": 0.2963
+    },
+    {
+      "code": "b-rnbqkbnrpp..pppp..p........p......B.P...........PPPP.PPPRNBQK.NRw",
+      "fen": "rnbqkbnr/pp2pppp/2p5/3p4/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 3",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_6/ply_4",
+      "depth": 4,
+      "index": 22,
+      "uci": "e2e4c7c6f1c4d7d5",
+      "count": 7684,
+      "pct": 0.2963
+    },
+    {
+      "code": "b-rnbqkbnrpp..pppp..p........P......B.............PPPP.PPPRNBQK.NRb",
+      "fen": "rnbqkbnr/pp2pppp/2p5/3P4/2B5/8/PPPP1PPP/RNBQK1NR b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 22,
+      "uci": "e2e4c7c6f1c4d7d5e4d5",
+      "count": 7684,
+      "pct": 0.2963
+    },
+    {
       "code": "b-rnbqkbnrpp..pppp...........p......B.............PPPP.PPPRNBQK.NRw",
       "fen": "rnbqkbnr/pp2pppp/8/3p4/2B5/8/PPPP1PPP/RNBQK1NR w KQkq - 0 4",
       "perspective": "w",
@@ -1002,6 +1783,28 @@
       "uci": "e2e4c7c6f1c4d7d5e4d5c6d5",
       "count": 7684,
       "pct": 0.2963
+    },
+    {
+      "code": "b-rnbqkb.rpppppp.p.....np...........PP............PP..PPPPRNBQKBNRw",
+      "fen": "rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_6/ply_4",
+      "depth": 4,
+      "index": 23,
+      "uci": "d2d4g8f6c2c4g7g6",
+      "count": 7512,
+      "pct": 0.2896
+    },
+    {
+      "code": "b-rnbqkb.rpppppp.p.....np...........PP......N.....PP..PPPPR.BQKBNRb",
+      "fen": "rnbqkb1r/pppppp1p/5np1/8/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq - 1 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 23,
+      "uci": "d2d4g8f6c2c4g7g6b1c3",
+      "count": 7512,
+      "pct": 0.2896
     },
     {
       "code": "b-rnbqk..rppppppbp.....np...........PP......N.....PP..PPPPR.BQKBNRw",
@@ -1015,6 +1818,17 @@
       "pct": 0.2896
     },
     {
+      "code": "b-rnbqkbnrpppp.ppp...................QP...........PPP..PPPRNB.KBNRb",
+      "fen": "rnbqkbnr/pppp1ppp/8/8/3QP3/8/PPP2PPP/RNB1KBNR b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_6/ply_5",
+      "depth": 5,
+      "index": 24,
+      "uci": "e2e4e7e5d2d4e5d4d1d4",
+      "count": 7418,
+      "pct": 0.286
+    },
+    {
       "code": "b-r.bqkbnrpppp.ppp..n................QP...........PPP..PPPRNB.KBNRw",
       "fen": "r1bqkbnr/pppp1ppp/2n5/8/3QP3/8/PPP2PPP/RNB1KBNR w KQkq - 1 4",
       "perspective": "w",
@@ -1024,6 +1838,17 @@
       "uci": "e2e4e7e5d2d4e5d4d1d4b8c6",
       "count": 7418,
       "pct": 0.286
+    },
+    {
+      "code": "b-r.bqkb.rpppp.ppp..n..n......p.N...B.P...........PPPP.PPPRNBQK..Rb",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p1N1/2B1P3/8/PPPP1PPP/RNBQK2R b KQkq - 5 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 2,
+      "uci": "e2e4e7e5g1f3b8c6f1c4g8f6f3g5",
+      "count": 7023,
+      "pct": 0.2708
     },
     {
       "code": "b-r.bqkb.rppp..ppp..n..n.....pp.N...B.P...........PPPP.PPPRNBQK..Rw",
@@ -1037,6 +1862,17 @@
       "pct": 0.2708
     },
     {
+      "code": "b-rnbqkbnrppp..ppp...........p.......P.........N..PPP..PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/ppp2ppp/8/3p4/3P4/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 3,
+      "uci": "e2e4e7e6g1f3d7d5e4d5e6d5d2d4",
+      "count": 7002,
+      "pct": 0.27
+    },
+    {
       "code": "b-rnbqkb.rppp..ppp.....n.....p.......P.........N..PPP..PPPRNBQKB.Rw",
       "fen": "rnbqkb1r/ppp2ppp/5n2/3p4/3P4/5N2/PPP2PPP/RNBQKB1R w KQkq - 1 5",
       "perspective": "w",
@@ -1046,6 +1882,17 @@
       "uci": "e2e4e7e6g1f3d7d5e4d5e6d5d2d4g8f6",
       "count": 7002,
       "pct": 0.27
+    },
+    {
+      "code": "b-rnbqkbnrpp..pppp...........p.......P.........N..PPP..PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pp2pppp/8/3p4/3P4/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 4,
+      "uci": "e2e4c7c6g1f3d7d5e4d5c6d5d2d4",
+      "count": 6436,
+      "pct": 0.2482
     },
     {
       "code": "b-r.bqkbnrpp..pppp..n........p.......P.........N..PPP..PPPRNBQKB.Rw",
@@ -1059,6 +1906,17 @@
       "pct": 0.2482
     },
     {
+      "code": "b-rnbqkbnrpp...ppp....p.....ppP......P......P.....PP...PPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pp3ppp/4p3/2ppP3/3P4/2P5/PP3PPP/RNBQKBNR b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 5,
+      "uci": "e2e4e7e6d2d4d7d5e4e5c7c5c2c3",
+      "count": 6326,
+      "pct": 0.2439
+    },
+    {
       "code": "b-r.bqkbnrpp...ppp..n.p.....ppP......P......P.....PP...PPPRNBQKBNRw",
       "fen": "r1bqkbnr/pp3ppp/2n1p3/2ppP3/3P4/2P5/PP3PPP/RNBQKBNR w KQkq - 1 5",
       "perspective": "w",
@@ -1068,6 +1926,17 @@
       "uci": "e2e4e7e6d2d4d7d5e4e5c7c5c2c3b8c6",
       "count": 6326,
       "pct": 0.2439
+    },
+    {
+      "code": "b-rnbqkb.rpp..pppp...p.n.............NP.....N.....PPP..PPPR.BQKB.Rb",
+      "fen": "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq - 2 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 0,
+      "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6b1c3",
+      "count": 5949,
+      "pct": 0.2294
     },
     {
       "code": "b-rnbqkb.r.p..ppppp..p.n.............NP.....N.....PPP..PPPR.BQKB.Rw",
@@ -1081,6 +1950,17 @@
       "pct": 0.2294
     },
     {
+      "code": "b-r.bqkbnrpp.ppppp..n................NP...........PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pp1ppppp/2n5/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 6,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4",
+      "count": 5546,
+      "pct": 0.2138
+    },
+    {
       "code": "b-r.bqkbnrpp.p.ppp..n.........p......NP...........PPP..PPPRNBQKB.Rw",
       "fen": "r1bqkbnr/pp1p1ppp/2n5/4p3/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 0 5",
       "perspective": "w",
@@ -1090,6 +1970,17 @@
       "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4e7e5",
       "count": 5546,
       "pct": 0.2138
+    },
+    {
+      "code": "b-r.bqkb.rpppp.ppp..n..n......p.....B.P......P.N..PPP..PPPRNBQK..Rb",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 7,
+      "uci": "e2e4e7e5g1f3b8c6f1c4g8f6d2d3",
+      "count": 5177,
+      "pct": 0.1996
     },
     {
       "code": "b-r.bqk..rpppp.ppp..n..n....b.p.....B.P......P.N..PPP..PPPRNBQK..Rw",
@@ -1125,6 +2016,17 @@
       "pct": 0.1812
     },
     {
+      "code": "b-r.bqk.nrpppp.ppp..n.......b.p.....B.P.....P..N..PP.P.PPPRNBQK..Rb",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 10,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5c2c3",
+      "count": 4528,
+      "pct": 0.1746
+    },
+    {
       "code": "b-r.bqk..rpppp.ppp..n..n....b.p.....B.P.....P..N..PP.P.PPPRNBQK..Rw",
       "fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R w KQkq - 1 5",
       "perspective": "w",
@@ -1147,6 +2049,17 @@
       "pct": 0.1688
     },
     {
+      "code": "b-rnbqkbnrpp..pppp..p................PN...........PPP..PPPR.BQKBNRb",
+      "fen": "rnbqkbnr/pp2pppp/2p5/8/3PN3/8/PPP2PPP/R1BQKBNR b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 12,
+      "uci": "e2e4c7c6d2d4d7d5b1c3d5e4c3e4",
+      "count": 4209,
+      "pct": 0.1623
+    },
+    {
       "code": "b-rnbqkb.rpp..pppp..p..n.............PN...........PPP..PPPR.BQKBNRw",
       "fen": "rnbqkb1r/pp2pppp/2p2n2/8/3PN3/8/PPP2PPP/R1BQKBNR w KQkq - 1 5",
       "perspective": "w",
@@ -1158,6 +2071,17 @@
       "pct": 0.1623
     },
     {
+      "code": "b-rnbqkbnrppp.pppp..........................N..N..PPPP.PPPR.BQKB.Rb",
+      "fen": "rnbqkbnr/ppp1pppp/8/8/8/2N2N2/PPPP1PPP/R1BQKB1R b KQkq - 3 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 13,
+      "uci": "e2e4d7d5e4d5d8d5b1c3d5d8g1f3",
+      "count": 4044,
+      "pct": 0.1559
+    },
+    {
       "code": "b-rnbqkb.rppp.pppp.....n....................N..N..PPPP.PPPR.BQKB.Rw",
       "fen": "rnbqkb1r/ppp1pppp/5n2/8/8/2N2N2/PPPP1PPP/R1BQKB1R w KQkq - 4 5",
       "perspective": "w",
@@ -1167,6 +2091,39 @@
       "uci": "e2e4d7d5e4d5d8d5b1c3d5d8g1f3g8f6",
       "count": 4044,
       "pct": 0.1559
+    },
+    {
+      "code": "b-rnbqkb.rppp.pppp.....n.....P..............N.....PPPP.PPPR.BQKBNRb",
+      "fen": "rnbqkb1r/ppp1pppp/5n2/3P4/8/2N5/PPPP1PPP/R1BQKBNR b KQkq - 2 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_5",
+      "depth": 5,
+      "index": 14,
+      "uci": "e2e4d7d5e4d5g8f6b1c3",
+      "count": 4031,
+      "pct": 0.1554
+    },
+    {
+      "code": "b-rnbqkb.rppp.pppp...........n..............N.....PPPP.PPPR.BQKBNRw",
+      "fen": "rnbqkb1r/ppp1pppp/8/3n4/8/2N5/PPPP1PPP/R1BQKBNR w KQkq - 0 4",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_8/ply_6",
+      "depth": 6,
+      "index": 14,
+      "uci": "e2e4d7d5e4d5g8f6b1c3f6d5",
+      "count": 4031,
+      "pct": 0.1554
+    },
+    {
+      "code": "b-rnbqkb.rppp.pppp...........N....................PPPP.PPPR.BQKBNRb",
+      "fen": "rnbqkb1r/ppp1pppp/8/3N4/8/8/PPPP1PPP/R1BQKBNR b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 14,
+      "uci": "e2e4d7d5e4d5g8f6b1c3f6d5c3d5",
+      "count": 4031,
+      "pct": 0.1554
     },
     {
       "code": "b-rnb.kb.rppp.pppp...........q....................PPPP.PPPR.BQKBNRw",
@@ -1202,6 +2159,17 @@
       "pct": 0.1392
     },
     {
+      "code": "b-r.bqkbnr.ppp.pppp.n.........p...B...P........N..PPPP.PPPRNBQK..Rb",
+      "fen": "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 17,
+      "uci": "e2e4e7e5g1f3b8c6f1b5a7a6b5a4",
+      "count": 3532,
+      "pct": 0.1362
+    },
+    {
       "code": "b-r.bqkb.r.ppp.pppp.n..n......p...B...P........N..PPPP.PPPRNBQK..Rw",
       "fen": "r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 5",
       "perspective": "w",
@@ -1211,6 +2179,17 @@
       "uci": "e2e4e7e5g1f3b8c6f1b5a7a6b5a4g8f6",
       "count": 3532,
       "pct": 0.1362
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.......b.p.....B.P........N..PPPP.PPPRNBQ.RK.b",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 5 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 18,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5e1g1",
+      "count": 3530,
+      "pct": 0.1361
     },
     {
       "code": "b-r.bqk..rpppp.ppp..n..n....b.p.....B.P........N..PPPP.PPPRNBQ.RK.w",
@@ -1224,6 +2203,17 @@
       "pct": 0.1361
     },
     {
+      "code": "b-rnbqk..rppppppbp.....np...........PPP.....N.....PP...PPPR.BQKBNRb",
+      "fen": "rnbqk2r/ppppppbp/5np1/8/2PPP3/2N5/PP3PPP/R1BQKBNR b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 19,
+      "uci": "d2d4g8f6c2c4g7g6b1c3f8g7e2e4",
+      "count": 3476,
+      "pct": 0.134
+    },
+    {
       "code": "b-rnbqk..rppp.ppbp...p.np...........PPP.....N.....PP...PPPR.BQKBNRw",
       "fen": "rnbqk2r/ppp1ppbp/3p1np1/8/2PPP3/2N5/PP3PPP/R1BQKBNR w KQkq - 0 5",
       "perspective": "w",
@@ -1233,6 +2223,17 @@
       "uci": "d2d4g8f6c2c4g7g6b1c3f8g7e2e4d7d6",
       "count": 3476,
       "pct": 0.134
+    },
+    {
+      "code": "b-r.bqkbnr.ppp.pppp.B.........p.......P........N..PPPP.PPPRNBQK..Rb",
+      "fen": "r1bqkbnr/1ppp1ppp/p1B5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 20,
+      "uci": "e2e4e7e5g1f3b8c6f1b5a7a6b5c6",
+      "count": 3247,
+      "pct": 0.1252
     },
     {
       "code": "b-r.bqkbnr.pp..pppp.p.........p.......P........N..PPPP.PPPRNBQK..Rw",
@@ -1257,6 +2258,17 @@
       "pct": 0.1186
     },
     {
+      "code": "b-rnbqkbnrpp.p.ppp....p..............NP...........PPP..PPPRNBQKB.Rb",
+      "fen": "rnbqkbnr/pp1p1ppp/4p3/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 22,
+      "uci": "e2e4c7c5g1f3e7e6d2d4c5d4f3d4",
+      "count": 3071,
+      "pct": 0.1184
+    },
+    {
       "code": "b-rnbqkbnr.p.p.pppp...p..............NP...........PPP..PPPRNBQKB.Rw",
       "fen": "rnbqkbnr/1p1p1ppp/p3p3/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 0 5",
       "perspective": "w",
@@ -1268,6 +2280,17 @@
       "pct": 0.1184
     },
     {
+      "code": "b-rnbqkbnrppp.pppp...................P......N.....PPP..PPPR.BQKBNRb",
+      "fen": "rnbqkbnr/ppp1pppp/8/8/3P4/2N5/PPP2PPP/R1BQKBNR b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_8/ply_7",
+      "depth": 7,
+      "index": 23,
+      "uci": "e2e4d7d5e4d5d8d5b1c3d5d8d2d4",
+      "count": 3034,
+      "pct": 0.117
+    },
+    {
       "code": "b-rnbqkb.rppp.pppp.....n.............P......N.....PPP..PPPR.BQKBNRw",
       "fen": "rnbqkb1r/ppp1pppp/5n2/8/3P4/2N5/PPP2PPP/R1BQKBNR w KQkq - 1 5",
       "perspective": "w",
@@ -1277,6 +2300,17 @@
       "uci": "e2e4d7d5e4d5d8d5b1c3d5d8d2d4g8f6",
       "count": 3034,
       "pct": 0.117
+    },
+    {
+      "code": "b-r.bqkb.rppp..ppp..n..n.....Pp.N...B.............PPPP.PPPRNBQK..Rb",
+      "fen": "r1bqkb1r/ppp2ppp/2n2n2/3Pp1N1/2B5/8/PPPP1PPP/RNBQK2R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 1,
+      "uci": "e2e4e7e5g1f3b8c6f1c4g8f6f3g5d7d5e4d5",
+      "count": 3009,
+      "pct": 0.116
     },
     {
       "code": "b-r.bqkb.rppp..ppp.....n..n..Pp.N...B.............PPPP.PPPRNBQK..Rw",
@@ -1301,6 +2335,17 @@
       "pct": 0.1131
     },
     {
+      "code": "b-r.bqkbnrpppp.ppp...................QP...........PPP..PPPRNB.KB.Rb",
+      "fen": "r1bqkbnr/pppp1ppp/8/8/3QP3/8/PPP2PPP/RNB1KB1R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 2,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4c6d4d1d4",
+      "count": 2905,
+      "pct": 0.112
+    },
+    {
       "code": "b-r.bqkbnrppp..ppp...p...............QP...........PPP..PPPRNB.KB.Rw",
       "fen": "r1bqkbnr/ppp2ppp/3p4/8/3QP3/8/PPP2PPP/RNB1KB1R w KQkq - 0 6",
       "perspective": "w",
@@ -1310,6 +2355,17 @@
       "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4c6d4d1d4d7d6",
       "count": 2905,
       "pct": 0.112
+    },
+    {
+      "code": "b-r.bqk..rpppp.ppp..n..n....b.p.....BPP.....P..N..PP...PPPRNBQK..Rb",
+      "fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2BPP3/2P2N2/PP3PPP/RNBQK2R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 3,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5c2c3g8f6d2d4",
+      "count": 2489,
+      "pct": 0.096
     },
     {
       "code": "b-r.bqk..rpppp.ppp..n..n....b.......BpP.....P..N..PP...PPPRNBQK..Rw",
@@ -1345,6 +2401,17 @@
       "pct": 0.0871
     },
     {
+      "code": "b-r.bqkbnrpp...ppp..n.p.....ppP......P......P..N..PP...PPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pp3ppp/2n1p3/2ppP3/3P4/2P2N2/PP3PPP/RNBQKB1R b KQkq - 2 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 6,
+      "uci": "e2e4e7e6d2d4d7d5e4e5c7c5c2c3b8c6g1f3",
+      "count": 2192,
+      "pct": 0.0845
+    },
+    {
       "code": "b-r.b.kbnrpp...ppp.qn.p.....ppP......P......P..N..PP...PPPRNBQKB.Rw",
       "fen": "r1b1kbnr/pp3ppp/1qn1p3/2ppP3/3P4/2P2N2/PP3PPP/RNBQKB1R w KQkq - 3 6",
       "perspective": "w",
@@ -1354,6 +2421,17 @@
       "uci": "e2e4e7e6d2d4d7d5e4e5c7c5c2c3b8c6g1f3d8b6",
       "count": 2192,
       "pct": 0.0845
+    },
+    {
+      "code": "b-rnbqkb.rpp..pppp..p..N.............P............PPP..PPPR.BQKBNRb",
+      "fen": "rnbqkb1r/pp2pppp/2p2N2/8/3P4/8/PPP2PPP/R1BQKBNR b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 7,
+      "uci": "e2e4c7c6d2d4d7d5b1c3d5e4c3e4g8f6e4f6",
+      "count": 2159,
+      "pct": 0.0832
     },
     {
       "code": "b-rnbqkb.rpp...ppp..p..p.............P............PPP..PPPR.BQKBNRw",
@@ -1367,6 +2445,17 @@
       "pct": 0.0832
     },
     {
+      "code": "b-r.bqkbnrpp.p.ppp..N.........p.......P...........PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pp1p1ppp/2N5/4p3/4P3/8/PPP2PPP/RNBQKB1R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 8,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4e7e5d4c6",
+      "count": 2098,
+      "pct": 0.0809
+    },
+    {
       "code": "b-r.bqkbnrp..p.ppp..p.........p.......P...........PPP..PPPRNBQKB.Rw",
       "fen": "r1bqkbnr/p2p1ppp/2p5/4p3/4P3/8/PPP2PPP/RNBQKB1R w KQkq - 0 6",
       "perspective": "w",
@@ -1376,6 +2465,17 @@
       "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4e7e5d4c6b7c6",
       "count": 2098,
       "pct": 0.0809
+    },
+    {
+      "code": "b-r.bqkbnrpp.ppp.p..n...p............NP.....N.....PPP..PPPR.BQKB.Rb",
+      "fen": "r1bqkbnr/pp1ppp1p/2n3p1/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq - 1 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 9,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4g7g6b1c3",
+      "count": 1963,
+      "pct": 0.0757
     },
     {
       "code": "b-r.bqk.nrpp.pppbp..n...p............NP.....N.....PPP..PPPR.BQKB.Rw",
@@ -1400,6 +2500,17 @@
       "pct": 0.0725
     },
     {
+      "code": "b-rn.qkbnrpp..pppp..p..........b.....P..........N.PPP..PPPR.BQKBNRb",
+      "fen": "rn1qkbnr/pp2pppp/2p5/5b2/3P4/6N1/PPP2PPP/R1BQKBNR b KQkq - 2 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 11,
+      "uci": "e2e4c7c6d2d4d7d5b1c3d5e4c3e4c8f5e4g3",
+      "count": 1865,
+      "pct": 0.0719
+    },
+    {
       "code": "b-rn.qkbnrpp..pppp..p...b............P..........N.PPP..PPPR.BQKBNRw",
       "fen": "rn1qkbnr/pp2pppp/2p3b1/8/3P4/6N1/PPP2PPP/R1BQKBNR w KQkq - 3 6",
       "perspective": "w",
@@ -1407,6 +2518,17 @@
       "depth": 10,
       "index": 11,
       "uci": "e2e4c7c6d2d4d7d5b1c3d5e4c3e4c8f5e4g3f5g6",
+      "count": 1865,
+      "pct": 0.0719
+    },
+    {
+      "code": "b-r.bqkb.rppp..ppp.....n..nB.Pp.N.................PPPP.PPPRNBQK..Rb",
+      "fen": "r1bqkb1r/ppp2ppp/5n2/nB1Pp1N1/8/8/PPPP1PPP/RNBQK2R b KQkq - 2 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 0,
+      "uci": "e2e4e7e5g1f3b8c6f1c4g8f6f3g5d7d5e4d5c6a5c4b5",
       "count": 1865,
       "pct": 0.0719
     },
@@ -1422,6 +2544,39 @@
       "pct": 0.0719
     },
     {
+      "code": "b-rn.qkbnrpp..pppp..p........pPb.....P.......B....PPP..PPPRNBQK.NRb",
+      "fen": "rn1qkbnr/pp2pppp/2p5/3pPb2/3P4/3B4/PPP2PPP/RNBQK1NR b KQkq - 2 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_7",
+      "depth": 7,
+      "index": 12,
+      "uci": "e2e4c7c6d2d4d7d5e4e5c8f5f1d3",
+      "count": 1588,
+      "pct": 0.0612
+    },
+    {
+      "code": "b-rn.qkbnrpp..pppp..p........pP......P.......b....PPP..PPPRNBQK.NRw",
+      "fen": "rn1qkbnr/pp2pppp/2p5/3pP3/3P4/3b4/PPP2PPP/RNBQK1NR w KQkq - 0 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_8",
+      "depth": 8,
+      "index": 12,
+      "uci": "e2e4c7c6d2d4d7d5e4e5c8f5f1d3f5d3",
+      "count": 1588,
+      "pct": 0.0612
+    },
+    {
+      "code": "b-rn.qkbnrpp..pppp..p........pP......P.......Q....PPP..PPPRNB.K.NRb",
+      "fen": "rn1qkbnr/pp2pppp/2p5/3pP3/3P4/3Q4/PPP2PPP/RNB1K1NR b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 12,
+      "uci": "e2e4c7c6d2d4d7d5e4e5c8f5f1d3f5d3d1d3",
+      "count": 1588,
+      "pct": 0.0612
+    },
+    {
       "code": "b-rn.qkbnrpp...ppp..p.p......pP......P.......Q....PPP..PPPRNB.K.NRw",
       "fen": "rn1qkbnr/pp3ppp/2p1p3/3pP3/3P4/3Q4/PPP2PPP/RNB1K1NR w KQkq - 0 6",
       "perspective": "w",
@@ -1433,6 +2588,17 @@
       "pct": 0.0612
     },
     {
+      "code": "b-r.bqkb.rpppp.ppp..N..n..............P...........PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkb1r/pppp1ppp/2N2n2/8/4P3/8/PPP2PPP/RNBQKB1R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 13,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4g8f6d4c6",
+      "count": 1524,
+      "pct": 0.0588
+    },
+    {
       "code": "b-r.bqkb.rp.pp.ppp..p..n..............P...........PPP..PPPRNBQKB.Rw",
       "fen": "r1bqkb1r/p1pp1ppp/2p2n2/8/4P3/8/PPP2PPP/RNBQKB1R w KQkq - 0 6",
       "perspective": "w",
@@ -1442,6 +2608,17 @@
       "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4g8f6d4c6b7c6",
       "count": 1524,
       "pct": 0.0588
+    },
+    {
+      "code": "b-r.bqk..rpppp.ppp..n..n....b.......BPP........N..PP...PPPRNBQK..Rb",
+      "fen": "r1bqk2r/pppp1ppp/2n2n2/2b5/2BPP3/5N2/PP3PPP/RNBQK2R b KQkq - 0 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 1,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5c2c3g8f6d2d4e5d4c3d4",
+      "count": 1480,
+      "pct": 0.0571
     },
     {
       "code": "b-r.bqk..rpppp.ppp..n..n...........bBPP........N..PP...PPPRNBQK..Rw",
@@ -1466,6 +2643,17 @@
       "pct": 0.0522
     },
     {
+      "code": "b-r.bqkb.rpp.ppppp..n..n.............NP.....N.....PPP..PPPR.BQKB.Rb",
+      "fen": "r1bqkb1r/pp1ppppp/2n2n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq - 2 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 15,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4g8f6b1c3",
+      "count": 1346,
+      "pct": 0.0519
+    },
+    {
       "code": "b-r.bqkb.rpp.p.ppp..n..n......p......NP.....N.....PPP..PPPR.BQKB.Rw",
       "fen": "r1bqkb1r/pp1p1ppp/2n2n2/4p3/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6",
       "perspective": "w",
@@ -1475,6 +2663,28 @@
       "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4g8f6b1c3e7e5",
       "count": 1346,
       "pct": 0.0519
+    },
+    {
+      "code": "b-r.bqk.nrppp..ppp..np......b.p.....B.P.....P..N..PP.P.PPPRNBQK..Rw",
+      "fen": "r1bqk1nr/ppp2ppp/2np4/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R w KQkq - 0 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_8",
+      "depth": 8,
+      "index": 16,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5c2c3d7d6",
+      "count": 1336,
+      "pct": 0.0515
+    },
+    {
+      "code": "b-r.bqk.nrppp..ppp..np......b.p.....BPP.....P..N..PP...PPPRNBQK..Rb",
+      "fen": "r1bqk1nr/ppp2ppp/2np4/2b1p3/2BPP3/2P2N2/PP3PPP/RNBQK2R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 16,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5c2c3d7d6d2d4",
+      "count": 1336,
+      "pct": 0.0515
     },
     {
       "code": "b-r.bqk.nrppp..ppp..np......b.......BpP.....P..N..PP...PPPRNBQK..Rw",
@@ -1488,6 +2698,17 @@
       "pct": 0.0515
     },
     {
+      "code": "b-r.bqk.nrpppp.ppp..N.......b.........P...........PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqk1nr/pppp1ppp/2N5/2b5/4P3/8/PPP2PPP/RNBQKB1R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 17,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4f8c5d4c6",
+      "count": 1308,
+      "pct": 0.0504
+    },
+    {
       "code": "b-r.bqk.nrp.pp.ppp..p.......b.........P...........PPP..PPPRNBQKB.Rw",
       "fen": "r1bqk1nr/p1pp1ppp/2p5/2b5/4P3/8/PPP2PPP/RNBQKB1R w KQkq - 0 6",
       "perspective": "w",
@@ -1497,6 +2718,17 @@
       "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4f8c5d4c6b7c6",
       "count": 1308,
       "pct": 0.0504
+    },
+    {
+      "code": "b-r.bqkbnrpp.ppp.p..N...p.............P...........PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pp1ppp1p/2N3p1/8/4P3/8/PPP2PPP/RNBQKB1R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 18,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4g7g6d4c6",
+      "count": 1291,
+      "pct": 0.0498
     },
     {
       "code": "b-r.bqkbnrp..ppp.p..p...p.............P...........PPP..PPPRNBQKB.Rw",
@@ -1510,6 +2742,17 @@
       "pct": 0.0498
     },
     {
+      "code": "b-r.bqkb.rppp..Npp..n........np.....B.............PPPP.PPPRNBQK..Rb",
+      "fen": "r1bqkb1r/ppp2Npp/2n5/3np3/2B5/8/PPPP1PPP/RNBQK2R b KQkq - 0 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 2,
+      "uci": "e2e4e7e5g1f3b8c6f1c4g8f6f3g5d7d5e4d5f6d5g5f7",
+      "count": 1266,
+      "pct": 0.0488
+    },
+    {
       "code": "b-r.bq.b.rppp..kpp..n........np.....B.............PPPP.PPPRNBQK..Rw",
       "fen": "r1bq1b1r/ppp2kpp/2n5/3np3/2B5/8/PPPP1PPP/RNBQK2R w KQ - 0 7",
       "perspective": "w",
@@ -1519,6 +2762,17 @@
       "uci": "e2e4e7e5g1f3b8c6f1c4g8f6f3g5d7d5e4d5f6d5g5f7e8f7",
       "count": 1266,
       "pct": 0.0488
+    },
+    {
+      "code": "b-r.bqkbnrpp.p.ppp..n......N..p.......P...........PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pp1p1ppp/2n5/1N2p3/4P3/8/PPP2PPP/RNBQKB1R b KQkq - 1 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 19,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4e7e5d4b5",
+      "count": 1210,
+      "pct": 0.0467
     },
     {
       "code": "b-r.bqkbnrpp...ppp..np.....N..p.......P...........PPP..PPPRNBQKB.Rw",
@@ -1543,6 +2797,39 @@
       "pct": 0.0434
     },
     {
+      "code": "b-rnbqkbnrpp..pppp...........p.......P.......B....PPP..PPPRNBQK.NRb",
+      "fen": "rnbqkbnr/pp2pppp/8/3p4/3P4/3B4/PPP2PPP/RNBQK1NR b KQkq - 1 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_7",
+      "depth": 7,
+      "index": 21,
+      "uci": "e2e4c7c6d2d4d7d5e4d5c6d5f1d3",
+      "count": 1120,
+      "pct": 0.0432
+    },
+    {
+      "code": "b-r.bqkbnrpp..pppp..n........p.......P.......B....PPP..PPPRNBQK.NRw",
+      "fen": "r1bqkbnr/pp2pppp/2n5/3p4/3P4/3B4/PPP2PPP/RNBQK1NR w KQkq - 2 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_8",
+      "depth": 8,
+      "index": 21,
+      "uci": "e2e4c7c6d2d4d7d5e4d5c6d5f1d3b8c6",
+      "count": 1120,
+      "pct": 0.0432
+    },
+    {
+      "code": "b-r.bqkbnrpp..pppp..n........p.......P......PB....PP...PPPRNBQK.NRb",
+      "fen": "r1bqkbnr/pp2pppp/2n5/3p4/3P4/2PB4/PP3PPP/RNBQK1NR b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 21,
+      "uci": "e2e4c7c6d2d4d7d5e4d5c6d5f1d3b8c6c2c3",
+      "count": 1120,
+      "pct": 0.0432
+    },
+    {
       "code": "b-r.bqkb.rpp..pppp..n..n.....p.......P......PB....PP...PPPRNBQK.NRw",
       "fen": "r1bqkb1r/pp2pppp/2n2n2/3p4/3P4/2PB4/PP3PPP/RNBQK1NR w KQkq - 1 6",
       "perspective": "w",
@@ -1552,6 +2839,28 @@
       "uci": "e2e4c7c6d2d4d7d5e4d5c6d5f1d3b8c6c2c3g8f6",
       "count": 1120,
       "pct": 0.0432
+    },
+    {
+      "code": "b-r.bqkb.rppp..ppp..n..n.....pp.....B.P......P.N..PPP..PPPRNBQK..Rw",
+      "fen": "r1bqkb1r/ppp2ppp/2n2n2/3pp3/2B1P3/3P1N2/PPP2PPP/RNBQK2R w KQkq - 0 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_8",
+      "depth": 8,
+      "index": 22,
+      "uci": "e2e4e7e5g1f3b8c6f1c4g8f6d2d3d7d5",
+      "count": 1088,
+      "pct": 0.042
+    },
+    {
+      "code": "b-r.bqkb.rppp..ppp..n..n.....Pp.....B........P.N..PPP..PPPRNBQK..Rb",
+      "fen": "r1bqkb1r/ppp2ppp/2n2n2/3Pp3/2B5/3P1N2/PPP2PPP/RNBQK2R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 22,
+      "uci": "e2e4e7e5g1f3b8c6f1c4g8f6d2d3d7d5e4d5",
+      "count": 1088,
+      "pct": 0.042
     },
     {
       "code": "b-r.bqkb.rppp..ppp..n........np.....B........P.N..PPP..PPPRNBQK..Rw",
@@ -1565,6 +2874,61 @@
       "pct": 0.042
     },
     {
+      "code": "b-rnbqkb.rpppp.ppp.....n......N.......P...........PPPP.PPPRNBQKB.Rb",
+      "fen": "rnbqkb1r/pppp1ppp/5n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_5",
+      "depth": 5,
+      "index": 23,
+      "uci": "e2e4e7e5g1f3g8f6f3e5",
+      "count": 1059,
+      "pct": 0.0408
+    },
+    {
+      "code": "b-r.bqkb.rpppp.ppp..n..n......N.......P...........PPPP.PPPRNBQKB.Rw",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4N3/4P3/8/PPPP1PPP/RNBQKB1R w KQkq - 1 4",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_6",
+      "depth": 6,
+      "index": 23,
+      "uci": "e2e4e7e5g1f3g8f6f3e5b8c6",
+      "count": 1059,
+      "pct": 0.0408
+    },
+    {
+      "code": "b-r.bqkb.rpppp.ppp..N..n..............P...........PPPP.PPPRNBQKB.Rb",
+      "fen": "r1bqkb1r/pppp1ppp/2N2n2/8/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_7",
+      "depth": 7,
+      "index": 23,
+      "uci": "e2e4e7e5g1f3g8f6f3e5b8c6e5c6",
+      "count": 1059,
+      "pct": 0.0408
+    },
+    {
+      "code": "b-r.bqkb.rppp..ppp..p..n..............P...........PPPP.PPPRNBQKB.Rw",
+      "fen": "r1bqkb1r/ppp2ppp/2p2n2/8/4P3/8/PPPP1PPP/RNBQKB1R w KQkq - 0 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_8",
+      "depth": 8,
+      "index": 23,
+      "uci": "e2e4e7e5g1f3g8f6f3e5b8c6e5c6d7c6",
+      "count": 1059,
+      "pct": 0.0408
+    },
+    {
+      "code": "b-r.bqkb.rppp..ppp..p..n..............P......P....PPP..PPPRNBQKB.Rb",
+      "fen": "r1bqkb1r/ppp2ppp/2p2n2/8/4P3/3P4/PPP2PPP/RNBQKB1R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 23,
+      "uci": "e2e4e7e5g1f3g8f6f3e5b8c6e5c6d7c6d2d3",
+      "count": 1059,
+      "pct": 0.0408
+    },
+    {
       "code": "b-r.bqk..rppp..ppp..p..n....b.........P......P....PPP..PPPRNBQKB.Rw",
       "fen": "r1bqk2r/ppp2ppp/2p2n2/2b5/4P3/3P4/PPP2PPP/RNBQKB1R w KQkq - 1 6",
       "perspective": "w",
@@ -1574,6 +2938,83 @@
       "uci": "e2e4e7e5g1f3g8f6f3e5b8c6e5c6d7c6d2d3f8c5",
       "count": 1059,
       "pct": 0.0408
+    },
+    {
+      "code": "b-rnbqkbnrpppp.ppp............P...................PPP.PPPPRNBQKBNRb",
+      "fen": "rnbqkbnr/pppp1ppp/8/4P3/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 2",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_3",
+      "depth": 3,
+      "index": 24,
+      "uci": "d2d4e7e5d4e5",
+      "count": 1035,
+      "pct": 0.0399
+    },
+    {
+      "code": "b-r.bqkbnrpppp.ppp..n.........P...................PPP.PPPPRNBQKBNRw",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/4P3/8/8/PPP1PPPP/RNBQKBNR w KQkq - 1 3",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_4",
+      "depth": 4,
+      "index": 24,
+      "uci": "d2d4e7e5d4e5b8c6",
+      "count": 1035,
+      "pct": 0.0399
+    },
+    {
+      "code": "b-r.bqkbnrpppp.ppp..n.........P................N..PPP.PPPPRNBQKB.Rb",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/4P3/8/5N2/PPP1PPPP/RNBQKB1R b KQkq - 2 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_5",
+      "depth": 5,
+      "index": 24,
+      "uci": "d2d4e7e5d4e5b8c6g1f3",
+      "count": 1035,
+      "pct": 0.0399
+    },
+    {
+      "code": "b-r.b.kbnrppppqppp..n.........P................N..PPP.PPPPRNBQKB.Rw",
+      "fen": "r1b1kbnr/ppppqppp/2n5/4P3/8/5N2/PPP1PPPP/RNBQKB1R w KQkq - 3 4",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_6",
+      "depth": 6,
+      "index": 24,
+      "uci": "d2d4e7e5d4e5b8c6g1f3d8e7",
+      "count": 1035,
+      "pct": 0.0399
+    },
+    {
+      "code": "b-r.b.kbnrppppqppp..n.........P........B.......N..PPP.PPPPRN.QKB.Rb",
+      "fen": "r1b1kbnr/ppppqppp/2n5/4P3/5B2/5N2/PPP1PPPP/RN1QKB1R b KQkq - 4 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_7",
+      "depth": 7,
+      "index": 24,
+      "uci": "d2d4e7e5d4e5b8c6g1f3d8e7c1f4",
+      "count": 1035,
+      "pct": 0.0399
+    },
+    {
+      "code": "b-r.b.kbnrpppp.ppp..n.........P....q...B.......N..PPP.PPPPRN.QKB.Rw",
+      "fen": "r1b1kbnr/pppp1ppp/2n5/4P3/1q3B2/5N2/PPP1PPPP/RN1QKB1R w KQkq - 5 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_10/ply_8",
+      "depth": 8,
+      "index": 24,
+      "uci": "d2d4e7e5d4e5b8c6g1f3d8e7c1f4e7b4",
+      "count": 1035,
+      "pct": 0.0399
+    },
+    {
+      "code": "b-r.b.kbnrpppp.ppp..n.........P....q...........N..PPPBPPPPRN.QKB.Rb",
+      "fen": "r1b1kbnr/pppp1ppp/2n5/4P3/1q6/5N2/PPPBPPPP/RN1QKB1R b KQkq - 6 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_10/ply_9",
+      "depth": 9,
+      "index": 24,
+      "uci": "d2d4e7e5d4e5b8c6g1f3d8e7c1f4e7b4f4d2",
+      "count": 1035,
+      "pct": 0.0399
     },
     {
       "code": "b-r.b.kbnrpppp.ppp..n.........P................N..PqPBPPPPRN.QKB.Rw",
@@ -1587,6 +3028,17 @@
       "pct": 0.0399
     },
     {
+      "code": "b-r.bqk.nrpp.pppbp..n...p............NP.....N.B...PPP..PPPR..QKB.Rb",
+      "fen": "r1bqk1nr/pp1pppbp/2n3p1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq - 3 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 3,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4g7g6b1c3f8g7c1e3",
+      "count": 946,
+      "pct": 0.0365
+    },
+    {
       "code": "b-r.bqk..rpp.pppbp..n..np............NP.....N.B...PPP..PPPR..QKB.Rw",
       "fen": "r1bqk2r/pp1pppbp/2n2np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq - 4 7",
       "perspective": "w",
@@ -1596,6 +3048,17 @@
       "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4g7g6b1c3f8g7c1e3g8f6",
       "count": 946,
       "pct": 0.0365
+    },
+    {
+      "code": "b-rnbqkb.r.p..ppppp..p.n........B....NP.....N.....PPP..PPPR..QKB.Rb",
+      "fen": "rnbqkb1r/1p2pppp/p2p1n2/6B1/3NP3/2N5/PPP2PPP/R2QKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 4,
+      "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6b1c3a7a6c1g5",
+      "count": 937,
+      "pct": 0.0361
     },
     {
       "code": "b-rnbqkb.r.p...pppp..ppn........B....NP.....N.....PPP..PPPR..QKB.Rw",
@@ -1609,6 +3072,17 @@
       "pct": 0.0361
     },
     {
+      "code": "b-rnbqkb.rpp..pp.p...p.np............NP.....N.B...PPP..PPPR..QKB.Rb",
+      "fen": "rnbqkb1r/pp2pp1p/3p1np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 5,
+      "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6b1c3g7g6c1e3",
+      "count": 851,
+      "pct": 0.0328
+    },
+    {
       "code": "b-rnbqk..rpp..ppbp...p.np............NP.....N.B...PPP..PPPR..QKB.Rw",
       "fen": "rnbqk2r/pp2ppbp/3p1np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq - 2 7",
       "perspective": "w",
@@ -1618,6 +3092,17 @@
       "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6b1c3g7g6c1e3f8g7",
       "count": 851,
       "pct": 0.0328
+    },
+    {
+      "code": "b-r.bqkb.rpp.p.ppp..n..n...N..p.......P.....N.....PPP..PPPR.BQKB.Rb",
+      "fen": "r1bqkb1r/pp1p1ppp/2n2n2/1N2p3/4P3/2N5/PPP2PPP/R1BQKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 6,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4g8f6b1c3e7e5d4b5",
+      "count": 774,
+      "pct": 0.0298
     },
     {
       "code": "b-r.bqkb.rpp...ppp..np.n...N..p.......P.....N.....PPP..PPPR.BQKB.Rw",
@@ -1631,6 +3116,17 @@
       "pct": 0.0298
     },
     {
+      "code": "b-rnbqkb.r.p..ppppp..p.n.............NP.....N.B...PPP..PPPR..QKB.Rb",
+      "fen": "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 7,
+      "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6b1c3a7a6c1e3",
+      "count": 748,
+      "pct": 0.0288
+    },
+    {
       "code": "b-rnbqkb.r.p...pppp..p.n......p......NP.....N.B...PPP..PPPR..QKB.Rw",
       "fen": "rnbqkb1r/1p3ppp/p2p1n2/4p3/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq - 0 7",
       "perspective": "w",
@@ -1640,6 +3136,17 @@
       "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6b1c3a7a6c1e3e7e5",
       "count": 748,
       "pct": 0.0288
+    },
+    {
+      "code": "b-r.bqkbnrppp..ppp...p...............QP.....N.....PPP..PPPR.B.KB.Rb",
+      "fen": "r1bqkbnr/ppp2ppp/3p4/8/3QP3/2N5/PPP2PPP/R1B1KB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 8,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f3d4c6d4d1d4d7d6b1c3",
+      "count": 718,
+      "pct": 0.0277
     },
     {
       "code": "b-r.bqkb.rppp..ppp...p.n.............QP.....N.....PPP..PPPR.B.KB.Rw",
@@ -1653,6 +3160,17 @@
       "pct": 0.0277
     },
     {
+      "code": "b-r.bqkbnrpp...ppp..np.....N..p.......P.....N.....PPP..PPPR.BQKB.Rb",
+      "fen": "r1bqkbnr/pp3ppp/2np4/1N2p3/4P3/2N5/PPP2PPP/R1BQKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 9,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4e7e5d4b5d7d6b1c3",
+      "count": 693,
+      "pct": 0.0267
+    },
+    {
       "code": "b-r.bqkbnr.p...pppp.np.....N..p.......P.....N.....PPP..PPPR.BQKB.Rw",
       "fen": "r1bqkbnr/1p3ppp/p1np4/1N2p3/4P3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 7",
       "perspective": "w",
@@ -1662,6 +3180,72 @@
       "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4e7e5d4b5d7d6b1c3a7a6",
       "count": 693,
       "pct": 0.0267
+    },
+    {
+      "code": "b-rnbqkb.rppp.pp.p.....np....p......PP......N.....PP..PPPPR.BQKBNRw",
+      "fen": "rnbqkb1r/ppp1pp1p/5np1/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 0 4",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_6",
+      "depth": 6,
+      "index": 10,
+      "uci": "d2d4g8f6c2c4g7g6b1c3d7d5",
+      "count": 650,
+      "pct": 0.0251
+    },
+    {
+      "code": "b-rnbqkb.rppp.pp.p.....np....P.......P......N.....PP..PPPPR.BQKBNRb",
+      "fen": "rnbqkb1r/ppp1pp1p/5np1/3P4/3P4/2N5/PP2PPPP/R1BQKBNR b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_7",
+      "depth": 7,
+      "index": 10,
+      "uci": "d2d4g8f6c2c4g7g6b1c3d7d5c4d5",
+      "count": 650,
+      "pct": 0.0251
+    },
+    {
+      "code": "b-rnbqkb.rppp.pp.p......p....n.......P......N.....PP..PPPPR.BQKBNRw",
+      "fen": "rnbqkb1r/ppp1pp1p/6p1/3n4/3P4/2N5/PP2PPPP/R1BQKBNR w KQkq - 0 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_8",
+      "depth": 8,
+      "index": 10,
+      "uci": "d2d4g8f6c2c4g7g6b1c3d7d5c4d5f6d5",
+      "count": 650,
+      "pct": 0.0251
+    },
+    {
+      "code": "b-rnbqkb.rppp.pp.p......p....n.......PP.....N.....PP...PPPR.BQKBNRb",
+      "fen": "rnbqkb1r/ppp1pp1p/6p1/3n4/3PP3/2N5/PP3PPP/R1BQKBNR b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_9",
+      "depth": 9,
+      "index": 10,
+      "uci": "d2d4g8f6c2c4g7g6b1c3d7d5c4d5f6d5e2e4",
+      "count": 650,
+      "pct": 0.0251
+    },
+    {
+      "code": "b-rnbqkb.rppp.pp.p......p............PP.....n.....PP...PPPR.BQKBNRw",
+      "fen": "rnbqkb1r/ppp1pp1p/6p1/8/3PP3/2n5/PP3PPP/R1BQKBNR w KQkq - 0 6",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_10",
+      "depth": 10,
+      "index": 10,
+      "uci": "d2d4g8f6c2c4g7g6b1c3d7d5c4d5f6d5e2e4d5c3",
+      "count": 650,
+      "pct": 0.0251
+    },
+    {
+      "code": "b-rnbqkb.rppp.pp.p......p............PP.....P.....P....PPPR.BQKBNRb",
+      "fen": "rnbqkb1r/ppp1pp1p/6p1/8/3PP3/2P5/P4PPP/R1BQKBNR b KQkq - 0 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 10,
+      "uci": "d2d4g8f6c2c4g7g6b1c3d7d5c4d5f6d5e2e4d5c3b2c3",
+      "count": 650,
+      "pct": 0.0251
     },
     {
       "code": "b-rnbqk..rppp.ppbp......p............PP.....P.....P....PPPR.BQKBNRw",
@@ -1675,6 +3259,39 @@
       "pct": 0.0251
     },
     {
+      "code": "b-r.bqkb.r.ppp.pppp.n..n......p...B...P........N..PPPP.PPPRNBQ.RK.b",
+      "fen": "r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 3 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_9",
+      "depth": 9,
+      "index": 11,
+      "uci": "e2e4e7e5g1f3b8c6f1b5a7a6b5a4g8f6e1g1",
+      "count": 624,
+      "pct": 0.0241
+    },
+    {
+      "code": "b-r.bqk..r.pppbpppp.n..n......p...B...P........N..PPPP.PPPRNBQ.RK.w",
+      "fen": "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 w kq - 4 6",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_10",
+      "depth": 10,
+      "index": 11,
+      "uci": "e2e4e7e5g1f3b8c6f1b5a7a6b5a4g8f6e1g1f8e7",
+      "count": 624,
+      "pct": 0.0241
+    },
+    {
+      "code": "b-r.bqk..r.pppbpppp.n..n......p...B...P........N..PPPP.PPPRNBQR.K.b",
+      "fen": "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQR1K1 b kq - 5 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 11,
+      "uci": "e2e4e7e5g1f3b8c6f1b5a7a6b5a4g8f6e1g1f8e7f1e1",
+      "count": 624,
+      "pct": 0.0241
+    },
+    {
       "code": "b-r.bqk..r..ppbpppp.n..n...p..p...B...P........N..PPPP.PPPRNBQR.K.w",
       "fen": "r1bqk2r/2ppbppp/p1n2n2/1p2p3/B3P3/5N2/PPPP1PPP/RNBQR1K1 w kq - 0 7",
       "perspective": "w",
@@ -1682,6 +3299,17 @@
       "depth": 12,
       "index": 11,
       "uci": "e2e4e7e5g1f3b8c6f1b5a7a6b5a4g8f6e1g1f8e7f1e1b7b5",
+      "count": 624,
+      "pct": 0.0241
+    },
+    {
+      "code": "b-r.bqk.nrppp..ppp..np......b.......BPP........N..PP...PPPRNBQK..Rb",
+      "fen": "r1bqk1nr/ppp2ppp/2np4/2b5/2BPP3/5N2/PP3PPP/RNBQK2R b KQkq - 0 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 12,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5c2c3d7d6d2d4e5d4c3d4",
       "count": 624,
       "pct": 0.0241
     },
@@ -1708,6 +3336,83 @@
       "pct": 0.024
     },
     {
+      "code": "b-rnbqkbnrppp..ppp....p......p.......PP.....N.....PPP..PPPR.BQKBNRb",
+      "fen": "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR b KQkq - 1 3",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_5",
+      "depth": 5,
+      "index": 14,
+      "uci": "e2e4e7e6d2d4d7d5b1c3",
+      "count": 610,
+      "pct": 0.0235
+    },
+    {
+      "code": "b-rnbqkb.rppp..ppp....pn.....p.......PP.....N.....PPP..PPPR.BQKBNRw",
+      "fen": "rnbqkb1r/ppp2ppp/4pn2/3p4/3PP3/2N5/PPP2PPP/R1BQKBNR w KQkq - 2 4",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_6",
+      "depth": 6,
+      "index": 14,
+      "uci": "e2e4e7e6d2d4d7d5b1c3g8f6",
+      "count": 610,
+      "pct": 0.0235
+    },
+    {
+      "code": "b-rnbqkb.rppp..ppp....pn.....pP......P......N.....PPP..PPPR.BQKBNRb",
+      "fen": "rnbqkb1r/ppp2ppp/4pn2/3pP3/3P4/2N5/PPP2PPP/R1BQKBNR b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_7",
+      "depth": 7,
+      "index": 14,
+      "uci": "e2e4e7e6d2d4d7d5b1c3g8f6e4e5",
+      "count": 610,
+      "pct": 0.0235
+    },
+    {
+      "code": "b-rnbqkb.rpppn.ppp....p......pP......P......N.....PPP..PPPR.BQKBNRw",
+      "fen": "rnbqkb1r/pppn1ppp/4p3/3pP3/3P4/2N5/PPP2PPP/R1BQKBNR w KQkq - 1 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_8",
+      "depth": 8,
+      "index": 14,
+      "uci": "e2e4e7e6d2d4d7d5b1c3g8f6e4e5f6d7",
+      "count": 610,
+      "pct": 0.0235
+    },
+    {
+      "code": "b-rnbqkb.rpppn.ppp....p......pP......P.P....N.....PPP...PPR.BQKBNRb",
+      "fen": "rnbqkb1r/pppn1ppp/4p3/3pP3/3P1P2/2N5/PPP3PP/R1BQKBNR b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_9",
+      "depth": 9,
+      "index": 14,
+      "uci": "e2e4e7e6d2d4d7d5b1c3g8f6e4e5f6d7f2f4",
+      "count": 610,
+      "pct": 0.0235
+    },
+    {
+      "code": "b-rnbqkb.rpp.n.ppp....p.....ppP......P.P....N.....PPP...PPR.BQKBNRw",
+      "fen": "rnbqkb1r/pp1n1ppp/4p3/2ppP3/3P1P2/2N5/PPP3PP/R1BQKBNR w KQkq - 0 6",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_10",
+      "depth": 10,
+      "index": 14,
+      "uci": "e2e4e7e6d2d4d7d5b1c3g8f6e4e5f6d7f2f4c7c5",
+      "count": 610,
+      "pct": 0.0235
+    },
+    {
+      "code": "b-rnbqkb.rpp.n.ppp....p.....ppP......P.P....N..N..PPP...PPR.BQKB.Rb",
+      "fen": "rnbqkb1r/pp1n1ppp/4p3/2ppP3/3P1P2/2N2N2/PPP3PP/R1BQKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 14,
+      "uci": "e2e4e7e6d2d4d7d5b1c3g8f6e4e5f6d7f2f4c7c5g1f3",
+      "count": 610,
+      "pct": 0.0235
+    },
+    {
       "code": "b-r.bqkb.rpp.n.ppp..n.p.....ppP......P.P....N..N..PPP...PPR.BQKB.Rw",
       "fen": "r1bqkb1r/pp1n1ppp/2n1p3/2ppP3/3P1P2/2N2N2/PPP3PP/R1BQKB1R w KQkq - 2 7",
       "perspective": "w",
@@ -1717,6 +3422,17 @@
       "uci": "e2e4e7e6d2d4d7d5b1c3g8f6e4e5f6d7f2f4c7c5g1f3b8c6",
       "count": 610,
       "pct": 0.0235
+    },
+    {
+      "code": "b-rnbqkb.rpp...ppp..p..p.............P.........N..PPP..PPPR.BQKB.Rb",
+      "fen": "rnbqkb1r/pp3ppp/2p2p2/8/3P4/5N2/PPP2PPP/R1BQKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 15,
+      "uci": "e2e4c7c6d2d4d7d5b1c3d5e4c3e4g8f6e4f6e7f6g1f3",
+      "count": 599,
+      "pct": 0.0231
     },
     {
       "code": "b-rnbqk..rpp...ppp..pb.p.............P.........N..PPP..PPPR.BQKB.Rw",
@@ -1730,6 +3446,17 @@
       "pct": 0.0231
     },
     {
+      "code": "b-r.bqkbnrp..p.ppp..p.........p.......P.....N.....PPP..PPPR.BQKB.Rb",
+      "fen": "r1bqkbnr/p2p1ppp/2p5/4p3/4P3/2N5/PPP2PPP/R1BQKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 16,
+      "uci": "e2e4c7c5g1f3b8c6d2d4c5d4f3d4e7e5d4c6b7c6b1c3",
+      "count": 574,
+      "pct": 0.0221
+    },
+    {
       "code": "b-r.bqkb.rp..p.ppp..p..n......p.......P.....N.....PPP..PPPR.BQKB.Rw",
       "fen": "r1bqkb1r/p2p1ppp/2p2n2/4p3/4P3/2N5/PPP2PPP/R1BQKB1R w KQkq - 2 7",
       "perspective": "w",
@@ -1741,6 +3468,17 @@
       "pct": 0.0221
     },
     {
+      "code": "b-rnbqkb.r.p..ppppp..p.n............BNP.....N.....PPP..PPPR.BQK..Rb",
+      "fen": "rnbqkb1r/1p2pppp/p2p1n2/8/2BNP3/2N5/PPP2PPP/R1BQK2R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 17,
+      "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6b1c3a7a6f1c4",
+      "count": 528,
+      "pct": 0.0204
+    },
+    {
       "code": "b-rnbqkb.r.p...pppp..ppn............BNP.....N.....PPP..PPPR.BQK..Rw",
       "fen": "rnbqkb1r/1p3ppp/p2ppn2/8/2BNP3/2N5/PPP2PPP/R1BQK2R w KQkq - 0 7",
       "perspective": "w",
@@ -1750,6 +3488,39 @@
       "uci": "e2e4c7c5g1f3d7d6d2d4c5d4f3d4g8f6b1c3a7a6f1c4e7e6",
       "count": 528,
       "pct": 0.0204
+    },
+    {
+      "code": "b-rnbqkb.rppp..ppp.....n.....p.......P.......B.N..PPP..PPPRNBQK..Rb",
+      "fen": "rnbqkb1r/ppp2ppp/5n2/3p4/3P4/3B1N2/PPP2PPP/RNBQK2R b KQkq - 2 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_9",
+      "depth": 9,
+      "index": 18,
+      "uci": "e2e4e7e6g1f3d7d5e4d5e6d5d2d4g8f6f1d3",
+      "count": 512,
+      "pct": 0.0197
+    },
+    {
+      "code": "b-rnbqk..rppp..ppp...b.n.....p.......P.......B.N..PPP..PPPRNBQK..Rw",
+      "fen": "rnbqk2r/ppp2ppp/3b1n2/3p4/3P4/3B1N2/PPP2PPP/RNBQK2R w KQkq - 3 6",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_10",
+      "depth": 10,
+      "index": 18,
+      "uci": "e2e4e7e6g1f3d7d5e4d5e6d5d2d4g8f6f1d3f8d6",
+      "count": 512,
+      "pct": 0.0197
+    },
+    {
+      "code": "b-rnbqk..rppp..ppp...b.n.....p.......P.......B.N..PPP..PPPRNBQ.RK.b",
+      "fen": "rnbqk2r/ppp2ppp/3b1n2/3p4/3P4/3B1N2/PPP2PPP/RNBQ1RK1 b kq - 4 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 18,
+      "uci": "e2e4e7e6g1f3d7d5e4d5e6d5d2d4g8f6f1d3f8d6e1g1",
+      "count": 512,
+      "pct": 0.0197
     },
     {
       "code": "b-rnbq.rk.ppp..ppp...b.n.....p.......P.......B.N..PPP..PPPRNBQ.RK.w",
@@ -1774,6 +3545,17 @@
       "pct": 0.0186
     },
     {
+      "code": "b-r.b.kbnrpppp.ppp..n.........P.............N..N..PqPBPPPPR..QKB.Rb",
+      "fen": "r1b1kbnr/pppp1ppp/2n5/4P3/8/2N2N2/PqPBPPPP/R2QKB1R b KQkq - 1 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 20,
+      "uci": "d2d4e7e5d4e5b8c6g1f3d8e7c1f4e7b4f4d2b4b2b1c3",
+      "count": 473,
+      "pct": 0.0182
+    },
+    {
       "code": "b-r.b.k.nrpppp.ppp..n.........P....b........N..N..PqPBPPPPR..QKB.Rw",
       "fen": "r1b1k1nr/pppp1ppp/2n5/4P3/1b6/2N2N2/PqPBPPPP/R2QKB1R w KQkq - 2 7",
       "perspective": "w",
@@ -1783,6 +3565,61 @@
       "uci": "d2d4e7e5d4e5b8c6g1f3d8e7c1f4e7b4f4d2b4b2b1c3f8b4",
       "count": 473,
       "pct": 0.0182
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.......b.p....PB.P........N..P.PP.PPPRNBQK..Rb",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/1PB1P3/5N2/P1PP1PPP/RNBQK2R b KQkq - 0 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_7",
+      "depth": 7,
+      "index": 21,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5b2b4",
+      "count": 467,
+      "pct": 0.018
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.........p....bB.P........N..P.PP.PPPRNBQK..Rw",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/5N2/P1PP1PPP/RNBQK2R w KQkq - 0 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_8",
+      "depth": 8,
+      "index": 21,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5b2b4c5b4",
+      "count": 467,
+      "pct": 0.018
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.........p....bB.P.....P..N..P..P.PPPRNBQK..Rb",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_9",
+      "depth": 9,
+      "index": 21,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5b2b4c5b4c2c3",
+      "count": 467,
+      "pct": 0.018
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.......b.p.....B.P.....P..N..P..P.PPPRNBQK..Rw",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/2P2N2/P2P1PPP/RNBQK2R w KQkq - 1 6",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_10",
+      "depth": 10,
+      "index": 21,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5b2b4c5b4c2c3b4c5",
+      "count": 467,
+      "pct": 0.018
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.......b.p.....BPP.....P..N..P....PPPRNBQK..Rb",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2BPP3/2P2N2/P4PPP/RNBQK2R b KQkq - 0 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 21,
+      "uci": "e2e4e7e5g1f3b8c6f1c4f8c5b2b4c5b4c2c3b4c5d2d4",
+      "count": 467,
+      "pct": 0.018
     },
     {
       "code": "b-r.bqk.nrpppp.ppp..n.......b.......BpP.....P..N..P....PPPRNBQK..Rw",
@@ -1796,6 +3633,17 @@
       "pct": 0.018
     },
     {
+      "code": "b-rnbqkb.rpp...ppp..p..p.............P......P.....PP...PPPR.BQKBNRb",
+      "fen": "rnbqkb1r/pp3ppp/2p2p2/8/3P4/2P5/PP3PPP/R1BQKBNR b KQkq - 0 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 22,
+      "uci": "e2e4c7c6d2d4d7d5b1c3d5e4c3e4g8f6e4f6e7f6c2c3",
+      "count": 460,
+      "pct": 0.0177
+    },
+    {
       "code": "b-rnbqk..rpp...ppp..pb.p.............P......P.....PP...PPPR.BQKBNRw",
       "fen": "rnbqk2r/pp3ppp/2pb1p2/8/3P4/2P5/PP3PPP/R1BQKBNR w KQkq - 1 7",
       "perspective": "w",
@@ -1807,6 +3655,39 @@
       "pct": 0.0177
     },
     {
+      "code": "b-rnb.kb.rppp.pppp...........q.................N..PPPP.PPPR.BQKB.Rb",
+      "fen": "rnb1kb1r/ppp1pppp/8/3q4/8/5N2/PPPP1PPP/R1BQKB1R b KQkq - 1 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_9",
+      "depth": 9,
+      "index": 23,
+      "uci": "e2e4d7d5e4d5g8f6b1c3f6d5c3d5d8d5g1f3",
+      "count": 453,
+      "pct": 0.0175
+    },
+    {
+      "code": "b-rn..kb.rppp.pppp...........q..........b......N..PPPP.PPPR.BQKB.Rw",
+      "fen": "rn2kb1r/ppp1pppp/8/3q4/6b1/5N2/PPPP1PPP/R1BQKB1R w KQkq - 2 6",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_10",
+      "depth": 10,
+      "index": 23,
+      "uci": "e2e4d7d5e4d5g8f6b1c3f6d5c3d5d8d5g1f3c8g4",
+      "count": 453,
+      "pct": 0.0175
+    },
+    {
+      "code": "b-rn..kb.rppp.pppp...........q..........b......N..PPPPBPPPR.BQK..Rb",
+      "fen": "rn2kb1r/ppp1pppp/8/3q4/6b1/5N2/PPPPBPPP/R1BQK2R b KQkq - 3 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 23,
+      "uci": "e2e4d7d5e4d5g8f6b1c3f6d5c3d5d8d5g1f3c8g4f1e2",
+      "count": 453,
+      "pct": 0.0175
+    },
+    {
       "code": "b-r...kb.rppp.pppp..n........q..........b......N..PPPPBPPPR.BQK..Rw",
       "fen": "r3kb1r/ppp1pppp/2n5/3q4/6b1/5N2/PPPPBPPP/R1BQK2R w KQkq - 4 7",
       "perspective": "w",
@@ -1816,6 +3697,61 @@
       "uci": "e2e4d7d5e4d5g8f6b1c3f6d5c3d5d8d5g1f3c8g4f1e2b8c6",
       "count": 453,
       "pct": 0.0175
+    },
+    {
+      "code": "b-r.bqkbnrpppp.ppp..n...............BpP........N..PPP..PPPRNBQK..Rb",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/8/2BpP3/5N2/PPP2PPP/RNBQK2R b KQkq - 1 4",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_7",
+      "depth": 7,
+      "index": 24,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f1c4",
+      "count": 442,
+      "pct": 0.017
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.......b.......BpP........N..PPP..PPPRNBQK..Rw",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b5/2BpP3/5N2/PPP2PPP/RNBQK2R w KQkq - 2 5",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_8",
+      "depth": 8,
+      "index": 24,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f1c4f8c5",
+      "count": 442,
+      "pct": 0.017
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.......b.......BpP.....P..N..PP...PPPRNBQK..Rb",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b5/2BpP3/2P2N2/PP3PPP/RNBQK2R b KQkq - 0 5",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_9",
+      "depth": 9,
+      "index": 24,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f1c4f8c5c2c3",
+      "count": 442,
+      "pct": 0.017
+    },
+    {
+      "code": "b-r.bqk.nrpppp.ppp..n.......b.......B.P.....p..N..PP...PPPRNBQK..Rw",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b5/2B1P3/2p2N2/PP3PPP/RNBQK2R w KQkq - 0 6",
+      "perspective": "w",
+      "source": "lookup_k1024/depth_12/ply_10",
+      "depth": 10,
+      "index": 24,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f1c4f8c5c2c3d4c3",
+      "count": 442,
+      "pct": 0.017
+    },
+    {
+      "code": "b-r.bqk.nrpppp.Bpp..n.......b.........P.....p..N..PP...PPPRNBQK..Rb",
+      "fen": "r1bqk1nr/pppp1Bpp/2n5/2b5/4P3/2p2N2/PP3PPP/RNBQK2R b KQkq - 0 6",
+      "perspective": "b",
+      "source": "lookup_k1024/depth_12/ply_11",
+      "depth": 11,
+      "index": 24,
+      "uci": "e2e4e7e5g1f3b8c6d2d4e5d4f1c4f8c5c2c3d4c3c4f7",
+      "count": 442,
+      "pct": 0.017
     },
     {
       "code": "b-r.bq..nrpppp.kpp..n.......b.........P.....p..N..PP...PPPRNBQK..Rw",

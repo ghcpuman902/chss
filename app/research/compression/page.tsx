@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   title: "How small can a chess share link get?",
   description:
     "Why encoding a chess position for a pasteable URL is harder than it looks, and how packed, lookup, and hybrid codecs compare on real Lichess games.",
+  alternates: {
+    canonical: "/research/compression",
+  },
 };
 
 type MetricSpread = {

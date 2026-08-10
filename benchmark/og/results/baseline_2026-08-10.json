@@ -1,0 +1,391 @@
+{
+  "meta": {
+    "iteration": "baseline",
+    "git_sha": "6fab51f",
+    "date": "2026-08-10T09:45:18.810Z",
+    "host": "Mac.localdomain (Apple M3 Pro / darwin)",
+    "engine": "next/og",
+    "node": "v24.18.0",
+    "fixtures_sha": "c1bfa31e9cb2d3a7",
+    "note": "Local origin render cost only — not crawler TTFB.",
+    "fixtures_sha_check": "c1bfa31e9cb2d3a7",
+    "git": "6fab51f"
+  },
+  "render": {
+    "n": 106,
+    "mean_ms": 56.67,
+    "p50_ms": 55.73,
+    "p95_ms": 80.72,
+    "p99_ms": 110.62,
+    "min_ms": 13.77,
+    "max_ms": 150.2,
+    "bytes_p50": 24854,
+    "bytes_p95": 26935,
+    "bytes_mean": 24722,
+    "size_px": 640,
+    "rounds": 2,
+    "warmup": 1
+  },
+  "coverage": {
+    "total_codes": 151,
+    "ply_1_pct": 0,
+    "ply_2_pct": 100,
+    "start_pct": 100,
+    "midgame_pct": 33.3,
+    "by_category": {
+      "start": {
+        "total": 1,
+        "hit": 1,
+        "pct": 100
+      },
+      "ply1": {
+        "total": 20,
+        "hit": 0,
+        "pct": 0
+      },
+      "ply2": {
+        "total": 20,
+        "hit": 20,
+        "pct": 100
+      },
+      "midgame": {
+        "total": 9,
+        "hit": 3,
+        "pct": 33.3
+      },
+      "endgame": {
+        "total": 1,
+        "hit": 0,
+        "pct": 0
+      },
+      "promotion": {
+        "total": 2,
+        "hit": 0,
+        "pct": 0
+      }
+    }
+  },
+  "prod": null,
+  "extra": {
+    "per_position": [
+      {
+        "id": "start",
+        "ms": 60.34,
+        "bytes": 24195,
+        "sha256_16": "922b65f9385b791b"
+      },
+      {
+        "id": "ply1_a2a3",
+        "ms": 59.37,
+        "bytes": 24747,
+        "sha256_16": "6616961feabb1b0e"
+      },
+      {
+        "id": "ply1_a2a4",
+        "ms": 62.67,
+        "bytes": 24713,
+        "sha256_16": "a4a037b927bd6804"
+      },
+      {
+        "id": "ply1_b2b3",
+        "ms": 61.61,
+        "bytes": 24615,
+        "sha256_16": "935d278032b36e24"
+      },
+      {
+        "id": "ply1_b2b4",
+        "ms": 60.79,
+        "bytes": 24648,
+        "sha256_16": "a6dfdd1f13e1b335"
+      },
+      {
+        "id": "ply1_c2c3",
+        "ms": 57.09,
+        "bytes": 24796,
+        "sha256_16": "f1b3967534fd765a"
+      },
+      {
+        "id": "ply1_c2c4",
+        "ms": 58.46,
+        "bytes": 24766,
+        "sha256_16": "22ce60e8e2c6f566"
+      },
+      {
+        "id": "ply1_d2d3",
+        "ms": 57.25,
+        "bytes": 24649,
+        "sha256_16": "59854f787043fe62"
+      },
+      {
+        "id": "ply1_d2d4",
+        "ms": 56.66,
+        "bytes": 24697,
+        "sha256_16": "57c77b67783188a9"
+      },
+      {
+        "id": "ply1_e2e3",
+        "ms": 60.86,
+        "bytes": 24775,
+        "sha256_16": "3730c6c64bf28795"
+      },
+      {
+        "id": "ply1_e2e4",
+        "ms": 58.64,
+        "bytes": 24748,
+        "sha256_16": "945521b7d7f03fb1"
+      },
+      {
+        "id": "ply1_f2f3",
+        "ms": 57.64,
+        "bytes": 24701,
+        "sha256_16": "abb73f0e20eda0ac"
+      },
+      {
+        "id": "ply1_f2f4",
+        "ms": 56.9,
+        "bytes": 24739,
+        "sha256_16": "4d5ce6340e3d19a6"
+      },
+      {
+        "id": "ply1_g2g3",
+        "ms": 54.54,
+        "bytes": 24888,
+        "sha256_16": "3816113300e00c81"
+      },
+      {
+        "id": "ply1_g2g4",
+        "ms": 56.54,
+        "bytes": 24854,
+        "sha256_16": "2b68f7f23ac432bb"
+      },
+      {
+        "id": "ply1_h2h3",
+        "ms": 58.11,
+        "bytes": 24655,
+        "sha256_16": "2a5f4521853f4b20"
+      },
+      {
+        "id": "ply1_h2h4",
+        "ms": 56.21,
+        "bytes": 24701,
+        "sha256_16": "ed5a73c3265217c7"
+      },
+      {
+        "id": "ply1_b1a3",
+        "ms": 68.59,
+        "bytes": 24286,
+        "sha256_16": "81b42b680075dfe5"
+      },
+      {
+        "id": "ply1_b1c3",
+        "ms": 104.26,
+        "bytes": 24248,
+        "sha256_16": "189bb342d826d05c"
+      },
+      {
+        "id": "ply1_g1f3",
+        "ms": 55.35,
+        "bytes": 24156,
+        "sha256_16": "1166497266e935da"
+      },
+      {
+        "id": "ply1_g1h3",
+        "ms": 54.98,
+        "bytes": 24154,
+        "sha256_16": "3176ba580ad359d7"
+      },
+      {
+        "id": "ply2_e2e4e7e5",
+        "ms": 53.43,
+        "bytes": 25245,
+        "sha256_16": "60ee1e1d8f2f462b"
+      },
+      {
+        "id": "ply2_d2d4d7d5",
+        "ms": 56.05,
+        "bytes": 25425,
+        "sha256_16": "e7583c7a62f78437"
+      },
+      {
+        "id": "ply2_e2e4c7c5",
+        "ms": 79.17,
+        "bytes": 25316,
+        "sha256_16": "11bd299112d7c9fe"
+      },
+      {
+        "id": "ply2_e2e4d7d5",
+        "ms": 60.97,
+        "bytes": 25317,
+        "sha256_16": "e57388b188548575"
+      },
+      {
+        "id": "ply2_e2e4e7e6",
+        "ms": 57.01,
+        "bytes": 25244,
+        "sha256_16": "52facf14e2c3c968"
+      },
+      {
+        "id": "ply2_e2e4c7c6",
+        "ms": 64.74,
+        "bytes": 25314,
+        "sha256_16": "de482387e5c3bbfd"
+      },
+      {
+        "id": "ply2_d2d4g8f6",
+        "ms": 72.09,
+        "bytes": 24812,
+        "sha256_16": "d8c29c6d958857fd"
+      },
+      {
+        "id": "ply2_d2d4e7e6",
+        "ms": 57.59,
+        "bytes": 25355,
+        "sha256_16": "77344ec0197715b8"
+      },
+      {
+        "id": "ply2_e2e4d7d6",
+        "ms": 63.15,
+        "bytes": 25300,
+        "sha256_16": "40c6798207f4b45c"
+      },
+      {
+        "id": "ply2_e2e4g7g6",
+        "ms": 74.08,
+        "bytes": 25152,
+        "sha256_16": "628c923e1f8b4bb6"
+      },
+      {
+        "id": "ply2_d2d4e7e5",
+        "ms": 63.09,
+        "bytes": 25357,
+        "sha256_16": "8be7b296fc7644f4"
+      },
+      {
+        "id": "ply2_d2d4g7g6",
+        "ms": 110.62,
+        "bytes": 25265,
+        "sha256_16": "9081855f6f01a564"
+      },
+      {
+        "id": "ply2_d2d4c7c5",
+        "ms": 53.49,
+        "bytes": 25421,
+        "sha256_16": "bb541013707c7d23"
+      },
+      {
+        "id": "ply2_e2e4b7b6",
+        "ms": 53.35,
+        "bytes": 25373,
+        "sha256_16": "00474d9c64b9d5e3"
+      },
+      {
+        "id": "ply2_d2d4c7c6",
+        "ms": 52.8,
+        "bytes": 25424,
+        "sha256_16": "24e8118f28f6efdf"
+      },
+      {
+        "id": "ply2_g1f3d7d5",
+        "ms": 54.71,
+        "bytes": 24903,
+        "sha256_16": "5684b2f08152e401"
+      },
+      {
+        "id": "ply2_e2e4g8f6",
+        "ms": 53,
+        "bytes": 24698,
+        "sha256_16": "96af30e0f7d101f6"
+      },
+      {
+        "id": "ply2_d2d4d7d6",
+        "ms": 52.48,
+        "bytes": 25412,
+        "sha256_16": "9e55a20e793d0fea"
+      },
+      {
+        "id": "ply2_c2c4e7e5",
+        "ms": 52.76,
+        "bytes": 25287,
+        "sha256_16": "65bfdfcb23d615de"
+      },
+      {
+        "id": "ply2_e2e4b8c6",
+        "ms": 52.24,
+        "bytes": 24633,
+        "sha256_16": "3b00fb11c50fbf7a"
+      },
+      {
+        "id": "mid_p8_e2e4c7c5g1f3d7d6",
+        "ms": 49.98,
+        "bytes": 25547,
+        "sha256_16": "0c798bc94414bcd6"
+      },
+      {
+        "id": "mid_p8_e2e4e7e5g1f3b8c6",
+        "ms": 48.74,
+        "bytes": 24566,
+        "sha256_16": "ee3cf48f01ef3bc4"
+      },
+      {
+        "id": "mid_p8_e2e4e7e5g1f3b8c6",
+        "ms": 52.22,
+        "bytes": 25962,
+        "sha256_16": "03c7ef81b8589a40"
+      },
+      {
+        "id": "mid_p16_e2e4c7c5g1f3b8c6",
+        "ms": 50.57,
+        "bytes": 26843,
+        "sha256_16": "06d03304cfcd70be"
+      },
+      {
+        "id": "mid_p16_e2e4c7c5g1f3d7d6",
+        "ms": 50.6,
+        "bytes": 27059,
+        "sha256_16": "d6c9ca2a2529cf13"
+      },
+      {
+        "id": "mid_p16_e2e4e7e5g1f3b8c6",
+        "ms": 49.37,
+        "bytes": 26181,
+        "sha256_16": "2e7a0fe884a24d8e"
+      },
+      {
+        "id": "mid_p24_e2e4e7e5g1f3b8c6",
+        "ms": 48.93,
+        "bytes": 27081,
+        "sha256_16": "a2ef17bfffd62394"
+      },
+      {
+        "id": "mid_p24_e2e4e7e5g1f3b8c6",
+        "ms": 45.53,
+        "bytes": 26935,
+        "sha256_16": "cf240ff00a222240"
+      },
+      {
+        "id": "mid_p24_e2e4e7e6d2d4d7d5",
+        "ms": 45.72,
+        "bytes": 26472,
+        "sha256_16": "0f0f4318d9b5e753"
+      },
+      {
+        "id": "endgame_kqk",
+        "ms": 13.77,
+        "bytes": 17473,
+        "sha256_16": "acc7eadd27940066"
+      },
+      {
+        "id": "promo_before",
+        "ms": 14.14,
+        "bytes": 17463,
+        "sha256_16": "3727864da07bdb81"
+      },
+      {
+        "id": "promo_after",
+        "ms": 13.89,
+        "bytes": 17676,
+        "sha256_16": "96d938ffc48d2da2"
+      }
+    ]
+  }
+}

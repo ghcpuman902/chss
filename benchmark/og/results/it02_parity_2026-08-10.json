@@ -1,0 +1,818 @@
+{
+  "meta": {
+    "iteration": "it02_parity",
+    "git_sha": "6fab51f",
+    "date": "2026-08-10T09:46:41.905Z",
+    "host": "Mac.localdomain (Apple M3 Pro / darwin)",
+    "engine": "next/og vs takumi-js",
+    "node": "v24.18.0",
+    "fixtures_sha": "c1bfa31e9cb2d3a7"
+  },
+  "render": null,
+  "coverage": null,
+  "prod": null,
+  "extra": {
+    "rows": [
+      {
+        "id": "start",
+        "satori_bytes": 24195,
+        "takumi_bytes": 14686,
+        "byte_ratio": 0.607,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "922b65f9385b791b",
+        "takumi_sha16": "1e80301c9fa6ac8e"
+      },
+      {
+        "id": "ply1_a2a3",
+        "satori_bytes": 24747,
+        "takumi_bytes": 15258,
+        "byte_ratio": 0.617,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "6616961feabb1b0e",
+        "takumi_sha16": "199cb7c6a825cf7a"
+      },
+      {
+        "id": "ply1_a2a4",
+        "satori_bytes": 24713,
+        "takumi_bytes": 15248,
+        "byte_ratio": 0.617,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "a4a037b927bd6804",
+        "takumi_sha16": "0aa592b1113e3026"
+      },
+      {
+        "id": "ply1_b2b3",
+        "satori_bytes": 24615,
+        "takumi_bytes": 15327,
+        "byte_ratio": 0.623,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "935d278032b36e24",
+        "takumi_sha16": "8e0079d5b1d8667e"
+      },
+      {
+        "id": "ply1_b2b4",
+        "satori_bytes": 24648,
+        "takumi_bytes": 15332,
+        "byte_ratio": 0.622,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "a6dfdd1f13e1b335",
+        "takumi_sha16": "9c976f1c367e1b1b"
+      },
+      {
+        "id": "ply1_c2c3",
+        "satori_bytes": 24796,
+        "takumi_bytes": 15415,
+        "byte_ratio": 0.622,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "f1b3967534fd765a",
+        "takumi_sha16": "aac0aa021bd04b23"
+      },
+      {
+        "id": "ply1_c2c4",
+        "satori_bytes": 24766,
+        "takumi_bytes": 15408,
+        "byte_ratio": 0.622,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "22ce60e8e2c6f566",
+        "takumi_sha16": "e12443be672899f6"
+      },
+      {
+        "id": "ply1_d2d3",
+        "satori_bytes": 24649,
+        "takumi_bytes": 15505,
+        "byte_ratio": 0.629,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "59854f787043fe62",
+        "takumi_sha16": "423adba5a55ec451"
+      },
+      {
+        "id": "ply1_d2d4",
+        "satori_bytes": 24697,
+        "takumi_bytes": 15510,
+        "byte_ratio": 0.628,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "57c77b67783188a9",
+        "takumi_sha16": "1f617ad5faa9b397"
+      },
+      {
+        "id": "ply1_e2e3",
+        "satori_bytes": 24775,
+        "takumi_bytes": 15536,
+        "byte_ratio": 0.627,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "3730c6c64bf28795",
+        "takumi_sha16": "504a7cbb25f567fd"
+      },
+      {
+        "id": "ply1_e2e4",
+        "satori_bytes": 24748,
+        "takumi_bytes": 15530,
+        "byte_ratio": 0.628,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "945521b7d7f03fb1",
+        "takumi_sha16": "2fceab0e1c6cde65"
+      },
+      {
+        "id": "ply1_f2f3",
+        "satori_bytes": 24701,
+        "takumi_bytes": 15559,
+        "byte_ratio": 0.63,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "abb73f0e20eda0ac",
+        "takumi_sha16": "354ee86d6306368d"
+      },
+      {
+        "id": "ply1_f2f4",
+        "satori_bytes": 24739,
+        "takumi_bytes": 15564,
+        "byte_ratio": 0.629,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "4d5ce6340e3d19a6",
+        "takumi_sha16": "7c4c4266423ea2da"
+      },
+      {
+        "id": "ply1_g2g3",
+        "satori_bytes": 24888,
+        "takumi_bytes": 15429,
+        "byte_ratio": 0.62,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "3816113300e00c81",
+        "takumi_sha16": "02e95f1d60f329c0"
+      },
+      {
+        "id": "ply1_g2g4",
+        "satori_bytes": 24854,
+        "takumi_bytes": 15424,
+        "byte_ratio": 0.621,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "2b68f7f23ac432bb",
+        "takumi_sha16": "67b99593f23d6dac"
+      },
+      {
+        "id": "ply1_h2h3",
+        "satori_bytes": 24655,
+        "takumi_bytes": 15150,
+        "byte_ratio": 0.614,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "2a5f4521853f4b20",
+        "takumi_sha16": "d774af4d26f00a67"
+      },
+      {
+        "id": "ply1_h2h4",
+        "satori_bytes": 24701,
+        "takumi_bytes": 15158,
+        "byte_ratio": 0.614,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "ed5a73c3265217c7",
+        "takumi_sha16": "9a551331d6c995d5"
+      },
+      {
+        "id": "ply1_b1a3",
+        "satori_bytes": 24286,
+        "takumi_bytes": 14951,
+        "byte_ratio": 0.616,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "81b42b680075dfe5",
+        "takumi_sha16": "7fb6e140480458ef"
+      },
+      {
+        "id": "ply1_b1c3",
+        "satori_bytes": 24248,
+        "takumi_bytes": 15097,
+        "byte_ratio": 0.623,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "189bb342d826d05c",
+        "takumi_sha16": "509b4d09bd06f7cf"
+      },
+      {
+        "id": "ply1_g1f3",
+        "satori_bytes": 24156,
+        "takumi_bytes": 15113,
+        "byte_ratio": 0.626,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "1166497266e935da",
+        "takumi_sha16": "9c1a7a0dc7eb4d66"
+      },
+      {
+        "id": "ply1_g1h3",
+        "satori_bytes": 24154,
+        "takumi_bytes": 14829,
+        "byte_ratio": 0.614,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "3176ba580ad359d7",
+        "takumi_sha16": "27fdca9e66121651"
+      },
+      {
+        "id": "ply2_e2e4e7e5",
+        "satori_bytes": 25245,
+        "takumi_bytes": 16174,
+        "byte_ratio": 0.641,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "60ee1e1d8f2f462b",
+        "takumi_sha16": "28f3a40ca31ebbbf"
+      },
+      {
+        "id": "ply2_d2d4d7d5",
+        "satori_bytes": 25425,
+        "takumi_bytes": 16236,
+        "byte_ratio": 0.639,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "e7583c7a62f78437",
+        "takumi_sha16": "9745c913799b3c30"
+      },
+      {
+        "id": "ply2_e2e4c7c5",
+        "satori_bytes": 25316,
+        "takumi_bytes": 16224,
+        "byte_ratio": 0.641,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "11bd299112d7c9fe",
+        "takumi_sha16": "b80d8a58f1e245b1"
+      },
+      {
+        "id": "ply2_e2e4d7d5",
+        "satori_bytes": 25317,
+        "takumi_bytes": 16204,
+        "byte_ratio": 0.64,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "e57388b188548575",
+        "takumi_sha16": "49e393caf0e721e2"
+      },
+      {
+        "id": "ply2_e2e4e7e6",
+        "satori_bytes": 25244,
+        "takumi_bytes": 16175,
+        "byte_ratio": 0.641,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "52facf14e2c3c968",
+        "takumi_sha16": "af6982810ac4a73e"
+      },
+      {
+        "id": "ply2_e2e4c7c6",
+        "satori_bytes": 25314,
+        "takumi_bytes": 16225,
+        "byte_ratio": 0.641,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "de482387e5c3bbfd",
+        "takumi_sha16": "05cda922d87a43b4"
+      },
+      {
+        "id": "ply2_d2d4g8f6",
+        "satori_bytes": 24812,
+        "takumi_bytes": 15786,
+        "byte_ratio": 0.636,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "d8c29c6d958857fd",
+        "takumi_sha16": "316cca909ebc8079"
+      },
+      {
+        "id": "ply2_d2d4e7e6",
+        "satori_bytes": 25355,
+        "takumi_bytes": 16209,
+        "byte_ratio": 0.639,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "77344ec0197715b8",
+        "takumi_sha16": "3a214ddf6ed496a8"
+      },
+      {
+        "id": "ply2_e2e4d7d6",
+        "satori_bytes": 25300,
+        "takumi_bytes": 16204,
+        "byte_ratio": 0.64,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "40c6798207f4b45c",
+        "takumi_sha16": "7576576bace27dee"
+      },
+      {
+        "id": "ply2_e2e4g7g6",
+        "satori_bytes": 25152,
+        "takumi_bytes": 16005,
+        "byte_ratio": 0.636,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "628c923e1f8b4bb6",
+        "takumi_sha16": "566066d82037c753"
+      },
+      {
+        "id": "ply2_d2d4e7e5",
+        "satori_bytes": 25357,
+        "takumi_bytes": 16208,
+        "byte_ratio": 0.639,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "8be7b296fc7644f4",
+        "takumi_sha16": "066da90c52cae6f5"
+      },
+      {
+        "id": "ply2_d2d4g7g6",
+        "satori_bytes": 25265,
+        "takumi_bytes": 16035,
+        "byte_ratio": 0.635,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "9081855f6f01a564",
+        "takumi_sha16": "b49ed6c7ca7dbd95"
+      },
+      {
+        "id": "ply2_d2d4c7c5",
+        "satori_bytes": 25421,
+        "takumi_bytes": 16256,
+        "byte_ratio": 0.639,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "bb541013707c7d23",
+        "takumi_sha16": "936da373e225e969"
+      },
+      {
+        "id": "ply2_e2e4b7b6",
+        "satori_bytes": 25373,
+        "takumi_bytes": 16089,
+        "byte_ratio": 0.634,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "00474d9c64b9d5e3",
+        "takumi_sha16": "de5afbe04e6026bc"
+      },
+      {
+        "id": "ply2_d2d4c7c6",
+        "satori_bytes": 25424,
+        "takumi_bytes": 16256,
+        "byte_ratio": 0.639,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "24e8118f28f6efdf",
+        "takumi_sha16": "f56febd6b2a43837"
+      },
+      {
+        "id": "ply2_g1f3d7d5",
+        "satori_bytes": 24903,
+        "takumi_bytes": 15787,
+        "byte_ratio": 0.634,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "5684b2f08152e401",
+        "takumi_sha16": "45f7c7e7315c2e0f"
+      },
+      {
+        "id": "ply2_e2e4g8f6",
+        "satori_bytes": 24698,
+        "takumi_bytes": 15753,
+        "byte_ratio": 0.638,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "96af30e0f7d101f6",
+        "takumi_sha16": "33ad564c7dd2a980"
+      },
+      {
+        "id": "ply2_d2d4d7d6",
+        "satori_bytes": 25412,
+        "takumi_bytes": 16237,
+        "byte_ratio": 0.639,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "9e55a20e793d0fea",
+        "takumi_sha16": "f3f3c335182c75fa"
+      },
+      {
+        "id": "ply2_c2c4e7e5",
+        "satori_bytes": 25287,
+        "takumi_bytes": 16230,
+        "byte_ratio": 0.642,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "65bfdfcb23d615de",
+        "takumi_sha16": "b5f2a7e154cb0dca"
+      },
+      {
+        "id": "ply2_e2e4b8c6",
+        "satori_bytes": 24633,
+        "takumi_bytes": 15786,
+        "byte_ratio": 0.641,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "3b00fb11c50fbf7a",
+        "takumi_sha16": "b7db2c8dd30049c1"
+      },
+      {
+        "id": "endgame_kqk",
+        "satori_bytes": 17473,
+        "takumi_bytes": 10039,
+        "byte_ratio": 0.575,
+        "satori_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "takumi_size": {
+          "width": 640,
+          "height": 640,
+          "valid": true
+        },
+        "dims_match": true,
+        "satori_sha16": "acc7eadd27940066",
+        "takumi_sha16": "c98d975eac8b2c9e"
+      }
+    ],
+    "dimsOk": true,
+    "bytesOk": true
+  }
+}

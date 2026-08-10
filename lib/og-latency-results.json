@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "OG crawler latency",
+    "date": "2026-08-10",
+    "fixtures_n": 53,
+    "note": "Local origin-render measurements on Apple Silicon via benchmark/og. Production TTFB rows filled after PV-1.",
+    "constraint": "Share is never gated on prewarm."
+  },
+  "baseline": {
+    "engine": "next/og (Satori)",
+    "render_p50_ms": 55.73,
+    "render_p95_ms": 80.72,
+    "bytes_p50": 24854,
+    "ply_1_pct": 0,
+    "ply_2_pct": 100,
+    "total_codes": 151
+  },
+  "iterations": [
+    {
+      "id": "it01_coverage",
+      "label": "Prerender odd plies + all legal ply-1",
+      "prediction": "ply-1 coverage → 100%",
+      "result": "ply_1_pct=100, total_codes=314 (176w/138b)",
+      "verdict": "kept"
+    },
+    {
+      "id": "it02_takumi",
+      "label": "Satori → Takumi",
+      "prediction": "p50 2–4× lower; bytes ±10%",
+      "result": "p50 55.73→7.80 (~7.1×); bytes 24854→15786 (~63%)",
+      "verdict": "kept"
+    },
+    {
+      "id": "it03_template",
+      "label": "Flatten OG template",
+      "prediction": "measurable p50 drop vs Takumi alone",
+      "result": "p50 7.80→6.97 (~11%)",
+      "verdict": "kept"
+    },
+    {
+      "id": "it04_browser",
+      "label": "Browser WASM prewarm feasibility",
+      "prediction": "WASM load+render <200ms; size acceptable",
+      "result": "wasm p50≈9ms but binary 3.7MB — wrong trade vs 7ms origin",
+      "verdict": "not productized"
+    },
+    {
+      "id": "it05_prewarm",
+      "label": "after() + in-flight dedupe",
+      "prediction": "action returns immediately; prod HIT after move",
+      "result": "shipped; prod HIT confirmation is PV-2",
+      "verdict": "shipped locally"
+    }
+  ],
+  "local_final": {
+    "engine": "takumi-js",
+    "render_p50_ms": 6.97,
+    "render_p95_ms": 8.05,
+    "bytes_p50": 15786,
+    "ply_1_pct": 100,
+    "total_codes": 314,
+    "speedup_vs_baseline": 8.0
+  },
+  "production": {
+    "status": "pending_pv1",
+    "commands": [
+      "node benchmark/og/prod-probe.mjs --tag it01-03",
+      "vercel logs chss.chat --since 10m --json > /tmp/og.jsonl",
+      "node benchmark/og/parse-vercel-logs.mjs /tmp/og.jsonl --tag it01-03"
+    ]
+  }
+}

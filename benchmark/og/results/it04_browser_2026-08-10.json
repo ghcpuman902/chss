@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "iteration": "it04_browser",
+    "git_sha": "6fab51f",
+    "date": "2026-08-10T09:48:25.900Z",
+    "host": "Mac.localdomain (Apple M3 Pro / darwin)",
+    "engine": "takumi-js/wasm",
+    "node": "v24.18.0",
+    "fixtures_sha": "c1bfa31e9cb2d3a7"
+  },
+  "render": {
+    "n": 22,
+    "mean_ms": 9.2,
+    "p50_ms": 9.11,
+    "p95_ms": 10.38,
+    "p99_ms": 11.68,
+    "min_ms": 5.9,
+    "max_ms": 11.68,
+    "bytes_p50": 15327,
+    "bytes_p95": 15559,
+    "bytes_mean": 15049
+  },
+  "coverage": null,
+  "prod": null,
+  "extra": {
+    "wasm_binary_bytes": 3734240,
+    "wasm_binary_path": "node_modules/.pnpm/@takumi-rs+wasm@2.5.4_csstype@3.2.3_react@19.2.8/node_modules/@takumi-rs/wasm/pkg/takumi_wasm_bg.wasm",
+    "init_ms": 16.79,
+    "wasm_render": {
+      "n": 22,
+      "mean_ms": 9.2,
+      "p50_ms": 9.11,
+      "p95_ms": 10.38,
+      "p99_ms": 11.68,
+      "min_ms": 5.9,
+      "max_ms": 11.68
+    },
+    "wasm_bytes": {
+      "n": 22,
+      "bytes_p50": 15327,
+      "bytes_p95": 15559,
+      "bytes_mean": 15049
+    },
+    "native_render": {
+      "n": 22,
+      "mean_ms": 7.05,
+      "p50_ms": 6.29,
+      "p95_ms": 6.56,
+      "p99_ms": 25.1,
+      "min_ms": 4.09,
+      "max_ms": 25.1
+    },
+    "sample_n": 22,
+    "note": "WASM measured in Node via takumi-js/wasm Renderer — proxy for browser cost; true browser also pays network fetch of ~3.7MB wasm."
+  }
+}

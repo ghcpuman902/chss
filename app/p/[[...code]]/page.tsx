@@ -1,17 +1,15 @@
-// app/p/[[...code]]/page.tsx
-
 import { Suspense, cache } from "react";
 import { parseCode, generateCode, START_FEN, type ParsedState } from "@/lib/state";
 import { parseUrlSegment } from "@/lib/utils";
 import { buildOgCode } from "@/lib/og-encoding";
 import { ChessBoard } from "@/components/chess-board";
+import { ChessBoardSkeleton } from "@/components/chess-board-skeleton";
 import { redirect } from "next/navigation";
 import type { Move } from "chess.js";
 import { isRawUciString, readUciMoveAt } from "@/lib/uci";
 
 type SearchP = string | string[] | undefined;
 
-/** Per-request dedupe between generateMetadata + page (server-cache-react). */
 const resolveGameState = cache((codeString: string): ParsedState => {
   try {
     return parseCode(codeString);
@@ -106,11 +104,11 @@ export async function generateMetadata(props: PageProps<"/p/[[...code]]">) {
   }
   return {
     title,
-    openGraph: { title, images: [`https://chss.chat/og/${ogCode}.png`] },
+    openGraph: { title, images: [`/og/${ogCode}.png`] },
     twitter: {
       card: "summary_large_image" as const,
       title,
-      images: [`https://chss.chat/og/${ogCode}.png`],
+      images: [`/og/${ogCode}.png`],
     },
   };
 }
@@ -119,10 +117,7 @@ const BoardFallback = () => (
   <main className="bg-background">
     <section className="relative overflow-hidden">
       <div className="container mx-auto max-w-2xl px-4 py-24">
-        <div
-          className="mx-auto aspect-square w-full max-w-md animate-pulse rounded-sm bg-muted"
-          aria-hidden="true"
-        />
+        <ChessBoardSkeleton />
       </div>
     </section>
   </main>
@@ -140,10 +135,6 @@ async function PlayPage({
   const p = pickSearchP(rawP);
   const gameState = resolveGameState(codeString);
 
-  // Canonicalize URL:
-  // - Bare UCI and native u-<UCI> history: keep as-is for detailed titles / demos
-  // - Research codecs (compression scoreboard): keep prefix so demos stay honest
-  // - Otherwise prefer short u- codes when available
   const preferred = generateCode(gameState);
   const isBareUci =
     !!codeString &&

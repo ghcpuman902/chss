@@ -1,4 +1,4 @@
-import { ImageResponse } from "next/og";
+import { ImageResponse } from "takumi-js/response";
 import { cacheLife, cacheTag } from "next/cache";
 import { createElement } from "react";
 import OGTemplate, { OG_SIZE } from "@/app/og/[[...code]]/og-template";
@@ -7,7 +7,8 @@ const stripExtension = (raw: string): string =>
   // Board64 uses '.' for empty squares — only strip a trailing image suffix.
   raw.trim().replace(/\.(png|jpe?g|webp|gif)$/i, "");
 
-async function renderOgPngBase64(code: string): Promise<string> {
+/** Uncached PNG bytes — used by the OG route cache wrapper and local benches. */
+export const renderOgPng = async (code: string): Promise<Buffer> => {
   const response = new ImageResponse(
     createElement(OGTemplate, { query: code || undefined }),
     {
@@ -16,12 +17,17 @@ async function renderOgPngBase64(code: string): Promise<string> {
     },
   );
   const ab = await response.arrayBuffer();
-  return Buffer.from(ab).toString("base64");
+  return Buffer.from(ab);
+};
+
+async function renderOgPngBase64(code: string): Promise<string> {
+  const buf = await renderOgPng(code);
+  return buf.toString("base64");
 }
 
 /**
  * Cached PNG bytes for an OG code (`b-…` / legacy `o-…`).
- * `use cache` + cacheLife('max') → first hit pays Satori; later hits are Data-Cache.
+ * `use cache` + cacheLife('max') → first hit pays Takumi; later hits are Data-Cache.
  * Cache stores base64 (JSON-serializable); Buffer is rebuilt on read.
  */
 async function getCachedOgPngBase64(code: string): Promise<string> {

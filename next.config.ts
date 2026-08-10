@@ -4,6 +4,8 @@ import path from "path";
 const nextConfig: NextConfig = {
   // Partial Prerendering + `use cache` (replaces experimental.ppr / unstable_cache)
   cacheComponents: true,
+  // Native napi binary for Takumi — must not be bundled by Next.
+  serverExternalPackages: ["@takumi-rs/core"],
   experimental: {
     // Tree-shake lucide / radix barrels → smaller client JS (LCP / INP)
     optimizePackageImports: ["lucide-react", "radix-ui"],
