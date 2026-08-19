@@ -7,12 +7,26 @@
 #   JOBS=12 bash benchmark/run_scoreboard.sh          # multicore eval (opt-in)
 #   JOBS=$(sysctl -n hw.ncpu) bash benchmark/run_scoreboard.sh
 #
+# MONTH defaults to the newest local hash corpus. Pin MONTH=YYYY-MM
+# to match a published run (2026-06).
+#
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=lichess_month.sh
+source "${ROOT}/benchmark/lichess_month.sh"
 
-MONTH="${MONTH:-2026-06}"
+if [[ -z "${MONTH:-}" ]]; then
+  MONTH="$(lichess_local_hash_month)"
+fi
+if [[ -z "${MONTH:-}" ]]; then
+  echo "No local hash corpus under data/standard/corpus/hash/"
+  echo "Download a month, then: bash benchmark/run_corpus.sh"
+  echo "  bash benchmark/download_month.sh"
+  echo "Sources: data/SOURCES.md"
+  exit 1
+fi
 PY="${PY:-${ROOT}/.venv-benchmark/bin/python}"
 TRAIN="${TRAIN:-${ROOT}/data/standard/corpus/hash/${MONTH}.train.compact.jsonl.zst}"
 EVAL="${EVAL:-${ROOT}/data/standard/corpus/hash/${MONTH}.val.compact.jsonl.zst}"

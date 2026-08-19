@@ -33,11 +33,9 @@ cd chss
 python3 -m venv .venv-benchmark
 .venv-benchmark/bin/pip install -r benchmark/requirements.txt
 
-# 1. Download one Lichess month (~26 GB for 2026-06)
-mkdir -p data/standard
-curl -L --continue-at - \
-  -o data/standard/lichess_db_standard_rated_2026-06.pgn.zst \
-  https://database.lichess.org/standard/lichess_db_standard_rated_2026-06.pgn.zst
+# 1. Download one Lichess month (newest unless MONTH=YYYY-MM)
+bash benchmark/download_month.sh
+# MONTH=2026-06 bash benchmark/download_month.sh   # published table
 
 # 2. Stream → compact hash sample → train/val/test
 bash benchmark/run_corpus.sh
@@ -46,12 +44,14 @@ bash benchmark/run_corpus.sh
 bash benchmark/run_scoreboard.sh
 ```
 
-After step 3 you should see means close to the published table (hybrid ≈ 39 URL chars, occupancy ≈ 54, native FEN ≈ 104 on the June 2026 hash-val split). Exact floats can drift slightly with toolchain versions; ranking should match.
+The published table used June 2026. A later month is enough to check that rankings still hold; exact floats can drift. Pin `MONTH=2026-06` to match the committed numbers (hybrid ≈ 39 URL chars, occupancy ≈ 54, native FEN ≈ 104 on that hash-val split).
+
+Download URLs and checksums: [`data/SOURCES.md`](../data/SOURCES.md).
 
 Optional: delete the raw PGN once the corpus exists:
 
 ```bash
-rm data/standard/lichess_db_standard_rated_2026-06.pgn.zst
+rm data/standard/lichess_db_standard_rated_*.pgn.zst
 ```
 
 ---
@@ -86,22 +86,19 @@ zstdcat --version
 
 Monthly dumps are **CC0**, listed at [database.lichess.org](https://database.lichess.org/). Files are **not cumulative** — each month is a separate archive.
 
-The published scoreboard used **June 2026** (`86,483,328` games, ~26 GB compressed):
+The published scoreboard used **June 2026** (`86,483,328` games, ~26 GB compressed). Re-runs default to the **newest** month on [list.txt](https://database.lichess.org/standard/list.txt):
 
 ```bash
-mkdir -p data/standard
-curl -L --continue-at - \
-  -o data/standard/lichess_db_standard_rated_2026-06.pgn.zst \
-  https://database.lichess.org/standard/lichess_db_standard_rated_2026-06.pgn.zst
+bash benchmark/download_month.sh
+# pin the published dump:
+# MONTH=2026-06 bash benchmark/download_month.sh
 ```
 
-Checksums and the full index live at:
+Checksums: https://database.lichess.org/standard/sha256sums.txt. Full source notes: [`data/SOURCES.md`](../data/SOURCES.md).
 
-- https://database.lichess.org/standard/list.txt
+Do **not** fully decompress the archive to disk. Uncompressed size is roughly **7×** the `.zst` (~180+ GB for a recent month). The scripts stream with `zstdcat`.
 
-Do **not** fully decompress the archive to disk. Uncompressed size is roughly **7×** the `.zst` (~180+ GB for this month). The scripts stream with `zstdcat`.
-
-To use another month, set `MONTH=YYYY-MM` when calling the shell helpers, and download the matching filename from the list above.
+Set `MONTH=YYYY-MM` on `download_month.sh`, `run_corpus.sh`, and `run_scoreboard.sh` to pin a month.
 
 ---
 
@@ -118,18 +115,20 @@ On our reference machine (Apple M3 Pro, 18 GB RAM) the June 2026 month finished 
 ```bash
 bash benchmark/run_corpus.sh
 # equivalent with overrides:
-# MONTH=2026-06 SAMPLE_PPT=30 bash benchmark/run_corpus.sh
+# MONTH=2026-07 SAMPLE_PPT=30 bash benchmark/run_corpus.sh
 ```
 
-Expected outputs:
+Expected outputs (month in the filename follows `MONTH`):
 
 ```text
-data/standard/corpus/hash/2026-06.train.compact.jsonl.zst   # ~2.05M games
-data/standard/corpus/hash/2026-06.val.compact.jsonl.zst     # ~270k games
-data/standard/corpus/hash/2026-06.test.compact.jsonl.zst    # ~270k games
-benchmark/results/aggregate_2026-06.json
+data/standard/corpus/hash/${MONTH}.train.compact.jsonl.zst
+data/standard/corpus/hash/${MONTH}.val.compact.jsonl.zst
+data/standard/corpus/hash/${MONTH}.test.compact.jsonl.zst
+benchmark/results/aggregate_${MONTH}.json
 benchmark/results/corpus_split_hash.json
 ```
+
+The committed June 2026 run wrote ~2.05M / 270k / 270k train / val / test games.
 
 Compact row shape (one game per line):
 
@@ -145,8 +144,8 @@ Skip the full month while wiring things up:
 
 ```bash
 .venv-benchmark/bin/python benchmark/extract_sampled_games.py \
-  data/standard/lichess_db_standard_rated_2026-06.pgn.zst \
-  --out data/standard/2026-06.smoke.compact.jsonl.zst \
+  data/standard/lichess_db_standard_rated_${MONTH}.pgn.zst \
+  --out data/standard/${MONTH}.smoke.compact.jsonl.zst \
   --sample-ppt 30 \
   --max-scan 5000 \
   --target-games 200
@@ -171,8 +170,8 @@ Manual equivalent:
 
 ```bash
 .venv-benchmark/bin/python benchmark/url_length_benchmark.py \
-  --train data/standard/corpus/hash/2026-06.train.compact.jsonl.zst \
-  --eval data/standard/corpus/hash/2026-06.val.compact.jsonl.zst \
+  --train data/standard/corpus/hash/${MONTH}.train.compact.jsonl.zst \
+  --eval data/standard/corpus/hash/${MONTH}.val.compact.jsonl.zst \
   --out benchmark/results/url_length_hash_val.json \
   --slim-out lib/compression-url-scoreboard.json
 ```
@@ -183,7 +182,7 @@ Bits-only floor (no alphabet):
 
 ```bash
 .venv-benchmark/bin/python benchmark/bit_benchmark.py \
-  data/standard/corpus/hash/2026-06.val.compact.jsonl.zst \
+  data/standard/corpus/hash/${MONTH}.val.compact.jsonl.zst \
   --out benchmark/results/bit_val.json
 ```
 
@@ -191,8 +190,8 @@ Frequency-index held-out coverage:
 
 ```bash
 .venv-benchmark/bin/python benchmark/freq_index_benchmark.py \
-  --train data/standard/corpus/hash/2026-06.train.compact.jsonl.zst \
-  --val data/standard/corpus/hash/2026-06.val.compact.jsonl.zst \
+  --train data/standard/corpus/hash/${MONTH}.train.compact.jsonl.zst \
+  --val data/standard/corpus/hash/${MONTH}.val.compact.jsonl.zst \
   --out benchmark/results/freq_index_hash.json
 ```
 
@@ -204,7 +203,9 @@ Frequency-index held-out coverage:
 benchmark/
   README.md                 ← this file
   requirements.txt
-  run_corpus.sh             ← download → stream → sample → split
+  run_corpus.sh             ← stream → sample → split (newest month by default)
+  download_month.sh         ← HTTP fetch + sha256 from database.lichess.org
+  lichess_month.sh          ← newest-month / URL helpers
   run_scoreboard.sh         ← URL bits/chars/url table
   pgn_common.py             ← shared PGN / hash / split helpers
   stream_aggregate.py
@@ -216,7 +217,7 @@ benchmark/
   results/                  ← committed summaries from the published run
 ```
 
-Local-only (gitignored under `/data/*`): raw PGN, compact corpora, checkpoints.
+Local-only (gitignored under `/data/*` except `data/SOURCES.md`): raw PGN, compact corpora, checkpoints.
 
 ---
 

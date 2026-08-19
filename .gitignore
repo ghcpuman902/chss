@@ -44,14 +44,16 @@ next-env.d.ts
 *.ai
 output.ai
 
-# large data
+# large data (keep the download index)
 /data/*
+!/data/SOURCES.md
 
 /scripts/*
 !scripts/build-og-top-codes.cjs
 lib/state.ts
 
 # large data files
+lib/keys.json
 lib/keys_358.3MB.json
 lib/fen_counts-from-lichess.json
 

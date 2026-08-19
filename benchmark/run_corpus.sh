@@ -5,15 +5,20 @@
 #   bash benchmark/run_corpus.sh
 #   MONTH=2026-06 SAMPLE_PPT=30 bash benchmark/run_corpus.sh
 #
+# MONTH defaults to the newest dump on database.lichess.org.
+# Pin MONTH=YYYY-MM to match a published run (2026-06).
+#
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=lichess_month.sh
+source "${ROOT}/benchmark/lichess_month.sh"
 
-MONTH="${MONTH:-2026-06}"
+MONTH="$(lichess_resolve_month)"
 SAMPLE_PPT="${SAMPLE_PPT:-30}"
 PY="${PY:-${ROOT}/.venv-benchmark/bin/python}"
-PGN="${PGN:-${ROOT}/data/standard/lichess_db_standard_rated_${MONTH}.pgn.zst}"
+PGN="${PGN:-${ROOT}/data/standard/$(lichess_pgn_filename "$MONTH")}"
 CORPUS_DIR="${CORPUS_DIR:-${ROOT}/data/standard/corpus}"
 CKPT_DIR="${CKPT_DIR:-${ROOT}/data/standard/checkpoints}"
 RESULTS_DIR="${ROOT}/benchmark/results"
@@ -32,7 +37,8 @@ fi
 
 if [[ ! -f "$PGN" ]]; then
   echo "Missing PGN archive: $PGN"
-  echo "See benchmark/README.md § Download"
+  echo "Download with: MONTH=$MONTH bash benchmark/download_month.sh"
+  echo "Sources: data/SOURCES.md"
   exit 1
 fi
 
@@ -64,6 +70,7 @@ echo "--- 3/3 split hash sample → train / val / test ---"
 "$PY" benchmark/split_corpus.py \
   "$HASH_SAMPLE" \
   --out-dir "${CORPUS_DIR}/hash" \
+  --name-prefix "$MONTH" \
   --stats "${RESULTS_DIR}/corpus_split_hash.json"
 
 echo "=== Corpus pipeline done $(date) ==="

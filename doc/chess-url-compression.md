@@ -110,9 +110,7 @@ Recorded from the official open-database page (Jul 2026):
 | **Transmission CLI** on `.torrent` | Tracker peers scarce; webseed flaky; curl partial did **not** resume as valid torrent pieces |
 | Keep `.torrent` on disk | Useful for checksum / magnet metadata; not required for HTTP path |
 
-Torrent file kept at:
-
-`data/standard/lichess_db_standard_rated_2026-06.pgn.zst.torrent`
+Raw dumps are not kept in the repo. Download URLs and the June 2026 checksum: [`data/SOURCES.md`](../data/SOURCES.md).
 
 ---
 
@@ -269,8 +267,10 @@ Stage 4  Product integration on chss.chat
 |---|---|
 | `benchmark/README.md` | Full reproduce guide (download → stream → scoreboard) |
 | `benchmark/requirements.txt` | Python deps (`python-chess`) |
-| `benchmark/run_corpus.sh` | Orchestrator: aggregate + hash extract + split |
+| `benchmark/run_corpus.sh` | Orchestrator: aggregate + hash extract + split (newest month by default) |
+| `benchmark/download_month.sh` | HTTP fetch + sha256 for one Lichess month |
 | `benchmark/run_scoreboard.sh` | Rebuild URL scoreboard + slim page JSON |
+| `data/SOURCES.md` | Download URLs; local dumps are not stored |
 | `benchmark/pgn_common.py` | Shared PGN parse, hash sample, split buckets |
 | `benchmark/stream_aggregate.py` | Pass 1 — streaming prefix/ECO/strata counters |
 | `benchmark/extract_sampled_games.py` | Hash-sampled compact JSONL (distributed) |
@@ -298,4 +298,4 @@ Stage 4  Product integration on chss.chat
 1. Optional: held-out **test** split scoreboard (sanity vs val).
 2. Decide product prefixes (`p-` / `o-` / `d-` / `h-`) and ship hybrid encoder.
 3. Export K=1024 codebook artifact for the edge runtime.
-4. `rm data/standard/lichess_db_standard_rated_2026-06.pgn.zst` when disk is needed (~26 GB).
+4. Local dumps were removed after the published run. Re-download with `bash benchmark/download_month.sh` (newest month, or `MONTH=2026-06`).

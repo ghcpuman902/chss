@@ -1827,14 +1827,13 @@ python3 -m venv .venv-benchmark
               CC0 on database.lichess.org
             </a>
             . The published table used June 2026 (~26&nbsp;GB compressed,
-            86.5M games). Do not fully decompress it. The scripts stream with{" "}
+            86.5M games). A later month is enough to check that the ranking
+            still holds. Do not fully decompress it. The scripts stream with{" "}
             <code className="text-sm text-foreground">zstdcat</code>.
           </p>
           <pre className="overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm font-mono leading-snug">
-            {`mkdir -p data/standard
-curl -L --continue-at - \\
-  -o data/standard/lichess_db_standard_rated_2026-06.pgn.zst \\
-  https://database.lichess.org/standard/lichess_db_standard_rated_2026-06.pgn.zst`}
+            {`bash benchmark/download_month.sh
+# MONTH=2026-06 bash benchmark/download_month.sh   # published dump`}
           </pre>
 
           <h3 className="font-serif text-xl tracking-tight pt-2">
@@ -1859,7 +1858,8 @@ curl -L --continue-at - \\
             as zstd-compressed train / validation / test JSONL. Once those exist you
             can delete the raw{" "}
             <code className="text-xs text-foreground">.pgn.zst</code> to free
-            ~26&nbsp;GB.
+            tens of gigabytes. Download URLs live in{" "}
+            <code className="text-xs text-foreground">data/SOURCES.md</code>.
           </p>
 
           <h3 className="font-serif text-xl tracking-tight pt-2">
@@ -1874,10 +1874,10 @@ curl -L --continue-at - \\
           <pre className="overflow-x-auto rounded-lg border bg-muted/40 p-4 text-sm font-mono leading-snug">
             {`bash benchmark/run_scoreboard.sh
 
-# same as:
+# same as (MONTH from the corpus you built):
 .venv-benchmark/bin/python benchmark/url_length_benchmark.py \\
-  --train data/standard/corpus/hash/2026-06.train.compact.jsonl.zst \\
-  --eval data/standard/corpus/hash/2026-06.val.compact.jsonl.zst \\
+  --train data/standard/corpus/hash/\${MONTH}.train.compact.jsonl.zst \\
+  --eval data/standard/corpus/hash/\${MONTH}.val.compact.jsonl.zst \\
   --out benchmark/results/url_length_hash_val.json \\
   --slim-out lib/compression-url-scoreboard.json`}
           </pre>

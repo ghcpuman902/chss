@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -24,6 +25,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from pgn_common import split_bucket
+
+NAME_PREFIX_RE = re.compile(r"(\d{4}-\d{2})")
+
+
+def infer_name_prefix(src: Path) -> str:
+    match = NAME_PREFIX_RE.search(src.name)
+    if match:
+        return match.group(1)
+    return src.stem.split(".")[0]
 
 
 def open_jsonl(path: Path):
@@ -70,6 +80,7 @@ def split_corpus(
     src: Path,
     out_dir: Path,
     *,
+    name_prefix: str,
     limit: int | None,
     write_skipped: bool,
 ) -> dict:
@@ -81,7 +92,7 @@ def split_corpus(
 
     def get_writer(bucket: str):
         if bucket not in writers:
-            out_path = out_dir / f"2026-06.{bucket}.compact.jsonl.zst"
+            out_path = out_dir / f"{name_prefix}.{bucket}.compact.jsonl.zst"
             writers[bucket] = open_zstd_writer(out_path)
         return writers[bucket][1]
 
@@ -141,8 +152,9 @@ def split_corpus(
             bucket: round(100 * counts[bucket] / total, 2) if total else 0
             for bucket in ("train", "val", "test", "skipped")
         },
+        "name_prefix": name_prefix,
         "outputs": {
-            bucket: str(out_dir / f"2026-06.{bucket}.compact.jsonl.zst")
+            bucket: str(out_dir / f"{name_prefix}.{bucket}.compact.jsonl.zst")
             for bucket in ("train", "val", "test")
             if counts[bucket]
         },
@@ -154,11 +166,19 @@ def main() -> None:
     parser.add_argument("src", type=Path)
     parser.add_argument("--out-dir", type=Path, default=Path("data/standard/corpus"))
     parser.add_argument("--stats", type=Path, default=Path("benchmark/results/corpus_split.json"))
+    parser.add_argument("--name-prefix", default=None, help="Output stem, e.g. 2026-07. Inferred from src if omitted.")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--write-skipped", action="store_true")
     args = parser.parse_args()
 
-    report = split_corpus(args.src, args.out_dir, limit=args.limit, write_skipped=args.write_skipped)
+    name_prefix = args.name_prefix or infer_name_prefix(args.src)
+    report = split_corpus(
+        args.src,
+        args.out_dir,
+        name_prefix=name_prefix,
+        limit=args.limit,
+        write_skipped=args.write_skipped,
+    )
     text = json.dumps(report, indent=2)
     print(text)
     args.stats.parent.mkdir(parents=True, exist_ok=True)
